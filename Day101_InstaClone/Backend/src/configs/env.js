@@ -5,8 +5,11 @@ const ENV = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: process.env.PORT,
   MONGO_URI: process.env.MONGO_URI,
-  JWT_SECRET:process.env.JWT_SECRET,
-  JWT_EXPIRE:process.env.JWT_EXPIRE
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRE: process.env.JWT_EXPIRE,
+  IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
+  IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY,
+  IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT,
 };
 
 Object.entries(ENV).forEach(([key, value]) => {

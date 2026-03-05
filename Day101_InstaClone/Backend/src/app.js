@@ -6,6 +6,7 @@ const CookieParser = require("cookie-parser")
 // External Modules
 const ENV = require("./configs/env.js")
 const routes = require("./routes/index.js")
+const { PREFIX_URL } = require("./constants/CONSTANTS.JS")
 
 
 const app = express()
@@ -22,7 +23,7 @@ app.use(ENV.NODE_ENV==="development" ? morgan("dev") : morgan("combined"))
  * @desc   API Prefix
  * @access Public
  */
-app.use("/api/v1", routes);
+app.use(PREFIX_URL.v1.root, routes);
 
 
 module.exports = app
