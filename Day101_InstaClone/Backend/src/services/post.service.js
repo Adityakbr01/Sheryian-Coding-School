@@ -1,6 +1,8 @@
 const postRepository = require("../repository/post.repository");
 const statusMessage = require("../constants/statusMessages");
 const uploadToImageKit = require("../utils/uploadToImageKit");
+const ApiError = require("../utils/apiError");
+const STATUS_CODES = require("../constants/statusCodes");
 
 /**
  * =========================================
@@ -28,7 +30,7 @@ const postService = {
     const { caption } = data;
 
     if (!caption) {
-      throw new Error("Caption is required");
+      throw new ApiError(STATUS_CODES.BAD_REQUEST,statusMessage.capRe);
     }
 
     // Upload image to ImageKit if a file was provided

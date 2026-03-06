@@ -4,6 +4,8 @@ const authRepository = require("../repository/auth.repository");
 const ENV = require("../configs/env");
 const statusMessage = require("../constants/statusMessages");
 const userModel = require("../model/user.model");
+const ApiError = require("../utils/apiError");
+const STATUS_CODES = require("../constants/statusCodes");
 
 /**
  * =========================================
@@ -35,7 +37,10 @@ const authService = {
     const { userName, email } = data;
 
     if (!userName || !email) {
-      throw new Error("Email and UserName Required");
+      throw new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        statusMessage.emailAndUserNameReq,
+      );
     }
 
     // Check existing user
@@ -45,7 +50,10 @@ const authService = {
     });
 
     if (isUserAlready) {
-      throw new Error(statusMessage.userAlreadyRegister);
+      throw new ApiError(
+        STATUS_CODES.CONFLICT,
+        statusMessage.userAlreadyRegister,
+      );
     }
 
     // Create user
@@ -91,7 +99,10 @@ const authService = {
     const { email, userName, password } = data;
 
     if ((!email && !userName) || !password) {
-      throw new Error("Email/Username and Password Required");
+      throw new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        statusMessage.emailOrUserNameAndPassReq,
+      );
     }
     const user = await authRepository.findUserWithPassword({
       email,
@@ -99,13 +110,13 @@ const authService = {
     });
 
     if (!user) {
-      throw new Error("Invalid Credentials");
+      throw new ApiError(STATUS_CODES.UNAUTHORIZED, statusMessage.invalideCred);
     }
 
     const isPasswordCorrect = await user.comparePassword(password);
 
     if (!isPasswordCorrect) {
-      throw new Error("Invalid Credentials");
+      throw new ApiError(STATUS_CODES.UNAUTHORIZED, statusMessage.invalideCred);
     }
 
     const jwtToken = await jwt.sign(

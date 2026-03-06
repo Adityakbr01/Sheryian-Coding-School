@@ -2,6 +2,7 @@ const cookieConf = require("../configs/cookieConf");
 const STATUS_CODES = require("../constants/statusCodes");
 const authService = require("../services/auth.service");
 const ApiResponse = require("../utils/apiResponse");
+const asyncHandler = require("../utils/asyncHandler");
 
 /**
  * =========================================
@@ -29,24 +30,21 @@ const authController = {
    *  - 400 : Validation error
    *  - 409 : Email already exists
    */
-  registerUser: async (req, res, next) => {
-    try {
-      const createdUser = await authService.registerUser(req.body);
+  registerUser: asyncHandler(async (req, res) => {
+    const createdUser = await authService.registerUser(req.body);
 
-      res.cookie("token", createdUser.token, cookieConf);
+    // Store JWT in cookie
+    res.cookie("token", createdUser.token, cookieConf);
 
-      return ApiResponse.success(res, {
-        status: STATUS_CODES.CREATED,
-        message: createdUser.message,
-        data: {
-          user: createdUser.user,
-          token: createdUser.token,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
+    return ApiResponse.success(res, {
+      status: STATUS_CODES.CREATED,
+      message: createdUser.message,
+      data: {
+        user: createdUser.user,
+        token: createdUser.token,
+      },
+    });
+  }),
 
   /**
    * ------------------------------------------------
@@ -55,30 +53,26 @@ const authController = {
    * @access  Public
    *
    * @body
-   *  - email OR userName  {String} Required
+   *  - email OR userName {String} Required
    *  - password {String} Required
-   *
    *
    * @returns
    *  - 200 : Login successful
    *  - 401 : Invalid credentials
    *  - 404 : User not found
    */
-  loginUser: async (req, res,next) => {
-    try {
-      const LoggedInUser = await authService.loginUser(req.body);
+  loginUser: asyncHandler(async (req, res) => {
+    const loggedInUser = await authService.loginUser(req.body);
 
-      res.cookie("token", LoggedInUser.token, cookieConf);
+    // Store JWT in cookie
+    res.cookie("token", loggedInUser.token, cookieConf);
 
-      return ApiResponse.success(res, {
-        status: STATUS_CODES.OK,
-        message: LoggedInUser.message,
-        data: LoggedInUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
+    return ApiResponse.success(res, {
+      status: STATUS_CODES.OK,
+      message: loggedInUser.message,
+      data: loggedInUser,
+    });
+  }),
 };
 
 module.exports = authController;

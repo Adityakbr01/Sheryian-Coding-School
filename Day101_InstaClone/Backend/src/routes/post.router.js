@@ -1,5 +1,6 @@
 const postController = require("../controllers/post.controller");
 const upload = require("../middlewares/multer");
+const isAuthenticated = require("../middlewares/isAuthenticated")
 
 const router = require("express").Router();
 
@@ -8,7 +9,7 @@ const router = require("express").Router();
  * @desc    Create a new post
  * @access  Authenticated
  */
-router.post("/",upload.single("postImage"), postController.createPost);
+router.post("/",isAuthenticated,upload.single("postImage"), postController.createPost);
 
 
 module.exports = router;

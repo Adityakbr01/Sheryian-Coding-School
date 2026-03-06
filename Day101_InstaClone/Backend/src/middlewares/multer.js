@@ -1,21 +1,43 @@
 const multer = require("multer");
+const ApiError = require("../utils/apiError");
+const STATUS_CODES = require("../constants/statusCodes");
 
-// Use memory storage — files are kept as Buffer so they can be
-// streamed directly to ImageKit without writing to disk.
+// Use memory storage so files can be sent directly to ImageKit
 const storage = multer.memoryStorage();
 
-// File filter (only images allowed)
+/**
+ * =========================================
+ * FILE FILTER
+ * =========================================
+ * Allow only image files
+ */
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
+  const allowedTypes = [
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "image/webp",
+  ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only images are allowed"), false);
+    cb(
+      new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        "Only image files are allowed"
+      ),
+      false
+    );
   }
 };
 
-// Multer upload instance
+/**
+ * =========================================
+ * MULTER INSTANCE
+ * =========================================
+ */
+
 const upload = multer({
   storage,
   fileFilter,

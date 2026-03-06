@@ -7,6 +7,7 @@ const CookieParser = require("cookie-parser")
 const ENV = require("./configs/env.js")
 const routes = require("./routes/index.js")
 const { PREFIX_URL } = require("./constants/CONSTANTS.JS")
+const globalErrorHandler = require("./middlewares/errorMiddleware.js")
 
 
 const app = express()
@@ -25,5 +26,12 @@ app.use(ENV.NODE_ENV==="development" ? morgan("dev") : morgan("combined"))
  */
 app.use(PREFIX_URL.v1.root, routes);
 
+
+/**
+ * @app
+ * @desc   GLOBAL ERROR HANDLER
+ * @access SYSTEM
+ */
+app.use(globalErrorHandler);
 
 module.exports = app
