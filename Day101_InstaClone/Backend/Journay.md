@@ -69,3 +69,32 @@ we use this
 - introducing a global error handler to prevent a  sending 500 status and random message and prevent to stop my app working and he is clean gloabl error handler 
 
 - introduce a asyncHandler which is handling error and send to global error handler
+
+
+
+
+
+# DAY 4
+
+## Implemented Full Post CRUD + Like/Unlike functionality with all Layers
+
+- Routes
+- Controllers
+- Services
+- Repository
+
+### POST DESC FOR LINKDIN
+
+- Day 104 of cohort 2.0 Sheryians coding school today class was all about implementing full Post CRUD (Create, Read, Update, Delete) and a like/unlike toggle feature across all layers (Router → Controller → Service → Repository). Routes are split into public (no auth) and protected (auth required) using a single `router.use(isAuthenticated)` divider. The service layer handles all business logic like ownership checks, pagination meta, and the like toggle, while the repository layer only talks to MongoDB using atomic operators like `$addToSet`, `$pull`, and `$inc` to keep `likeCount` in sync. Thanks to our mentor Ankur Bhaiya for pushing clean, production-level architecture.
+
+#### Routes Added
+
+| Method   | Path              | Access | Description                      |
+| -------- | ----------------- | ------ | -------------------------------- |
+| GET      | /                 | Public | Paginated feed of all posts      |
+| GET      | /:postId          | Public | Single post details              |
+| POST     | /                 | Auth   | Create post (with optional image)|
+| GET      | /my/posts         | Auth   | Logged-in user's own posts       |
+| PUT      | /:postId          | Auth   | Update caption/image (owner only)|
+| DELETE   | /:postId          | Auth   | Delete post (owner only)         |
+| POST     | /:postId/like     | Auth   | Toggle like / unlike             |
