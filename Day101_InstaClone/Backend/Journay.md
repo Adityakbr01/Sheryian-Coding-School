@@ -1,143 +1,113 @@
-# DAY 1
+# Development Journey
 
-## Implemnted register And login User functionality with Layer
+## Day 1: User Authentication
 
+### Implemented Features:
+- User registration and login functionality with layered architecture.
 
-### POST DESC FOR LINKDIN
+### LinkedIn Post Description:
+Day 101 of Cohort 2.0 at Sheryians Coding School: We started building an Instagram clone using the MERN stack. Today, I implemented user registration and login functionality. Thanks to our mentor, Ankur Bhaiya, for explaining the importance of clean code and layered architecture for production-level codebases.
 
-- Day 101 of cohort 2.0 Sheryians coding school we starting a Insta clone Project with mern stack today i was build a Register and Login user,thanks to Our mentor ankur Bhaiya he explain clearly how and why clean code and layer base arctechture matter for Production level Codebase
+#### Tools & Libraries Practiced:
+- Express
+- MongoDB
+- JSON Web Token (JWT)
+- Cookie-Parser
+- CORS
+- dotenv
+- Nodemon
+- Morgan
 
-#### Practice
+---
 
-      - Express
-      - mongodb
-      - jsonwebtoken
-      - cookie-parser
-      - cors
-      - env
-      - nodemon
-      - morgan
+## Day 2: Post Creation
 
-# DAY 2
+### Implemented Features:
+- Post creation functionality with multer middleware for image uploads and integration with ImageKit for storage.
+- Layered architecture: Routes, Controllers, Services, Repository.
 
-## Implelmenting Post creation with multer as middleware and image storage for image-kit with previews layers
+### LinkedIn Post Description:
+Day 102 of Cohort 2.0 at Sheryians Coding School: Implemented post creation functionality with proper layering. Thanks to our mentor, Ankur Bhaiya, for encouraging us to read documentation to become better developers.
 
-- Routes
-- Controllers
-- Services
-- Respository
+---
 
-  ### POST DESC FOR LINKDIN
-  - DAY 102 of cohort 2.0 Sheryains coding school we implementing a post creation route,controller,service and all db assential funtion in repository and again thanks to Our mentor ankur Bhaiya he forcing to read documentation to become a best Developer
+## Day 3: Authenticated Post Creation
 
+### Implemented Features:
+- Post creation with authentication using JWT stored in browser cookies.
+- Middleware (`isAuthenticated`) to verify JWT and attach user info to requests.
+- Introduced `ApiError` for cleaner error handling.
+- Added a global error handler to standardize error responses.
+- Introduced `asyncHandler` to streamline error handling in async functions.
 
+### LinkedIn Post Description:
+Day 103 of Cohort 2.0 at Sheryians Coding School: Implemented post creation with authentication. Learned about the importance of image optimization (e.g., WebP) and how ImageKit handles it seamlessly. Thanks to our mentor, Ankur Bhaiya, for explaining these concepts and pushing us to write scalable code.
 
+---
 
-# DAY 3
+## Day 4: Full Post CRUD + Like/Unlike
 
-## Implemnted Post Creation with Authenticated User, functionality with Layer
+### Implemented Features:
+- Full CRUD (Create, Read, Update, Delete) for posts.
+- Like/Unlike toggle functionality.
+- Layered architecture: Routes, Controllers, Services, Repository.
+- Public and protected routes divided using `router.use(isAuthenticated)`.
+- Atomic MongoDB operations (`$addToSet`, `$pull`, `$inc`) for like toggling.
 
-- Routes
-- Controllers
-- Services
-- Respository
-- middlewares {New}
+### LinkedIn Post Description:
+Day 104 of Cohort 2.0 at Sheryians Coding School: Implemented full Post CRUD and Like/Unlike functionality. Thanks to our mentor, Ankur Bhaiya, for emphasizing clean, production-level architecture.
 
-### POST DESC FOR LINKDIN
-
-- Day 103 of cohort 2.0 Sheryians coding school today Class all about Post creation with Authenticated user for authentication we use a JWT token which is store in client Browser cookies and my backend middleware(isAuthenticated) read cookies and extract jwt token and verify them and if verification failed he throw an error (Unauthorized) | | 401 and if verification success than he send a req.user and he contain info's (userId,email) after all these we create a post with who created post,caption,and PostImageUrl and Thanks to Our mentor Ankur bhaiay he explain all of these and one more thing he  explain why webp(image optimization required) why image comppression required every scalbel web app and Image kit do it behind the scene already
-
- - instroducing ApiError which help to siplified throw error insted of 
--  
-`` 
-const err = new Error("User not found");
-err.status = 404;
-throw err
-
-``
-we use this
-
-``if (!user) {
-  throw new ApiError(404, "User not found");
-}
-``
-
-- introducing a global error handler to prevent a  sending 500 status and random message and prevent to stop my app working and he is clean gloabl error handler 
-
-- introduce a asyncHandler which is handling error and send to global error handler
-
-
-
-
-
-# DAY 4
-
-## Implemented Full Post CRUD + Like/Unlike functionality with all Layers
-
-- Routes
-- Controllers
-- Services
-- Repository
-
-### POST DESC FOR LINKDIN
-
-- Day 104 of cohort 2.0 Sheryians coding school today class was all about implementing full Post CRUD (Create, Read, Update, Delete) and a like/unlike toggle feature across all layers (Router → Controller → Service → Repository). Routes are split into public (no auth) and protected (auth required) using a single `router.use(isAuthenticated)` divider. The service layer handles all business logic like ownership checks, pagination meta, and the like toggle, while the repository layer only talks to MongoDB using atomic operators like `$addToSet`, `$pull`, and `$inc` to keep `likeCount` in sync. Thanks to our mentor Ankur Bhaiya for pushing clean, production-level architecture.
-
-#### Routes Added
-
+#### Routes Added:
 | Method | Path          | Access | Description                       |
-| ------ | ------------- | ------ | --------------------------------- |
+|--------|---------------|--------|-----------------------------------|
 | GET    | /             | Public | Paginated feed of all posts       |
 | GET    | /:postId      | Public | Single post details               |
 | POST   | /             | Auth   | Create post (with optional image) |
 | GET    | /my/posts     | Auth   | Logged-in user's own posts        |
 | PUT    | /:postId      | Auth   | Update caption/image (owner only) |
 | DELETE | /:postId      | Auth   | Delete post (owner only)          |
-| POST   | /:postId/like | Auth   | Toggle like / unlike              |
+| POST   | /:postId/like | Auth   | Toggle like/unlike                |
 
+---
 
+## Day 5: Followers System Design
 
+### Implemented Features:
+- Designed a scalable followers system using a separate `Follow` collection.
+- Removed `followers` and `followings` arrays from the `User` model to avoid hitting MongoDB's 16MB document size limit.
+- Created an edge collection `Follow` with the following schema:
+  ```json
+  {
+    "_id": ObjectId,
+    "follower": ObjectId,
+    "following": ObjectId,
+    "createdAt": Date
+  }
+  ```
 
+### LinkedIn Post Description:
+Day 105 of Cohort 2.0 at Sheryians Coding School: Designed a scalable followers system. Learned why storing followers in a separate collection is better than embedding them in the user document. Thanks to our mentor, Ankur Bhaiya, for explaining these concepts.
 
+---
 
---------------------Layers-----------------
+## Day 6: Follow/Unfollow + Like/Unlike Refactor + Follow Request Status
 
-- Routes
-- Controllers
-- Services
-- Respository
-- - middlewares {New}
+### Implemented Features:
+- Follow/Unfollow functionality.
+- Implemented **Follow Request Status** ("pending", "active", "rejected", "blocked"). Follow requests default to "pending" upon creation.
+- Added endpoints to accept/reject/block follow requests, and to fetch all pending requests.
+- Refactored `Follow` model to use `String` fields for `follower` and `following` (future-proofing for user IDs) and added the `status` enum.
+- Created a `Like` collection for scalability, removing `likes` and `comments` arrays from the `Post` model.
+- `Like` schema:
+  ```json
+  {
+    "post": ObjectId,
+    "likedBy": ObjectId,
+    "createdAt": Date
+  }
+  ```
 
+### LinkedIn Post Description:
+Day 106 of Cohort 2.0 at Sheryians Coding School: Implemented Follow/Unfollow and Like/Unlike functionality with scalable design. Also added a robust status management system for followers ("pending", "active", "rejected", "blocked") to handle user privacy effectively. Thanks to our mentor, Ankur Bhaiya, for guiding us through these changes and emphasizing scalability.
 
-# DAY 5
-
-## Implemented Followers functionality
-
-### POST DESC FOR LINKDIN
-
-- Day 104 of cohort 2.0 Sheryians coding school today class was all about implemnting a followers, and followings with scalable system design why not storing followers in user collection in followers array instead of creating a edge collection called follows and strong 
-- {
-_id,
-follower,
-following,
-createdtedAt
-- 
-- }
-becouse in mongodb only give 16mb to store a data in user>followers Array, i remove 
-
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
-      },
-    ],
-
-    followings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
-      },
-    ],
-
-
-in user.model and create a seprate collection called follow only implemneting a model not any routes.controller...
+---

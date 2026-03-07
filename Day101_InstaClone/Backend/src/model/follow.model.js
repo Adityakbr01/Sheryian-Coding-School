@@ -1,21 +1,28 @@
 const mongoose = require("mongoose");
 
-const followSchema = mongoose.Schema({
-  follower: {
-    type: mongoose.Schema.ObjectId,
-    ref: "users",
-    required: [true, "Followers required"],
+const followSchema = mongoose.Schema(
+  {
+    follower: {
+      type: String,
+    },
+    following: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ["pending", "active", "rejected", "blocked"],
+        message: "Status must be one of: pending, active, rejected, blocked",
+      },
+      default: "pending",
+    },
   },
-  following: {
-    type: mongoose.Schema.ObjectId,
-    ref: "users",
-    required: [true, "Following required"],
+
+  {
+    timestamps: true,
   },
-},{
-    timestaps:true
-});
+);
 
+const followModel = mongoose.model("follow", followSchema);
 
-const followModel = mongoose.model("follow",followSchema)
-
-module.exports = followModel
+module.exports = followModel;

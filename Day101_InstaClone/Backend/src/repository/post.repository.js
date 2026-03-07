@@ -109,38 +109,6 @@ const postRepository = {
   deletePost: async (postId) => {
     return await postModel.findByIdAndDelete(postId);
   },
-
-  // ─────────────────────────────────────────────
-  //  LIKE / UNLIKE
-  // ─────────────────────────────────────────────
-
-  /**
-   * @desc    Add userId to the `likes` array and increment `likeCount` atomically.
-   * @param   {String} postId – MongoDB ObjectId string
-   * @param   {String} userId – user's ObjectId string
-   * @returns {Object} updated post document
-   */
-  likePost: async (postId, userId) => {
-    return await postModel.findByIdAndUpdate(
-      postId,
-      { $addToSet: { likes: userId }, $inc: { likeCount: 1 } },
-      { returnDocument: "after" }
-    );
-  },
-
-  /**
-   * @desc    Remove userId from the `likes` array and decrement `likeCount` atomically.
-   * @param   {String} postId – MongoDB ObjectId string
-   * @param   {String} userId – user's ObjectId string
-   * @returns {Object} updated post document
-   */
-  unlikePost: async (postId, userId) => {
-    return await postModel.findByIdAndUpdate(
-      postId,
-      { $pull: { likes: userId }, $inc: { likeCount: -1 } },
-      { returnDocument: "after" }
-    );
-  },
 };
 
 module.exports = postRepository;

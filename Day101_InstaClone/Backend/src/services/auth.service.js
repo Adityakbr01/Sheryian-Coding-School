@@ -3,9 +3,9 @@ const jwt = require("jsonwebtoken");
 const authRepository = require("../repository/auth.repository");
 const ENV = require("../configs/env");
 const statusMessage = require("../constants/statusMessages");
-const userModel = require("../model/user.model");
 const ApiError = require("../utils/apiError");
 const STATUS_CODES = require("../constants/statusCodes");
+const { signJwtToken } = require("../utils/jwt");
 
 /**
  * =========================================
@@ -13,6 +13,7 @@ const STATUS_CODES = require("../constants/statusCodes");
  * =========================================
  * @description Handles business logic related
  *              to user authentication.
+ * @module services/auth.service
  */
 
 const authService = {
@@ -59,17 +60,14 @@ const authService = {
     // Create user
     const createdUser = await authRepository.createUser(data);
 
-    // Create JWT
-    const jwtToken = await jwt.sign(
-      {
-        userId: createdUser._id,
+      const payload =   {
         email: createdUser.email,
-      },
-      ENV.JWT_SECRET,
-      {
-        expiresIn: ENV.JWT_EXPIRE,
-      },
-    );
+        userId: createdUser._id,
+        userName: createdUser.userName,
+      }
+
+    // Create JWT
+    const jwtToken = await signJwtToken({payload})
 
     return {
       user: {
@@ -119,14 +117,13 @@ const authService = {
       throw new ApiError(STATUS_CODES.UNAUTHORIZED, statusMessage.invalideCred);
     }
 
-    const jwtToken = await jwt.sign(
-      {
+    const payload =   {
         email: user.email,
         userId: user._id,
-      },
-      ENV.JWT_SECRET,
-      { expiresIn: ENV.JWT_EXPIRE },
-    );
+        userName: user.userName,
+      }
+
+    const jwtToken = await signJwtToken({payload:payload})
 
     return {
       user: {

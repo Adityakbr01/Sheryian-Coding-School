@@ -190,40 +190,6 @@ const postService = {
 
     return { message: statusMessage.postDeleted };
   },
-
-  // ─────────────────────────────────────────────
-  //  LIKE / UNLIKE  (toggle)
-  // ─────────────────────────────────────────────
-
-  /**
-   * @desc    Toggle a like on a post.
-   *          Adds userId to `likes` array if not present (like),
-   *          removes it if already present (unlike).
-   *          Keeps `likeCount` field in sync atomically.
-   * @param   {String} postId – MongoDB ObjectId string
-   * @param   {String} userId – authenticated user's ObjectId
-   * @returns {{ liked: Boolean, likeCount: Number, message: String }}
-   * @throws  404 if post not found
-   */
-  toggleLike: async (postId, userId) => {
-    const post = await postRepository.findPostById(postId);
-
-    if (!post) {
-      throw new ApiError(STATUS_CODES.NOT_FOUND, statusMessage.postNotFound);
-    }
-
-    const alreadyLiked = post.likes.some((id) => id.toString() === userId);
-
-    const updatedPost = alreadyLiked
-      ? await postRepository.unlikePost(postId, userId)   // pull userId from likes
-      : await postRepository.likePost(postId, userId);    // push userId into likes
-
-    return {
-      liked: !alreadyLiked,
-      likeCount: updatedPost.likeCount,
-      message: alreadyLiked ? statusMessage.postUnliked : statusMessage.postLiked,
-    };
-  },
 };
 
 module.exports = postService;

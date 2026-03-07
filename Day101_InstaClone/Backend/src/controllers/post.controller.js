@@ -1,5 +1,6 @@
 const STATUS_CODES = require("../constants/statusCodes");
 const postService = require("../services/post.service");
+const likeService = require("../services/like.service");
 const ApiResponse = require("../utils/apiResponse");
 const asyncHandler = require("../utils/asyncHandler");
 
@@ -166,7 +167,7 @@ const postController = {
   toggleLike: asyncHandler(async (req, res) => {
     const userId     = req.user.userId;
     const { postId } = req.params;
-    const result     = await postService.toggleLike(postId, userId);
+    const result     = await likeService.toggleLike(postId, userId);
 
     return ApiResponse.success(res, {
       status: STATUS_CODES.OK,

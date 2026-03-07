@@ -19,32 +19,6 @@ const postSchema = new mongoose.Schema(
       type: String,
     },
 
-    // tracking likes
-    likes: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: "user",
-      },
-    ],
-
-    // tracking comments
-    comments: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: "comment",
-      },
-    ],
-
-    likeCount: {
-      type: Number,
-      default: 0,
-    },
-
-    commentCount: {
-      type: Number,
-      default: 0,
-    },
-
     // track post edited or not
     isEdited: {
       type: Boolean,
