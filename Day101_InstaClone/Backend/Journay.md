@@ -2,10 +2,6 @@
 
 ## Implemnted register And login User functionality with Layer
 
-- Routes
-- Controllers
-- Services
-- Respository
 
 ### POST DESC FOR LINKDIN
 
@@ -89,12 +85,59 @@ we use this
 
 #### Routes Added
 
-| Method   | Path              | Access | Description                      |
-| -------- | ----------------- | ------ | -------------------------------- |
-| GET      | /                 | Public | Paginated feed of all posts      |
-| GET      | /:postId          | Public | Single post details              |
-| POST     | /                 | Auth   | Create post (with optional image)|
-| GET      | /my/posts         | Auth   | Logged-in user's own posts       |
-| PUT      | /:postId          | Auth   | Update caption/image (owner only)|
-| DELETE   | /:postId          | Auth   | Delete post (owner only)         |
-| POST     | /:postId/like     | Auth   | Toggle like / unlike             |
+| Method | Path          | Access | Description                       |
+| ------ | ------------- | ------ | --------------------------------- |
+| GET    | /             | Public | Paginated feed of all posts       |
+| GET    | /:postId      | Public | Single post details               |
+| POST   | /             | Auth   | Create post (with optional image) |
+| GET    | /my/posts     | Auth   | Logged-in user's own posts        |
+| PUT    | /:postId      | Auth   | Update caption/image (owner only) |
+| DELETE | /:postId      | Auth   | Delete post (owner only)          |
+| POST   | /:postId/like | Auth   | Toggle like / unlike              |
+
+
+
+
+
+
+--------------------Layers-----------------
+
+- Routes
+- Controllers
+- Services
+- Respository
+- - middlewares {New}
+
+
+# DAY 5
+
+## Implemented Followers functionality
+
+### POST DESC FOR LINKDIN
+
+- Day 104 of cohort 2.0 Sheryians coding school today class was all about implemnting a followers, and followings with scalable system design why not storing followers in user collection in followers array instead of creating a edge collection called follows and strong 
+- {
+_id,
+follower,
+following,
+createdtedAt
+- 
+- }
+becouse in mongodb only give 16mb to store a data in user>followers Array, i remove 
+
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+
+    followings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+
+
+in user.model and create a seprate collection called follow only implemneting a model not any routes.controller...
