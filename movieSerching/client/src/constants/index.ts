@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:3001/api/v1";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api/v1";
 export const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 export const PLACEHOLDER_IMAGE = "https://via.placeholder.com/500x750?text=No+Image";
 export const PLACEHOLDER_BACKDROP = "https://via.placeholder.com/1280x720?text=No+Backdrop";
