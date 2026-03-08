@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
+
+// ── Instagram dark-mode auth tokens ─────────────────────────
+$card-border: #363636;
+$input-bg: #121212;
+$input-border: #363636;
+$input-border-focus: #a8a8a8;
+$text-primary: #f5f5f5;
+$text-secondary: #a8a8a8;
+$blue: #0095f6;
+$facebook-text: #e0f1ff;
+$link-color: #0095f6;
+$card-bg: #000;
+$card-width: 350px;
+
+// ── Page wrapper ────────────────────────────────────────────
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 32px 20px 0;
+  gap: 10px;
+}
+
+// ── Cards ───────────────────────────────────────────────────
+.auth-card {
+  width: $card-width;
+  border: 1px solid $card-border;
+  background: $card-bg;
+  text-align: center;
+}
+
+.auth-card-main {
+  padding: 10px 40px 25px;
+}
+
+.auth-card-switch {
+  padding: 22px 40px;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: $text-primary;
+  }
+}
+
+// ── Logo ────────────────────────────────────────────────────
+.auth-logo {
+  margin: 36px 0 12px;
+}
+
+.instagram-logo-text {
+  font-family: 'Grand Hotel', cursive;
+  font-size: 42px;
+  color: $text-primary;
+  letter-spacing: 1px;
+}
+
+// ── Tagline (register) ─────────────────────────────────────
+.auth-tagline {
+  margin: 0 0 10px;
+  color: $text-secondary;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+// ── Form ────────────────────────────────────────────────────
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+// ── Floating-label input ────────────────────────────────────
+.auth-input-wrapper {
+  position: relative;
+
+  input {
+    width: 100%;
+    height: 38px;
+    padding: 14px 8px 2px;
+    background: $input-bg;
+    border: 1px solid $input-border;
+    border-radius: 3px;
+    color: $text-primary;
+    font-size: 12px;
+    line-height: 18px;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &::placeholder {
+      color: transparent;
+    }
+
+    &:focus {
+      border-color: $input-border-focus;
+    }
+
+    // float label when focused or has content
+    &:focus ~ label,
+    &:not(:placeholder-shown) ~ label {
+      top: 4px;
+      font-size: 10px;
+    }
+
+    // show / hide password toggle only when input has content
+    &:not(:placeholder-shown) ~ .auth-show-password {
+      display: block;
+    }
+  }
+
+  label {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: $text-secondary;
+    pointer-events: none;
+    transition: all 0.1s ease;
+    background-color: $input-bg;
+    
+  }
+
+  .auth-show-password {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: $text-primary;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+}
+
+// ── Submit button ───────────────────────────────────────────
+.auth-submit-btn {
+  width: 100%;
+  height: 32px;
+  margin-top: 8px;
+  background: $blue;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+// ── Error message ───────────────────────────────────────────
+.auth-error {
+  margin: 0 0 4px;
+  padding: 10px;
+  border-radius: 4px;
+  background: rgba(237, 73, 86, 0.12);
+  color: #ed4956;
+  font-size: 14px;
+  text-align: center;
+}
+
+// ── OR divider ──────────────────────────────────────────────
+.auth-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 18px 0;
+}
+
+.auth-or-line {
+  flex: 1;
+  height: 1px;
+  background: $card-border;
+}
+
+.auth-or-text {
+  color: $text-secondary;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+// ── Facebook button ─────────────────────────────────────────
+.auth-facebook-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: $facebook-text;
+  font-size: 14px;
+  font-weight: 600;
+  cursor:not-allowed;
+  padding: 0;
+  margin: 0 auto;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  &.auth-facebook-btn-filled {
+    width: 100%;
+    height: 32px;
+    background: $blue;
+    border-radius: 8px;
+    color: #fff;
+    margin-top: 8px;
+  }
+}
+
+// ── Forgot password ─────────────────────────────────────────
+.auth-forgot-link {
+  display: block;
+  margin-top: 16px;
+  color: $facebook-text;
+  font-size: 12px;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ── Terms text (register) ───────────────────────────────────
+.auth-terms {
+  margin: 4px 0;
+  color: $text-secondary;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+
+  a {
+    color: $link-color;
+    text-decoration: none;
+  }
+}
+
+// ── Switch-card link ────────────────────────────────────────
+.auth-switch-link {
+  color: $link-color;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+// ── Get the app section ─────────────────────────────────────
+.auth-get-app {
+  width: $card-width;
+  padding: 10px 0 20px;
+  text-align: center;
+}
+
+.auth-get-app-text {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: $text-primary;
+}
+
+.auth-app-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  img {
+    height: 40px;
+  }
+}
+
+// ── Footer ──────────────────────────────────────────────────
+.auth-footer {
+  margin-top: auto;
+  padding: 20px 0 32px;
+  text-align: center;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.auth-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 16px;
+  row-gap: 12px;
+  margin-bottom: 18px;
+
+  a {
+    color: $text-secondary;
+    font-size: 12px;
+    text-decoration: none;
+  }
+}
+
+.auth-footer-copy {
+  margin: 0;
+  color: $text-secondary;
+  font-size: 12px;
+}
+
+// ── Responsive ──────────────────────────────────────────────
+@media (max-width: 450px) {
+  .auth-card,
+  .auth-get-app {
+    width: 100%;
+    border: none;
+  }
+
+  .auth-card-main {
+    padding: 10px 16px 25px;
+  }
+
+  .auth-card-switch {
+    padding: 22px 16px;
+  }
+}

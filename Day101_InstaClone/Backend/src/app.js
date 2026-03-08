@@ -14,7 +14,10 @@ const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(cors())
+app.use(cors({
+    origin: ENV.CLIENT_URL,
+    credentials: true
+}))
 app.use(CookieParser())
 app.use(ENV.NODE_ENV==="development" ? morgan("dev") : morgan("combined"))
 
