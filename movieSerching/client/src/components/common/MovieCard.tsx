@@ -1,21 +1,20 @@
-import { memo } from "react";
-import { Link } from "react-router-dom";
-import { HiStar, HiHeart, HiOutlineHeart } from "react-icons/hi";
+import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import {
-  getImageUrl,
-  getMediaTitle,
-  getMediaDate,
   formatRating,
-  truncateText,
+  getImageUrl,
+  getMediaDate,
+  getMediaTitle,
   getMediaType,
 } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import {
   addFavorite,
   removeFavoriteByTmdbId,
 } from "@/store/slices/favoriteSlice";
 import type { TMDBMovie } from "@/types";
+import { memo } from "react";
 import toast from "react-hot-toast";
+import { HiHeart, HiOutlineHeart, HiStar } from "react-icons/hi";
+import { Link } from "react-router-dom";
 
 interface MovieCardProps {
   movie: TMDBMovie;
@@ -44,21 +43,25 @@ export default memo(function MovieCard({
       return;
     }
 
-    if (isFavorite) {
-      await dispatch(removeFavoriteByTmdbId(movie.id));
-      toast.success("Removed from favorites");
-    } else {
-      await dispatch(
-        addFavorite({
-          tmdbId: movie.id,
-          title,
-          posterUrl: movie.poster_path || "",
-          mediaType: type,
-          rating: movie.vote_average,
-          releaseDate: date,
-        }),
-      );
-      toast.success("Added to favorites");
+    try {
+      if (isFavorite) {
+        await dispatch(removeFavoriteByTmdbId(movie.id)).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        await dispatch(
+          addFavorite({
+            tmdbId: movie.id,
+            title,
+            posterUrl: movie.poster_path || "",
+            mediaType: type,
+            rating: movie.vote_average,
+            releaseDate: date,
+          }),
+        ).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (err) {
+      // Handled by api interceptor
     }
   };
 
@@ -123,4 +126,4 @@ export default memo(function MovieCard({
       </div>
     </Link>
   );
-})
+});

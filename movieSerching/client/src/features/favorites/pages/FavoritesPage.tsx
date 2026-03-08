@@ -28,7 +28,7 @@ export default function FavoritesPage() {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="p-2.5 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
           <HiArrowLeft size={20} />
         </button>

@@ -34,15 +34,27 @@ export default function ProfileDropdown() {
 
   return (
     <div ref={profileRef} className="relative">
-      <button
+      <div
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         aria-label="User Profile"
       >
-        <div className="w-10 h-10 rounded-full bg-[var(--custom-primary)] border border-white/20 flex items-center justify-center text-sm font-bold text-black shadow-[0_0_10px_rgba(27,209,166,0.5)]">
-          {user?.name?.charAt(0).toUpperCase()}
+        <div className="w-10 h-10 rounded-full bg-[var(--custom-primary)] border border-white/20 flex items-center justify-center text-sm font-bold text-black shadow-[0_0_10px_rgba(27,209,166,0.5)] overflow-hidden">
+          <img
+            src="/images/avatar.jpg"
+            alt={user?.name || "Avatar"}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to text if image fails to load
+              e.currentTarget.style.display = "none";
+              if (e.currentTarget.parentElement) {
+                e.currentTarget.parentElement.innerText =
+                  user?.name?.charAt(0).toUpperCase() || "";
+              }
+            }}
+          />
         </div>
-      </button>
+      </div>
 
       {isOpen && (
         <div className="absolute right-0 mt-3 w-48 rounded-lg bg-card border border-border shadow-xl py-1 fade-in font-NeuMachina z-50">
@@ -73,12 +85,13 @@ export default function ProfileDropdown() {
               <HiCog className="text-yellow-400" /> Admin Panel
             </Link>
           )}
-          <button
+          <Link
+            to={"/"}
             onClick={handleLogout}
-            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-foreground/80 hover:bg-black/5 dark:hover:bg-white/5 hover:text-red-400 cursor-pointer text-left"
+            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-foreground/80 border-none! hover:bg-black/5 dark:hover:bg-white/5 hover:text-red-400 cursor-pointer text-left"
           >
             <HiLogout /> Logout
-          </button>
+          </Link>
         </div>
       )}
     </div>

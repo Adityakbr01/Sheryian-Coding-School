@@ -111,12 +111,13 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 <HiCog className="text-yellow-400 text-xl" /> Admin Panel
               </Link>
             )}
-            <button
+            <Link
+              to={"/"}
               onClick={handleLogout}
               className="flex items-center gap-3 text-base text-foreground/80 cursor-pointer"
             >
               <HiLogout className="text-xl" /> Logout
-            </button>
+            </Link>
           </div>
         ) : (
           <div className="pt-6 border-t border-border/50 flex gap-4">

@@ -18,7 +18,6 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -73,9 +72,9 @@ export default function Navbar() {
           showNav ? "translate-y-0" : "-translate-y-full"
         } bg-background/95 backdrop-blur-md shadow-sm border-b border-border/50 text-foreground`}
       >
-        <div className="max-w-7xl mx-auto h-full grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
           {/* Left: Logo */}
-          <Link to="/" className="justify-self-start flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 z-10">
             <span className="text-3xl font-juana tracking-wider font-bold">
               {APP_INFO.APP_NAME}
             </span>
@@ -84,11 +83,11 @@ export default function Navbar() {
           {/* Center: Nav Links */}
           <NavLinks />
 
-          {/* Right: Search, Theme Toggle, Auth/Profile */}
-          <div className="hidden min-[850px]:flex items-center gap-3 justify-self-end">
+          {/* Right: Search, Theme Toggle, Auth/Profile (Desktop) */}
+          <div className="hidden min-[850px]:flex items-center gap-3 z-10">
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="flex items-center gap-2 bg-black/5 dark:bg-black/40 border-2 border-border/50 rounded-lg px-4 py-1.5 text-sm font-medium text-foreground hover:border-[var(--custom-primary)] hover:bg-black/10 transition-all cursor-pointer mr-2 shadow-sm focus:ring-2 focus:ring-[var(--custom-primary)]/20"
+              className="flex items-center gap-2 bg-black/5 dark:bg-black/40 rounded-full px-4 py-2 text-sm font-medium text-foreground hover:border-[var(--custom-primary)] hover:bg-black/10 transition-all cursor-pointer mr-2 shadow-sm focus:ring-2 focus:ring-[var(--custom-primary)]/20"
               title="Search (Ctrl+K)"
             >
               <HiSearch className="text-base" />
@@ -104,14 +103,14 @@ export default function Navbar() {
               <ProfileDropdown />
             ) : (
               <div className="flex items-center gap-2 ml-2">
-                <NavCTA href="/login" label="Login" />
+                {/* <NavCTA href="/login" label="Login" /> */}
                 <NavCTA href="/signup" label="Sign Up" primary />
               </div>
             )}
           </div>
 
           {/* Mobile: Search + Hamburger */}
-          <div className="min-[850px]:hidden absolute right-4 flex items-center gap-2">
+          <div className="min-[850px]:hidden flex items-center gap-2 z-10">
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 rounded-full text-muted-foreground hover:text-foreground transition-colors cursor-pointer"

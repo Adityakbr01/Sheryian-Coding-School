@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { getMe } from "@/store/slices/authSlice";
+import { fetchFavorites } from "@/store/slices/favoriteSlice";
 
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
@@ -9,26 +10,39 @@ import AdminRoute from "@/components/common/AdminRoute";
 import Loader from "@/components/common/Loader";
 
 // Eagerly load homepage (critical path)
-import HomePage from "@/features/home/HomePage";
+import HomePage from "@/features/home/pages/HomePage";
 
 // Lazy load non-critical routes for smaller initial bundle
-const MoviesPage = lazy(() => import("@/features/movies/MoviesPage"));
-const TvShowsPage = lazy(() => import("@/features/tv/TvShowsPage"));
-const TrendingPage = lazy(() => import("@/features/trending/TrendingPage"));
-const SearchPage = lazy(() => import("@/features/search/SearchPage"));
-const MovieDetailPage = lazy(() => import("@/features/detail/MovieDetailPage"));
+const MoviesPage = lazy(() => import("@/features/movies/pages/MoviesPage"));
+const TvShowsPage = lazy(() => import("@/features/tv/pages/TvShowsPage"));
+const TrendingPage = lazy(
+  () => import("@/features/trending/pages/TrendingPage"),
+);
+const SearchPage = lazy(() => import("@/features/search/pages/SearchPage"));
+const SpotlightPage = lazy(
+  () => import("@/features/spotlight/pages/SpotlightPage"),
+);
+const MovieDetailPage = lazy(
+  () => import("@/features/detail/pages/MovieDetailPage"),
+);
 const PersonDetailPage = lazy(
-  () => import("@/features/person/PersonDetailPage"),
+  () => import("@/features/person/pages/PersonDetailPage"),
 );
-const FavoritesPage = lazy(() => import("@/features/favorites/FavoritesPage"));
+const FavoritesPage = lazy(
+  () => import("@/features/favorites/pages/FavoritesPage"),
+);
 const WatchHistoryPage = lazy(
-  () => import("@/features/history/WatchHistoryPage"),
+  () => import("@/features/history/pages/WatchHistoryPage"),
 );
-const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
-const SignupPage = lazy(() => import("@/features/auth/SignupPage"));
-const AdminDashboard = lazy(() => import("@/features/admin/AdminDashboard"));
-const AdminMovies = lazy(() => import("@/features/admin/AdminMovies"));
-const AdminUsers = lazy(() => import("@/features/admin/AdminUsers"));
+const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"));
+const SignupPage = lazy(() => import("@/features/auth/pages/SignupPage"));
+const AdminDashboard = lazy(
+  () => import("@/features/admin/pages/AdminDashboardPage"),
+);
+const AdminMovies = lazy(
+  () => import("@/features/admin/pages/AdminMoviesPage"),
+);
+const AdminUsers = lazy(() => import("@/features/admin/pages/AdminUsersPage"));
 const NotFoundPage = lazy(() => import("@/features/notfound/NotFoundPage"));
 
 export default function App() {
@@ -38,6 +52,7 @@ export default function App() {
   useEffect(() => {
     if (token) {
       dispatch(getMe());
+      dispatch(fetchFavorites());
     }
   }, [dispatch, token]);
 
@@ -51,6 +66,7 @@ export default function App() {
           <Route path="/tv" element={<TvShowsPage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/spotlight" element={<SpotlightPage />} />
           <Route path="/movie/:id" element={<MovieDetailPage />} />
           <Route path="/tv/:id" element={<MovieDetailPage />} />
           <Route path="/person/:id" element={<PersonDetailPage />} />

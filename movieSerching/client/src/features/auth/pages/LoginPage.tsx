@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { login, clearError } from "@/store/slices/authSlice";
+import LoginForm from "../components/LoginForm";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, error } = useAppSelector(
@@ -24,12 +23,7 @@ export default function LoginPage() {
     }
   }, [error, dispatch]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+  const handleSubmit = (email: string, password: string) => {
     dispatch(login({ email, password }));
   };
 
@@ -44,40 +38,7 @@ export default function LoginPage() {
             Sign in to your account
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-                placeholder="you@example.com"
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field"
-                placeholder="••••••••"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full disabled:opacity-50"
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
+          <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />
 
           <p className="text-center text-muted-foreground text-sm mt-6 font-NeuMachina">
             Don't have an account?{" "}

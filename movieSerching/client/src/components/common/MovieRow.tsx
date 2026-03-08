@@ -2,7 +2,8 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import type { TMDBMovie } from "@/types";
 import MovieCard from "./MovieCard";
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 interface MovieRowProps {
   title: string;
   movies: TMDBMovie[];
@@ -33,7 +34,19 @@ export default memo(function MovieRow({
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4  gap-4">
+      {/* Mobile view (Swiper) */}
+      <div className="block md:hidden pb-4">
+        <Swiper spaceBetween={10} slidesPerView={1.1} className="w-full">
+          {movies.slice(0, 12).map((movie) => (
+            <SwiperSlide key={movie.id}>
+              <MovieCard movie={movie} showMediaType={showMediaType} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+
+      {/* Desktop view (Grid) */}
+      <div className="hidden md:grid md:grid-cols-4 gap-4">
         {movies.slice(0, 12).map((movie) => (
           <MovieCard
             key={movie.id}
@@ -44,4 +57,4 @@ export default memo(function MovieRow({
       </div>
     </section>
   );
-})
+});

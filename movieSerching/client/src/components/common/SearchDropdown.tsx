@@ -106,7 +106,9 @@ export default function SearchDropdown({ onClose }: SearchDropdownProps) {
     };
 
     fetchResults();
-    return () => { controller.abort(); };
+    return () => {
+      controller.abort();
+    };
   }, [debouncedQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {

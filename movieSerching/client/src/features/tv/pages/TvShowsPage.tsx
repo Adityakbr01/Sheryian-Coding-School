@@ -8,15 +8,9 @@ import {
 } from "@/store/slices/movieSlice";
 import MovieCard from "@/components/common/MovieCard";
 import { SkeletonGrid } from "@/components/common/SkeletonCard";
-import CustomSelect from "@/components/common/CustomSelect";
 import ErrorState from "@/components/common/ErrorState";
 import Loader from "@/components/common/Loader";
-
-const SORT_OPTIONS = [
-  { label: "Popularity", value: "popularity.desc" },
-  { label: "Rating", value: "vote_average.desc" },
-  { label: "First Air Date", value: "first_air_date.desc" },
-];
+import TVFilter from "../components/TVFilter";
 
 export default function TvShowsPage() {
   const dispatch = useAppDispatch();
@@ -65,26 +59,13 @@ export default function TvShowsPage() {
       </h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <CustomSelect
-          value={selectedGenre}
-          onChange={setSelectedGenre}
-          options={[
-            { label: "All Genres", value: "" },
-            ...genres.map((g) => ({ label: g.name, value: g.id.toString() })),
-          ]}
-          placeholder="All Genres"
-          className="w-40"
-        />
-
-        <CustomSelect
-          value={sortBy}
-          onChange={setSortBy}
-          options={SORT_OPTIONS}
-          placeholder="Sort By"
-          className="w-48"
-        />
-      </div>
+      <TVFilter
+        genres={genres}
+        selectedGenre={selectedGenre}
+        onGenreChange={setSelectedGenre}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
 
       {/* Results */}
       {isLoading && discoverResults.length === 0 ? (

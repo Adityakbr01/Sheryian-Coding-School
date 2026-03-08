@@ -28,6 +28,8 @@ import MovieCard from "@/components/common/MovieCard";
 import MobileDetailDrawer from "@/components/common/MobileDetailDrawer";
 import Loader from "@/components/common/Loader";
 import toast from "react-hot-toast";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import type { TMDBVideo, TMDBCast } from "@/types";
 
 export default function MovieDetailPage() {
@@ -84,28 +86,32 @@ export default function MovieDetailPage() {
     }
   };
 
-  const handleFavorite = () => {
+  const handleFavorite = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to add favorites");
       return;
     }
     if (!detail) return;
 
-    if (isFavorite) {
-      dispatch(removeFavoriteByTmdbId(detail.id));
-      toast.success("Removed from favorites");
-    } else {
-      dispatch(
-        addFavorite({
-          tmdbId: detail.id,
-          title: getMediaTitle(detail),
-          posterUrl: detail.poster_path || "",
-          mediaType: type as "movie" | "tv",
-          rating: detail.vote_average,
-          releaseDate: getMediaDate(detail),
-        }),
-      );
-      toast.success("Added to favorites");
+    try {
+      if (isFavorite) {
+        await dispatch(removeFavoriteByTmdbId(detail.id)).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        await dispatch(
+          addFavorite({
+            tmdbId: detail.id,
+            title: getMediaTitle(detail),
+            posterUrl: detail.poster_path || "",
+            mediaType: type as "movie" | "tv",
+            rating: detail.vote_average,
+            releaseDate: getMediaDate(detail),
+          }),
+        ).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (err) {
+      // Handled by api interceptor
     }
   };
 
@@ -118,7 +124,7 @@ export default function MovieDetailPage() {
   const recommendations = detail.recommendations?.results?.slice(0, 6) || [];
 
   return (
-    <div>
+    <div className="pb-6">
       {/* Backdrop Hero */}
       <div className="relative h-[50vh] md:h-[60vh]">
         <div
@@ -259,7 +265,19 @@ export default function MovieDetailPage() {
             <h2 className="text-2xl font-juana tracking-wide text-foreground mb-4">
               Similar
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {/* Mobile view (Swiper) */}
+            <div className="block md:hidden pb-4">
+              <Swiper spaceBetween={16} slidesPerView={1.2} className="w-full">
+                {similar.map((m) => (
+                  <SwiperSlide key={m.id}>
+                    <MovieCard movie={{ ...m, media_type: type as any }} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+            {/* Desktop view (Grid) */}
+            <div className="hidden md:grid md:grid-cols-4 gap-4">
               {similar.map((m) => (
                 <MovieCard
                   key={m.id}
@@ -276,7 +294,19 @@ export default function MovieDetailPage() {
             <h2 className="text-2xl font-juana tracking-wide text-foreground mb-4">
               Recommendations
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {/* Mobile view (Swiper) */}
+            <div className="block md:hidden pb-4">
+              <Swiper spaceBetween={16} slidesPerView={1.2} className="w-full">
+                {recommendations.map((m) => (
+                  <SwiperSlide key={m.id}>
+                    <MovieCard movie={{ ...m, media_type: type as any }} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+            {/* Desktop view (Grid) */}
+            <div className="hidden md:grid md:grid-cols-4 gap-4">
               {recommendations.map((m) => (
                 <MovieCard
                   key={m.id}

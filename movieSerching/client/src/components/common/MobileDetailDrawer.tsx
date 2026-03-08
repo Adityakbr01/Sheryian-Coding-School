@@ -143,20 +143,16 @@ export default function MobileDetailDrawer({
 
   /* Compute height: snap + live drag offset */
   const maxDrawerPx =
-    typeof window !== "undefined"
-      ? window.innerHeight - NAVBAR_HEIGHT_PX
-      : 600;
+    typeof window !== "undefined" ? window.innerHeight - NAVBAR_HEIGHT_PX : 600;
 
   const getBaseHeightPx = () => {
     if (drawerState === "collapsed")
       return (SNAP_COLLAPSED / 100) * window.innerHeight;
-    if (drawerState === "peek")
-      return (SNAP_PEEK / 100) * window.innerHeight;
+    if (drawerState === "peek") return (SNAP_PEEK / 100) * window.innerHeight;
     return maxDrawerPx;
   };
 
-  const baseHeightPx =
-    typeof window !== "undefined" ? getBaseHeightPx() : 0;
+  const baseHeightPx = typeof window !== "undefined" ? getBaseHeightPx() : 0;
   const liveHeight = isDragging
     ? Math.max(50, Math.min(maxDrawerPx, baseHeightPx + dragOffset))
     : undefined;
@@ -173,7 +169,9 @@ export default function MobileDetailDrawer({
       onTouchEnd={handleTouchEnd}
       style={heightStyle}
       className={`md:hidden fixed bottom-0 left-0 right-0 z-40 ${
-        isDragging ? "" : "transition-[height] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        isDragging
+          ? ""
+          : "transition-[height] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
       }`}
     >
       {/* Backdrop when fully expanded */}
@@ -186,7 +184,7 @@ export default function MobileDetailDrawer({
 
       <div className="h-full bg-background/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl shadow-[0_-4px_40px_rgba(0,0,0,0.35)] flex flex-col overflow-hidden">
         {/* Drag Handle */}
-        <button
+        <div
           onClick={cycleDrawer}
           className="flex flex-col items-center pt-2.5 pb-2 cursor-pointer flex-shrink-0 touch-none"
           aria-label="Toggle drawer"
@@ -198,7 +196,7 @@ export default function MobileDetailDrawer({
             }`}
             size={16}
           />
-        </button>
+        </div>
 
         {/* Collapsed: Compact title bar */}
         {drawerState === "collapsed" && (
@@ -332,14 +330,16 @@ export default function MobileDetailDrawer({
               >
                 {detail.overview || "No overview available."}
               </p>
-              {drawerState === "peek" && detail.overview && detail.overview.length > 200 && (
-                <button
-                  onClick={() => setDrawerState("full")}
-                  className="text-[var(--custom-primary)] text-[11px] font-medium mt-1 cursor-pointer"
-                >
-                  Read more
-                </button>
-              )}
+              {drawerState === "peek" &&
+                detail.overview &&
+                detail.overview.length > 200 && (
+                  <button
+                    onClick={() => setDrawerState("full")}
+                    className="text-[var(--custom-primary)] text-[11px] font-medium mt-1 cursor-pointer"
+                  >
+                    Read more
+                  </button>
+                )}
             </div>
 
             {/* Cast */}

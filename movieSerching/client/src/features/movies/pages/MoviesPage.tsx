@@ -8,9 +8,8 @@ import {
 } from "@/store/slices/movieSlice";
 import MovieCard from "@/components/common/MovieCard";
 import { SkeletonGrid } from "@/components/common/SkeletonCard";
-import CustomSelect from "@/components/common/CustomSelect";
 import ErrorState from "@/components/common/ErrorState";
-import { SORT_OPTIONS } from "@/constants";
+import MoviesFilter from "../components/MoviesFilter";
 import Loader from "@/components/common/Loader";
 
 export default function MoviesPage() {
@@ -68,40 +67,15 @@ export default function MoviesPage() {
       </h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <CustomSelect
-          value={selectedGenre}
-          onChange={setSelectedGenre}
-          options={[
-            { label: "All Genres", value: "" },
-            ...genres.map((g) => ({ label: g.name, value: g.id.toString() })),
-          ]}
-          placeholder="All Genres"
-          className="w-40"
-        />
-
-        <CustomSelect
-          value={sortBy}
-          onChange={setSortBy}
-          options={SORT_OPTIONS}
-          placeholder="Sort By"
-          className="w-48"
-        />
-
-        <CustomSelect
-          value={year}
-          onChange={setYear}
-          options={[
-            { label: "All Years", value: "" },
-            ...Array.from({ length: 30 }, (_, i) => {
-              const y = new Date().getFullYear() - i;
-              return { label: y.toString(), value: y.toString() };
-            }),
-          ]}
-          placeholder="All Years"
-          className="w-32"
-        />
-      </div>
+      <MoviesFilter
+        genres={genres}
+        selectedGenre={selectedGenre}
+        onGenreChange={setSelectedGenre}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        year={year}
+        onYearChange={setYear}
+      />
 
       {/* Results */}
       {isLoading && discoverResults.length === 0 ? (

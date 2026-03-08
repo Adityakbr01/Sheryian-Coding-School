@@ -20,18 +20,56 @@ export function SkeletonGrid({ count = 12 }: { count?: number }) {
   );
 }
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { EffectCoverflow } from "swiper/modules";
+
 export function SkeletonHero() {
   return (
-    <div className="relative h-[70vh] skeleton rounded-none">
-      <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4">
-        <div className="h-8 skeleton w-96 max-w-full" />
-        <div className="h-4 skeleton w-64 max-w-full" />
-        <div className="h-4 skeleton w-full max-w-2xl" />
-        <div className="flex gap-3">
-          <div className="h-10 w-32 skeleton rounded-lg" />
-          <div className="h-10 w-32 skeleton rounded-lg" />
-        </div>
-      </div>
+    <div className="w-full relative bg-background pb-10 pt-4 pointer-events-none">
+      <Swiper
+        modules={[EffectCoverflow]}
+        effect="coverflow"
+        centeredSlides={true}
+        slidesPerView="auto"
+        loop={true}
+        allowTouchMove={false}
+        spaceBetween={25}
+        coverflowEffect={{
+          rotate: 0,
+          stretch: -25,
+          depth: 50,
+          modifier: 1,
+          slideShadows: false,
+        }}
+        className="w-full pb-12!"
+        initialSlide={1}
+      >
+        {Array.from({ length: 5 }).map((_, i) => (
+          <SwiperSlide
+            key={i}
+            className="w-[95%] sm:w-[85%] md:w-[75%] lg:w-[60%] xl:w-[50%] max-w-6xl"
+          >
+            {({ isActive }) => (
+              <div
+                className={`relative h-[60vh] md:h-[65vh] rounded-[2rem] overflow-hidden border border-white/5 transition-all duration-500 bg-foreground/5 ${
+                  isActive ? "opacity-100" : "opacity-40 grayscale-[20%]"
+                }`}
+              >
+                <div className="absolute inset-0 skeleton" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 space-y-4 z-10">
+                  <div className="h-6 skeleton w-24 rounded-full bg-background/20" />
+                  <div className="h-10 skeleton w-3/4 max-w-xl rounded-lg bg-background/20" />
+                  <div className="h-4 skeleton w-full max-w-2xl bg-background/20" />
+                  <div className="flex gap-3 pt-2">
+                    <div className="h-10 w-32 skeleton rounded-lg bg-background/20" />
+                    <div className="h-10 w-32 skeleton rounded-lg bg-background/20" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 }

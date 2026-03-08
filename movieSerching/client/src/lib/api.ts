@@ -26,10 +26,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRoute =
+      error.config?.url?.includes("/auth/login") ||
+      error.config?.url?.includes("/auth/register");
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem("token");
       toast.error("Session expired. Please log in again.");
-    } else if (error.response?.data?.message) {
+    } else if (error.response?.data?.message && !isAuthRoute) {
       toast.error(error.response.data.message);
     }
     // Network errors and other failures are handled by in-page ErrorState UI

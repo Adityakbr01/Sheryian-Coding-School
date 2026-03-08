@@ -3,8 +3,11 @@ import MovieCard from "@/components/common/MovieCard";
 import { SkeletonGrid } from "@/components/common/SkeletonCard";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getImageUrl } from "@/lib/utils";
 import type { SearchCategory } from "@/store/slices/movieSlice";
+import SearchInput from "../components/SearchInput";
+import CategoryTabs from "../components/CategoryTabs";
+import PersonCard from "../components/PersonCard";
+import SearchEmptyState from "../components/SearchEmptyState";
 import {
   clearSearch,
   searchByCategory,
@@ -58,16 +61,20 @@ export default function SearchPage() {
   const categoryFromUrl = (searchParams.get("type") as SearchCategory) || "all";
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  // Sync URL query to state on mount
+  // Sync URL query to state on mount and when URL changes
   useEffect(() => {
     if (queryFromUrl && queryFromUrl !== searchQuery) {
       dispatch(setSearchQuery(queryFromUrl));
+    } else if (!queryFromUrl && searchQuery) {
+      // Clear search if URL query is removed
+      dispatch(setSearchQuery(""));
     }
+
     if (categoryFromUrl !== searchCategory) {
       dispatch(setSearchCategory(categoryFromUrl));
     }
     inputRef.current?.focus();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [queryFromUrl, categoryFromUrl, dispatch]); // Added URL dependencies // eslint-disable-line react-hooks/exhaustive-deps
 
   // Trigger search on debounced query or category change
   useEffect(() => {
@@ -129,46 +136,20 @@ export default function SearchPage() {
       </div>
 
       {/* Search Input */}
-      <div className="relative mb-6 max-w-2xl">
-        <input
-          ref={inputRef}
-          type="text"
-          value={searchQuery}
-          onChange={handleInputChange}
-          placeholder="Search for movies, TV shows, people..."
-          className="w-full bg-black/5 dark:bg-black/40 border-2 border-border/50 rounded-lg px-5 py-4 pl-12 text-lg font-medium text-foreground placeholder-muted-foreground focus:outline-none focus:border-[var(--custom-primary)] focus:bg-black/10 focus:ring-2 focus:ring-[var(--custom-primary)]/20 shadow-sm transition-all"
-          autoFocus
-        />
-        <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-xl" />
-        {isSearching && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <div className="w-5 h-5 border-2 border-[var(--custom-primary)] border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-      </div>
+      <SearchInput
+        inputRef={inputRef}
+        searchQuery={searchQuery}
+        onInputChange={handleInputChange}
+        isSearching={isSearching}
+      />
 
       {/* Category Tabs */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-        {categories.map((cat) => (
-          <button
-            key={cat.key}
-            onClick={() => handleCategoryChange(cat.key)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
-              searchCategory === cat.key
-                ? "bg-[var(--custom-primary)] text-white shadow-lg shadow-[var(--custom-primary)]/25"
-                : "bg-black/5 dark:bg-white/5 text-muted-foreground hover:text-foreground hover:bg-black/10 dark:hover:bg-white/10"
-            }`}
-          >
-            {cat.icon}
-            {cat.label}
-            {searchCategory === cat.key && searchTotalResults > 0 && (
-              <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs">
-                {searchTotalResults.toLocaleString()}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      <CategoryTabs
+        categories={categories}
+        searchCategory={searchCategory}
+        searchTotalResults={searchTotalResults}
+        onCategoryChange={handleCategoryChange}
+      />
 
       {/* Results */}
       {isLoading && searchResults.length === 0 ? (
@@ -207,7 +188,7 @@ export default function SearchPage() {
           </InfiniteScroll>
         </>
       ) : debouncedQuery && !isLoading ? (
-        <EmptyState
+        <SearchEmptyState
           icon={
             <HiSearch className="mx-auto text-6xl text-muted-foreground/50 mb-4" />
           }
@@ -215,7 +196,7 @@ export default function SearchPage() {
           subtitle="Try different keywords or change the search category"
         />
       ) : !debouncedQuery ? (
-        <EmptyState
+        <SearchEmptyState
           icon={
             <HiSearch className="mx-auto text-6xl text-muted-foreground/50 mb-4" />
           }
@@ -223,62 +204,6 @@ export default function SearchPage() {
           subtitle="Search for movies, TV shows, and people"
         />
       ) : null}
-    </div>
-  );
-}
-
-/* ---------- Sub-components ---------- */
-
-function PersonCard({ person }: { person: TMDBPerson }) {
-  return (
-    <Link to={`/person/${person.id}`} className="group block">
-      <div className="card-hover relative overflow-hidden rounded-xl bg-card border border-border/50">
-        <div className="aspect-[2/3] overflow-hidden">
-          <img
-            src={getImageUrl(person.profile_path)}
-            alt={person.name}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        </div>
-        <div className="absolute top-2 right-2 bg-purple-600/80 rounded-full px-2 py-0.5">
-          <span className="text-xs font-medium text-white">PERSON</span>
-        </div>
-        <div className="p-3">
-          <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-[var(--custom-primary)] transition-colors">
-            {person.name}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {person.known_for_department}
-          </p>
-          {person.known_for && person.known_for.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-1 truncate">
-              {person.known_for
-                .slice(0, 2)
-                .map((m) => m.title || m.name)
-                .join(", ")}
-            </p>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function EmptyState({
-  icon,
-  title,
-  subtitle,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <div className="text-center py-20">
-      {icon}
-      <p className="text-foreground text-lg font-medium">{title}</p>
-      <p className="text-muted-foreground text-sm mt-1">{subtitle}</p>
     </div>
   );
 }
