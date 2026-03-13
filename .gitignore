@@ -20,6 +20,7 @@ yarn.lock
 dist/
 build/
 out/
+.next/
 
 # Logs
 *.log

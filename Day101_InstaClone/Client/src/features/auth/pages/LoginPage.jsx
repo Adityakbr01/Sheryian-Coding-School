@@ -1,32 +1,33 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import AuthInput from '../components/AuthInput.jsx'
-import authApi from '../services/authApi.js'
-import useAuth from '../hooks/useAuth.js'
+import { useAuthContext } from '../../../provider/AuthContext.jsx'
 import '../styles/form.scss'
 
 function LoginPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ identifier: '', password: '' })
-
-  const { submit, loading, error } = useAuth(authApi.login, {
-    onSuccess: () => navigate('/'),
-  })
+  const { handleLogin, loading, error } = useAuthContext()
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     // Backend accepts email OR userName — detect which one the user typed
     const isEmail = form.identifier.includes('@')
-    submit({
-      ...(isEmail
-        ? { email: form.identifier }
-        : { userName: form.identifier }),
-      password: form.password,
-    })
+    try {
+      await handleLogin({
+        ...(isEmail
+          ? { email: form.identifier }
+          : { userName: form.identifier }),
+        password: form.password,
+      })
+      navigate('/')
+    } catch {
+      // error is already set in context
+    }
   }
 
   return (

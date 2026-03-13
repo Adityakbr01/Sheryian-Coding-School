@@ -1,0 +1,194 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 340px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    overflow: hidden;
+}
+
+#app {
+    padding: 20px;
+}
+
+.view { display: block; }
+.hidden { display: none !important; }
+
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+/* Login form */
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    border-color: #6366f1;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+#login-btn {
+    padding: 10px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+}
+
+#login-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.error {
+    color: #f87171;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* User bar */
+.user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.user-email {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.link-btn {
+    background: none;
+    color: #818cf8;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.link-btn:hover {
+    background: #1e293b;
+}
+
+/* Page info */
+.page-info {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.page-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.page-url {
+    font-size: 11px;
+    color: #64748b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 4px;
+}
+
+/* Save button */
+.save-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 15px;
+    border-radius: 10px;
+}
+
+.save-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Status */
+.status {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.status.success {
+    background: #064e3b;
+    color: #6ee7b7;
+}
+
+.status.error {
+    background: #450a0a;
+    color: #fca5a5;
+}
+
+/* Loading */
+.loader {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #334155;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin: 40px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+/* ---------------- FONTS ---------------- */
+
+@font-face {
+  font-family: "NeueMachina";
+  src: url("/fonts/NeueMachina-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "NeueMachina";
+  src: url("/fonts/NeueMachina-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "HelveticaNow";
+  src: url("/fonts/HelveticaNowDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "HelveticaNow";
+  src: url("/fonts/HelveticaNowDisplay-Bold.woff2") format("woff2");
+  font-weight: 700;
+}
+
+/* ---------------- THEME ---------------- */
+
+@theme {
+  --font-display: "NeueMachina", sans-serif;
+  --font-body: "HelveticaNow", sans-serif;
+}
+
+/* ---------------- LIGHT MODE ---------------- */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 9%;
+
+  --popover: 0 0% 98%;
+  --popover-foreground: 0 0% 9%;
+
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
+
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 9%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 0 0% 20%;
+
+  --radius: 0.5rem;
+
+  /* Custom Colors */
+  --color-accent: 45 93% 58%; /* amber base */
+  --color-accent-soft: 45 93% 75%;
+  --color-accent-light: 45 93% 95%;
+
+  --base-1: #3d2fa9;
+  --base-2: #ff7722;
+  --base-3: #ff3d33;
+  --base-4: #785f47;
+}
+
+/* ---------------- DARK MODE ---------------- */
+
+.dark {
+  --background: 0 0% 9%;
+  --foreground: 0 0% 98%;
+
+  --card: 0 0% 11%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 0 0% 11%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+
+  --secondary: 0 0% 13%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 13%;
+  --muted-foreground: 0 0% 65%;
+
+  --accent: 0 0% 13%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 0 0% 80%;
+
+  /* Custom Colors */
+  --color-accent: 45 93% 60%;
+  --color-accent-soft: 45 93% 70%;
+}
+
+/* ---------------- TAILWIND COLOR MAPPING ---------------- */
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius: var(--radius);
+
+  /* Custom Colors */
+  --color-accent: hsl(var(--color-accent));
+  --color-accent-soft: hsl(var(--color-accent-soft));
+  --color-accent-light: hsl(var(--color-accent-light));
+}
+
+/* ---------------- BASE STYLES ---------------- */
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+}
+
+/* Custom CSS */
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.apple-border-shine {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.apple-border-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0; /* Stretches exactly to the edges of the parent */
+  border-radius: inherit; /* Automatically matches the parent's rounded corners! */
+  padding: 1px; /* This controls the thickness of your border */
+
+  /* The top-left and bottom-right shine colors */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.05) 75%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  /* Modern CSS Masking to cut out the inside, leaving ONLY the border */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  /* Ensures you can still click the button underneath the border */
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+/* Hover: smoothly reveal the border shine via opacity */
+.apple-border-shine:hover::after {
+  opacity: 1;
+}
+
+/* ---- Section base (shared across all sections) ---- */
+
+section {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.shape {
+  height: 200px;
+  width: 200px;
+  background-color: rgb(109, 166, 148);
+}
+
+.path {
+  clip-path: path("M Z");
+}
+
+
+.word {
+  display: inline-block;
+  margin-right: 6px;
+}

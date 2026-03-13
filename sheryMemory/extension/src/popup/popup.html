@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=340" />
+    <title>SheryMemory</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Login View -->
+      <div id="login-view" class="view hidden">
+        <div class="header">
+          <h1>🧠 SheryMemory</h1>
+          <p class="subtitle">Sign in to save anything</p>
+        </div>
+        <form id="login-form">
+          <input
+            type="email"
+            id="email"
+            placeholder="Email"
+            required
+            autocomplete="email"
+          />
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+            autocomplete="current-password"
+          />
+          <button type="submit" id="login-btn">Sign In</button>
+          <p id="login-error" class="error hidden"></p>
+        </form>
+      </div>
+
+      <!-- Save View -->
+      <div id="save-view" class="view hidden">
+        <div class="header">
+          <h1>🧠 SheryMemory</h1>
+          <div class="user-bar">
+            <span id="user-email" class="user-email"></span>
+            <button id="logout-btn" class="link-btn">Logout</button>
+          </div>
+        </div>
+
+        <div id="current-page" class="page-info">
+          <p id="page-title" class="page-title"></p>
+          <p id="page-url" class="page-url"></p>
+        </div>
+
+        <button id="save-btn" class="save-btn">
+          <span id="save-text">💾 Save This Page</span>
+        </button>
+
+        <div id="save-status" class="status hidden"></div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading-view" class="view">
+        <div class="loader"></div>
+      </div>
+    </div>
+
+    <script src="../../dist/popup.js"></script>
+  </body>
+</html>
