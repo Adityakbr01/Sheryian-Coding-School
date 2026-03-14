@@ -18,6 +18,13 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   MISTRALAI_API_KEY: z.string().min(1, "MISTRALAI_API_KEY is required"),
+  TAVILY_API_KEY: z.string().min(1, "TAVILY_API_KEY is required"),
+  GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
+  GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
+  GOOGLE_CALLBACK_URL: z.string().min(1, "GOOGLE_CALLBACK_URL is required"),
+  GITHUB_CLIENT_ID: z.string().min(1, "GITHUB_CLIENT_ID is required"),
+  GITHUB_CLIENT_SECRET: z.string().min(1, "GITHUB_CLIENT_SECRET is required"),
+  GITHUB_CALLBACK_URL: z.string().min(1, "GITHUB_CALLBACK_URL is required"),
 });
 
 const parsed = envSchema.safeParse(process.env);
