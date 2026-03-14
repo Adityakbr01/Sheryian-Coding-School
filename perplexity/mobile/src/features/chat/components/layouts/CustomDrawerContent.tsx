@@ -53,6 +53,7 @@ export function CustomDrawerContent(props: any) {
   const activeChatId = useChatStore((s) => s.activeChatId);
 
   const fabScale = useRef(new Animated.Value(1)).current;
+  const logScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isAuthenticated) loadChats();
@@ -175,7 +176,6 @@ export function CustomDrawerContent(props: any) {
           data={activeTab === "Threads" ? chats : []}
           keyExtractor={(item) => item.id}
           scrollEnabled={false}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Ionicons
@@ -204,22 +204,23 @@ export function CustomDrawerContent(props: any) {
         />
       </DrawerContentScrollView>
 
-      {/* ── FAB ── */}
-     <View style={{ position: "absolute", bottom: 20, left: 0, right: 0, alignItems: "center", flex: 1 ,flexDirection: "row", justifyContent: "center"}}>
-       <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
-        <TouchableOpacity style={styles.fabInner} activeOpacity={1} onPress={onFabPress}>
-          <Ionicons name="pencil-outline" size={18} color={styles.fabPlus.color as string} />
-          <AppText style={styles.fabPlus}>+</AppText>
-        </TouchableOpacity>
-      </Animated.View>
+      {/* ── Fixed Bottom Actions ── */}
+      <View style={{ position: "absolute", bottom: 50, left: 0, right: 0, flexDirection: "row", justifyContent: "space-evenly", gap: 20 }}>
+        {/* Logout */}
+        <Animated.View style={{ transform: [{ scale: logScale }] }}>
+          <TouchableOpacity style={styles.logInner} activeOpacity={1} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={20} color={styles.logPlus.color as string} />
+          </TouchableOpacity>
+        </Animated.View>
 
-      {/* ── Bottom: logout ── */}
-      <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }], bottom: 20 }]}>
-        <TouchableOpacity style={styles.fabInner} activeOpacity={1} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={18} color={styles.fabPlus.color as string} />
-        </TouchableOpacity>
-      </Animated.View>
-     </View>
+        {/* New Chat FAB */}
+        <Animated.View style={{ transform: [{ scale: fabScale }] }}>
+          <TouchableOpacity style={styles.fabInner} activeOpacity={1} onPress={onFabPress}>
+            <Ionicons name="pencil-outline" size={18} color={styles.fabPlus.color as string} />
+            <AppText style={styles.fabPlus}>+</AppText>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
     </View>
   );
 }

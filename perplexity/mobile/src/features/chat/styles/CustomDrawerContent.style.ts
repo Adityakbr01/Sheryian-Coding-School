@@ -79,12 +79,6 @@ export const drawerStyles = StyleSheet.create({
     color: colors.primarySoft,
   },
 
-  // Separator
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-  },
-
   // Empty state
   empty: {
     paddingTop: spacing.xxl + 20, // 52
@@ -131,6 +125,32 @@ export const drawerStyles = StyleSheet.create({
   },
   fabPlus: {
     color: colors.text,
+    fontSize: 17,
+    fontWeight: "300",
+    lineHeight: 20,
+    marginLeft: -2,
+  },
+
+  logInner: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.danger,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: colors.danger + "88",
+  },
+
+  logPlus: {
+    color: colors.textInverted,
     fontSize: 17,
     fontWeight: "300",
     lineHeight: 20,
