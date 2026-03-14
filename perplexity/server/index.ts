@@ -1,5 +1,5 @@
 import { HumanMessage } from "langchain";
-import model from "./src/configs/ai.model.conf";
+import MistralAI from "./src/configs/mistral.config";
 import rl from "./src/utils/readline.util";
 
 let ChatMessage = [];
@@ -16,7 +16,7 @@ while (true) {
     break;
   }
   ChatMessage.push(new HumanMessage(userInput));
-  const response = await model.invoke(ChatMessage);
+  const response = await MistralAI.invoke(ChatMessage);
   ChatMessage.push(response);
   console.log(`Assistant: ${response.content}`);
 }
