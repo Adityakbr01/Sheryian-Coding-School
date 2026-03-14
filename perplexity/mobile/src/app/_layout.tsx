@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -23,7 +24,7 @@ function RootLayoutNav() {
 
     if (isAuthenticated && inAuthGroup) {
       // Redirect to home if user is logged in but tries to access auth screens
-      router.replace("/(tabs)");
+      router.replace("/(home)");
     } else if (!isAuthenticated && !inAuthGroup) {
       // Redirect to login if user is not logged in but tries to access auth-protected routes
       router.replace("/(auth)/signUp");
@@ -41,7 +42,7 @@ function RootLayoutNav() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)/signUp/index" />
         <Stack.Screen name="(auth)/login/index" />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(home)" />
       </Stack>
     </SafeAreaProvider>
   );
@@ -49,8 +50,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <RootLayoutNav />
-    </ThemeProvider>
+    <KeyboardProvider>
+      <ThemeProvider>
+        <RootLayoutNav />
+      </ThemeProvider>
+    </KeyboardProvider>
   );
 }

@@ -4,13 +4,13 @@ import api from '../../../services/api';
 
 export const register = async (email: string, password?: string, name?: string) => {
     const response = await api.post('/auth/register', { email, password, name });
-    return response.data.data;
+    return response.data.data.response;
 };
 
 export const login = async (email: string, password?: string) => {
     const response = await api.post('/auth/login', { email, password });
-    console.log(response.data);
-    return response.data.data;
+    console.log(response.data.data.response);
+    return response.data.data.response;
 };
 
 export const googleLogin = async () => {

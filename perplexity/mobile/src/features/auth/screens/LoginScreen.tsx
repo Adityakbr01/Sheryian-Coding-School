@@ -7,15 +7,12 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import styles from "../styles/SignUp.style";
+import APP_INFO from "@/constants/app.info";
+import { useEffect, useState } from "react";
+import { Platform, TouchableOpacity, View } from "react-native";
 
 const LoginScreen = () => {
   const { colors, toggleTheme, isDark } = useTheme();
@@ -34,13 +31,13 @@ const LoginScreen = () => {
   const router = useRouter();
 
   // Auto redirect if already logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isInitializing && isAuthenticated) {
-      router.replace("/(tabs)");
+      router.replace("/(home)");
     }
   }, [isInitializing, isAuthenticated, router]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       setAlertContent({ title: "Error", message: error });
       setAlertVisible(true);
@@ -50,7 +47,7 @@ const LoginScreen = () => {
   const handleGoogleLogin = async () => {
     const success = await googleLogin();
     if (success) {
-      router.replace("/(tabs)");
+      router.replace("/(home)");
     }
   };
 
@@ -66,7 +63,7 @@ const LoginScreen = () => {
 
     const success = await login(email, password);
     if (success) {
-      router.replace("/(tabs)");
+      router.replace("/(home)");
     }
   };
 
@@ -86,103 +83,100 @@ const LoginScreen = () => {
         />
       </TouchableOpacity>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.header}>
-            <AppText style={[styles.logoText, { color: colors.text }]}>
-              perplexity
-            </AppText>
-            <AppText variant="body" style={styles.tagline}>
-              Welcome back
-            </AppText>
-          </View>
+        <View style={styles.header}>
+          <AppText style={[styles.logoText, { color: colors.text }]}>
+            {APP_INFO.name}
+          </AppText>
+          <AppText variant="body" style={styles.tagline}>
+            Welcome back
+          </AppText>
+        </View>
 
-          <View style={styles.content}>
-            <AppText variant="h2" style={styles.title}>
-              Log In
-            </AppText>
+        <View style={styles.content}>
+          <AppText variant="h2" style={styles.title}>
+            Log In
+          </AppText>
 
-            {/* Social Logins */}
-            <View style={styles.socialButtons}>
-              <Button
-                label={isLoading ? "Loading..." : "Continue with Google"}
-                variant="outline"
-                icon="logo-google"
-                style={styles.socialButton}
-                onPress={handleGoogleLogin}
-                disabled={isLoading}
-              />
-              {Platform.OS === "ios" && (
-                <Button
-                  label="Continue with Apple"
-                  variant="outline"
-                  icon="logo-apple"
-                  style={styles.socialButton}
-                  onPress={() => console.log("Apple login")}
-                />
-              )}
-            </View>
-
-            <View style={styles.divider}>
-              <View style={[styles.line, { backgroundColor: colors.border }]} />
-              <AppText variant="caption" color="muted" style={styles.orText}>
-                OR
-              </AppText>
-              <View style={[styles.line, { backgroundColor: colors.border }]} />
-            </View>
-
-            {/* Email Login */}
-            <View style={styles.emailContainer}>
-              <Input
-                placeholder="name@example.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                returnKeyType="next"
-                style={{ marginBottom: 12 }}
-              />
-              <Input
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                returnKeyType="done"
-              />
-            </View>
-
+          {/* Social Logins */}
+          <View style={styles.socialButtons}>
             <Button
-              label={isLoading ? "Logging in..." : "Log In"}
-              variant="primary"
-              onPress={handleEmailLogin}
-              disabled={!email || !password || isLoading}
-              style={styles.submitButton}
+              label={isLoading ? "Loading..." : "Continue with Google"}
+              variant="outline"
+              icon="logo-google"
+              style={styles.socialButton}
+              onPress={handleGoogleLogin}
+              disabled={isLoading}
             />
-
-            <View style={styles.footer}>
-              <TouchableOpacity onPress={() => router.push("/(auth)/signUp")}>
-                <AppText
-                  variant="body"
-                  style={{
-                    textAlign: "center",
-                    color: colors.primary,
-                    marginTop: 16,
-                  }}
-                >
-                  Don't have an account? Sign Up
-                </AppText>
-              </TouchableOpacity>
-            </View>
+            {Platform.OS === "ios" && (
+              <Button
+                label="Continue with Apple"
+                variant="outline"
+                icon="logo-apple"
+                style={styles.socialButton}
+                onPress={() => console.log("Apple login")}
+              />
+            )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <View style={styles.divider}>
+            <View style={[styles.line, { backgroundColor: colors.border }]} />
+            <AppText variant="caption" color="muted" style={styles.orText}>
+              OR
+            </AppText>
+            <View style={[styles.line, { backgroundColor: colors.border }]} />
+          </View>
+
+          {/* Email Login */}
+          <View style={styles.emailContainer}>
+            <Input
+              placeholder="name@example.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              returnKeyType="next"
+              style={{ marginBottom: 12 }}
+            />
+            <Input
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              returnKeyType="done"
+            />
+          </View>
+
+          <Button
+            label={isLoading ? "Logging in..." : "Log In"}
+            variant="primary"
+            onPress={handleEmailLogin}
+            disabled={!email || !password || isLoading}
+            style={styles.submitButton}
+          />
+
+          <View style={styles.footer}>
+            <TouchableOpacity onPress={() => router.push("/(auth)/signUp")}>
+              <AppText
+                variant="body"
+                style={{
+                  textAlign: "center",
+                  color: colors.primary,
+                  marginTop: 16,
+                }}
+              >
+                Don't have an account? Sign Up
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 };

@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthService } from 'modules/auth/auth.service';
-import { catchAsync } from 'utils/catchAsync';
 import { ApiResponse } from 'utils/ApiResponse';
-import { AppError } from 'utils/AppError';
+import { catchAsync } from 'utils/catchAsync';
 
 export class AuthController {
   private authService = new AuthService();
@@ -10,20 +9,21 @@ export class AuthController {
   register = catchAsync(async (req: Request, res: Response) => {
     const { email, password, name } = req.body;
     const token = await this.authService.register(email, password, name);
-    res.status(201).json(new ApiResponse(201, 'User registered successfully', { token }));
+    ApiResponse.success(res, 201, 'Registration successful', { token });
   });
 
   login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const token = await this.authService.login(email, password);
-    res.status(200).json(new ApiResponse(200, 'Login successful', { token }));
+    ApiResponse.success(res, 200, 'Login successful', { token });
   });
 
   googleCallback = catchAsync(async (req: Request, res: Response) => {
     // Passport handles much of this, but here we can return the token or handle redirection
     const user = req.user as any;
     if (!user) {
-      throw new AppError('Authentication failed', 401);
+      ApiResponse.error(res, 401, 'Authentication failed');
+      return;
     }
 
     const token = await this.authService.googleCallback(user);
