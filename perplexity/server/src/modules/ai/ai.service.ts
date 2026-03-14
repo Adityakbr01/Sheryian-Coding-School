@@ -1,7 +1,7 @@
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import MistralAI from "@/configs/mistral.config";
 import { AiRepository } from "@/modules/ai/ai.repository";
-
+import { Socket } from "socket.io";
 // Import all separated tools
 import { 
     webSearchTool, 
@@ -17,23 +17,49 @@ export class AiService {
     /**
      * Retrieves user chat history from database
      */
-    static async getHistory(userId: string) {
-        const records = await AiRepository.getHistoryByUser(userId);
+    static async getHistory(chatId: string, page: number = 1, limit?: number) {
+        const records = await AiRepository.getHistoryByChat(chatId, page, limit);
         return records;
     }
 
     /**
-     * Processes a new chat message, saves to DB, fetches history,
-     * invokes LangChain, and saves/returns the AI response.
+     * Optional summarizer logic
      */
-    static async handleChat(userId: string, prompt: string): Promise<string> {
-        // 1. Save the new user message to DB
-        await AiRepository.saveMessage(userId, "user", prompt);
+    static async generateTitle(prompt: string): Promise<string> {
+        try {
+            const summaryModel = MistralAI; // generic text generation
+            const res = await summaryModel.invoke(`Create a very short title (max 5 words) for this chat prompt: "${prompt}"`);
+            return res.content.toString().replace(/"/g, '').trim();
+        } catch (error) {
+            return "New Chat";
+        }
+    }
 
-        // 2. Fetch all historical messages for context
-        const dbHistory = await AiRepository.getHistoryByUser(userId);
+    /**
+     * Process message via socket and stream response
+     */
+    static async handleSocketChat(userId: string, requestedChatId: string | null, prompt: string, socket: Socket) {
+        let chat = await AiRepository.getOrCreateChat(userId, requestedChatId);
+        
+        // Auto title gen for first chat message
+        const isFirstMessage = (await AiRepository.getHistoryByChat(chat.id, 1, 1)).length === 0;
+        if (isFirstMessage) {
+            const newTitle = await this.generateTitle(prompt);
+            chat = await AiRepository.updateChatTitle(chat.id, newTitle);
+            socket.emit("chat_title_updated", { chatId: chat.id, title: newTitle });
+        }
 
-        // 3. Map Prisma DB records into LangChain Message objects
+        // 1. Save new message
+        await AiRepository.saveMessage(chat.id, "user", prompt);
+        
+        // Memory RAG retrieval could be done here...
+        // e.g., const queryEmbedding = await generateEmbedding(prompt);
+        // const context = await AiRepository.searchMemories(userId, queryEmbedding);
+        // prompt = \`Use context \${context} to answer \${prompt}\`;
+
+        // 2. Fetch history
+        const dbHistory = await AiRepository.getHistoryByChat(chat.id, 1, 50);
+
         const chatHistory: any[] = dbHistory.map((msg) => {
             if (msg.role === "assistant" || msg.role === "ai") {
                 return new AIMessage(msg.content);
@@ -41,44 +67,61 @@ export class AiService {
             return new HumanMessage(msg.content);
         });
 
-        // 4. Invoke LLM with the chronological conversation array + tools
+        // Add Langchain streaming support
+        // Note: bindTools supports stream event
+        const stream = await aiModel.stream(chatHistory);
+        
+        let aiContent = "";
+
+        socket.emit("response_start", { chatId: chat.id });
+        for await (const chunk of stream) {
+            if (chunk.content) {
+                socket.emit("response_chunk", { chatId: chat.id, content: chunk.content });
+                aiContent += chunk.content;
+            }
+            // For simplicity in this demo, missing nested tool calls inside standard stream chunks.
+        }
+
+        socket.emit("response_end", { chatId: chat.id, totalContent: aiContent });
+
+        // 5. Save AI's response
+        if (aiContent) {
+           await AiRepository.saveMessage(chat.id, "assistant", aiContent);
+        }
+    }
+
+    /**
+     * REST endpoint wrapper backwards compatibility
+     */
+    static async handleChat(userId: string, prompt: string): Promise<string> {
+        const chat = await AiRepository.getOrCreateChat(userId);
+        
+        await AiRepository.saveMessage(chat.id, "user", prompt);
+
+        const dbHistory = await AiRepository.getHistoryByChat(chat.id);
+        const chatHistory: any[] = dbHistory.map((msg) => {
+            if (msg.role === "assistant" || msg.role === "ai") {
+                return new AIMessage(msg.content);
+            }
+            return new HumanMessage(msg.content);
+        });
+
         let response = await aiModel.invoke(chatHistory);
 
-        // LangChain doesn't automatically run tools unless you use an AgentExecutor or LangGraph loop. 
-        // We must manually execute tools if the model asks for them, and return the result to the model.
         while (response.tool_calls && response.tool_calls.length > 0) {
-            console.log("\n[AI TOOL CALLS] Model requested tools:", JSON.stringify(response.tool_calls, null, 2));
-
-            // Add the model's reasoning/tool-request to history
             chatHistory.push(response);
-
-            // Execute the tools requested by the model
             for (const toolCall of response.tool_calls) {
-                console.log(`[AI TOOL EXECUTION] Executing: ${toolCall.name} with args:`, toolCall.args);
-
-                // Find the correct tool from our available tools array
                 const toolToExecute = availableTools.find(t => t.name === toolCall.name);
-
                 if (toolToExecute) {
                     const toolMessage = await (toolToExecute as any).invoke(toolCall);
-                    console.log(`[AI TOOL RESULT] ${toolCall.name} returned data of length:`, String(toolMessage.content).length);
-                    // Add the tool's output back to history
                     chatHistory.push(toolMessage);
-                } else {
-                    console.log(`[AI TOOL ERROR] Tool ${toolCall.name} not found!`);
                 }
             }
-
-            console.log("[AI TOOL LOOP] Re-invoking model with tool outputs...\n");
-            // Call the model again so it can read the tool output and generate a final answer
             response = await aiModel.invoke(chatHistory);
         }
 
         const aiContent = response.content as string;
-
-        // 5. Save the AI's response to the database
-        await AiRepository.saveMessage(userId, "assistant", aiContent);
-
+        await AiRepository.saveMessage(chat.id, "assistant", aiContent);
         return aiContent;
     }
 }

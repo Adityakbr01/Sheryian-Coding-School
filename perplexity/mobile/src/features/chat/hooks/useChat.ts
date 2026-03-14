@@ -57,6 +57,18 @@ export const useChat = () => {
         }
     };
 
+    const switchChat = (chatId: string) => {
+        // Logic to switch chat context, e.g., load different history
+        // For simplicity, we can just reload history for now
+        loadHistory();
+    };
+
+    const createNewChat = () => {
+        // Logic to create a new chat, e.g., reset messages and call API to create chat
+        setMessages([]);
+        loadHistory();
+    };
+
     return {
         messages,
         isLoading,

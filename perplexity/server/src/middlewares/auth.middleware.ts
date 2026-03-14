@@ -31,6 +31,7 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
 
         // Attach user to request object
         req.user = decoded;
+        console.log(`Authenticated user: ${decoded.email} (ID: ${decoded.id})`);
         next();
     } catch (error) {
         next(new AppError('Not authorized, token failed', 401));

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User } from 'generated/prisma';
+import { User } from "@prisma/client";
 import env from 'configs/ENV';
 import { AuthRepository } from 'modules/auth/auth.repository';
 
@@ -23,7 +23,8 @@ export class AuthService {
       name,
     });
 
-    return this.generateToken(user);
+     const result = { token: this.generateToken(user), user };
+     return result;
   }
 
   async login(email: string, password?: string) {
@@ -43,7 +44,8 @@ export class AuthService {
       }
     }
 
-    return this.generateToken(user);
+    const result = { token: this.generateToken(user), user };
+    return result;
   }
 
   generateToken(user: User) {

@@ -11,6 +11,7 @@ export class AuthService {
             const tokenStr = response?.token || response?.data?.token;
             if (tokenStr) {
                 await this.setToken(tokenStr);
+                await this.setUser(response.user);
             } else {
                 throw new Error('Registration failed: No token received');
             }
@@ -25,9 +26,11 @@ export class AuthService {
     static async login(email: string, password?: string): Promise<void> {
         try {
             const response = await AuthApi.login(email, password);
-            const tokenStr = response?.token || response?.data?.token;
+            console.log('Login response:', response.data);
+            const tokenStr = response?.data?.token;
             if (tokenStr) {
                 await this.setToken(tokenStr);
+                await this.setUser(response.data.user);
             } else {
                 throw new Error('Login failed: No token received');
             }
@@ -46,6 +49,7 @@ export class AuthService {
 
             if (tokenStr) {
                 await this.setToken(tokenStr);
+                await this.setUser((result as any)?.user);
             } else if ('error' in result) {
                 throw new Error((result as any).error || 'Google login failed');
             } else {
@@ -61,6 +65,28 @@ export class AuthService {
      */
     static async logout(): Promise<void> {
         await deleteItem(STORAGE_KEYS.AUTH_TOKEN);
+        await deleteItem(STORAGE_KEYS.USER);
+    }
+
+    /**
+     * Get the current user info
+     */
+    static async getUser(): Promise<any | null> {
+        const userStr = await getItem(STORAGE_KEYS.USER);
+        if (!userStr) return null;
+        try {
+            return JSON.parse(userStr);
+        } catch (e) {
+            return userStr;
+        }
+    }
+
+    /**
+     * Set the current user info
+     */
+    private static async setUser(user: any): Promise<void> {
+        let userStr = typeof user === 'string' ? user : JSON.stringify(user);
+        await saveItem(STORAGE_KEYS.USER, userStr);
     }
 
     /**
@@ -76,6 +102,7 @@ export class AuthService {
     private static async setToken(token: string): Promise<void> {
         await saveItem(STORAGE_KEYS.AUTH_TOKEN, token);
     }
+    
 
     /**
      * Format error safely

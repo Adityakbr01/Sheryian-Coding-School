@@ -8,14 +8,14 @@ export class AuthController {
 
   register = catchAsync(async (req: Request, res: Response) => {
     const { email, password, name } = req.body;
-    const token = await this.authService.register(email, password, name);
-    ApiResponse.success(res, 201, 'Registration successful', { token });
+    const { token , user} = await this.authService.register(email, password, name);
+    ApiResponse.success(res, 201, 'Registration successful', { token, user });
   });
 
   login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const token = await this.authService.login(email, password);
-    ApiResponse.success(res, 200, 'Login successful', { token });
+    const { token, user } = await this.authService.login(email, password);
+    ApiResponse.success(res, 200, 'Login successful', { token, user });
   });
 
   googleCallback = catchAsync(async (req: Request, res: Response) => {

@@ -3,15 +3,23 @@ import express from 'express';
 import os from 'os';
 import passport from 'passport';
 import morgan from "morgan";
+import http from 'http';
 import env from './src/configs/ENV';
 import router from './src/routes';
 import './src/configs/passport.config'; // Initialize passport config
 import logger from './src/utils/logger';
 import { notFoundHandler } from './src/middlewares/notFound.middleware';
 import { globalErrorHandler } from './src/middlewares/error.middleware';
+import { initSocketIO } from './src/Sockets/socketIO';
 
 const app = express();
 
+const httpServer = http.createServer(app);
+
+// Initialize Socket.io
+initSocketIO(httpServer);
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
@@ -33,7 +41,7 @@ app.use(globalErrorHandler);
 
 const PORT = env.PORT || 3000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   const interfaces = os.networkInterfaces();
   const getNetworkAddress = () => {
     for (const name of Object.keys(interfaces)) {
@@ -49,8 +57,8 @@ app.listen(PORT, () => {
 
   const ipAddress = getNetworkAddress();
 
-  logger.info(`\n🚀 Server is running on port ${PORT}`);
-  logger.info(`\nNetwork access:`);
+  logger.info(`🚀 Server is running on port ${PORT}`);
+  logger.info(`Network access:`);
   logger.info(`- Local:    http://localhost:${PORT}`);
   logger.info(`- Network:  http://${ipAddress}:${PORT}\n`);
 });

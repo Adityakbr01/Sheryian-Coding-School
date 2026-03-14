@@ -1,64 +1,51 @@
 /**
  * MarkdownRenderer.tsx
  *
- * Custom Markdown renderer — NO external markdown library needed.
- * Parses and renders inline in React Native with full feature support:
+ * Your existing renderer + streaming sine-wave shimmer.
  *
- *  ✅ Syntax highlighted code blocks (via SyntaxHighlighter)
- *  ✅ Copy button with animated feedback (via CodeBlock)
- *  ✅ Collapsible long code blocks
- *  ✅ Tables (via MarkdownTable)
- *  ✅ Streaming safe — rerenders cleanly as content grows
- *  ✅ Bold, italic, inline code
- *  ✅ Headings h1–h3
- *  ✅ Ordered + unordered lists (nested)
- *  ✅ Blockquotes
- *  ✅ Horizontal rules
- *  ✅ Line breaks
+ * What changed vs your original:
+ *   1. Props now accepts `isStreaming?: boolean`
+ *   2. `renderBlock` gets an extra `isLiveBlock` boolean
+ *   3. When isLiveBlock=true, the last piece of text in that block
+ *      renders via <StreamingText isStreaming> instead of plain <Text>
+ *   4. All previous blocks stay 100% static — zero extra cost
  *
- * No native deps — pure React Native + expo-clipboard.
+ * Import paths kept exactly as your project uses them.
  */
 
 import React, { memo, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { CodeBlock } from "./Codeblock";
 import { MarkdownTable } from "./Markdowntable";
+import { StreamingText } from "./Streamingtext";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ── Types (unchanged) ──────────────────────────────────────────────────────────
 type BlockType =
-  | "fence"
-  | "table"
-  | "heading"
-  | "hr"
-  | "blockquote"
-  | "ul"
-  | "ol"
-  | "paragraph"
-  | "blank";
+  | "fence" | "table" | "heading" | "hr"
+  | "blockquote" | "ul" | "ol" | "paragraph" | "blank";
 
-interface FenceBlock    { type: "fence";      lang: string;  code: string }
-interface TableBlock    { type: "table";      header: string[]; rows: string[][] }
-interface HeadingBlock  { type: "heading";    level: 1|2|3;  text: string }
-interface HrBlock       { type: "hr" }
-interface QuoteBlock    { type: "blockquote"; lines: string[] }
-interface ListBlock     { type: "ul"|"ol";    items: string[] }
-interface ParagraphBlock{ type: "paragraph";  text: string }
-interface BlankBlock    { type: "blank" }
+interface FenceBlock     { type: "fence";      lang: string;   code: string }
+interface TableBlock     { type: "table";      header: string[]; rows: string[][] }
+interface HeadingBlock   { type: "heading";    level: 1|2|3;   text: string }
+interface HrBlock        { type: "hr" }
+interface QuoteBlock     { type: "blockquote"; lines: string[] }
+interface ListBlock      { type: "ul"|"ol";    items: string[] }
+interface ParagraphBlock { type: "paragraph";  text: string }
+interface BlankBlock     { type: "blank" }
 
 type Block =
   | FenceBlock | TableBlock | HeadingBlock | HrBlock
   | QuoteBlock | ListBlock | ParagraphBlock | BlankBlock;
 
-// ── Parser ─────────────────────────────────────────────────────────────────────
+// ── Parser (unchanged) ────────────────────────────────────────────────────────
 function parse(markdown: string): Block[] {
-  const lines = markdown.split("\n");
+  const lines  = markdown.split("\n");
   const blocks: Block[] = [];
   let i = 0;
 
   while (i < lines.length) {
     const line = lines[i];
 
-    // ── Fenced code block ──
     const fenceMatch = line.match(/^```(\w*)/);
     if (fenceMatch) {
       const lang = fenceMatch[1] ?? "";
@@ -68,16 +55,18 @@ function parse(markdown: string): Block[] {
         codeLines.push(lines[i]);
         i++;
       }
-      // Skip incomplete fence during streaming (no closing ```)
-      if (i < lines.length) i++; // skip closing ```
+      if (i < lines.length) i++;
       blocks.push({ type: "fence", lang, code: codeLines.join("\n") });
       continue;
     }
 
-    // ── Table ──
-    if (line.includes("|") && i + 1 < lines.length && lines[i + 1].match(/^\|?[\s-|]+\|?$/)) {
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      lines[i + 1].match(/^\|?[\s-|]+\|?$/)
+    ) {
       const header = line.split("|").filter((c) => c.trim()).map((c) => c.trim());
-      i += 2; // skip separator
+      i += 2;
       const rows: string[][] = [];
       while (i < lines.length && lines[i].includes("|")) {
         rows.push(lines[i].split("|").filter((c) => c.trim()).map((c) => c.trim()));
@@ -87,26 +76,23 @@ function parse(markdown: string): Block[] {
       continue;
     }
 
-    // ── Heading ──
     const headMatch = line.match(/^(#{1,3})\s+(.+)/);
     if (headMatch) {
       blocks.push({
         type: "heading",
-        level: Math.min(headMatch[1].length, 3) as 1|2|3,
+        level: Math.min(headMatch[1].length, 3) as 1 | 2 | 3,
         text: headMatch[2],
       });
       i++;
       continue;
     }
 
-    // ── HR ──
     if (line.match(/^[-*_]{3,}$/)) {
       blocks.push({ type: "hr" });
       i++;
       continue;
     }
 
-    // ── Blockquote ──
     if (line.startsWith(">")) {
       const quoteLines: string[] = [];
       while (i < lines.length && lines[i].startsWith(">")) {
@@ -117,7 +103,6 @@ function parse(markdown: string): Block[] {
       continue;
     }
 
-    // ── Unordered list ──
     if (line.match(/^[\s]*[-*+]\s/)) {
       const items: string[] = [];
       while (i < lines.length && lines[i].match(/^[\s]*[-*+]\s/)) {
@@ -128,7 +113,6 @@ function parse(markdown: string): Block[] {
       continue;
     }
 
-    // ── Ordered list ──
     if (line.match(/^\d+\.\s/)) {
       const items: string[] = [];
       while (i < lines.length && lines[i].match(/^\d+\.\s/)) {
@@ -139,14 +123,12 @@ function parse(markdown: string): Block[] {
       continue;
     }
 
-    // ── Blank line ──
     if (line.trim() === "") {
       blocks.push({ type: "blank" });
       i++;
       continue;
     }
 
-    // ── Paragraph (accumulate until blank/block) ──
     const paraLines: string[] = [];
     while (
       i < lines.length &&
@@ -164,29 +146,34 @@ function parse(markdown: string): Block[] {
   return blocks;
 }
 
-// ── Inline renderer ────────────────────────────────────────────────────────────
-// Handles: **bold**, *italic*, `code`, plain text
+// ── Inline renderer (unchanged) ───────────────────────────────────────────────
 function renderInline(text: string, baseStyle?: object): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
   return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
+    if (part.startsWith("**") && part.endsWith("**"))
       return <Text key={i} style={[baseStyle, inlineStyles.bold]}>{part.slice(2, -2)}</Text>;
-    }
-    if (part.startsWith("*") && part.endsWith("*")) {
+    if (part.startsWith("*") && part.endsWith("*"))
       return <Text key={i} style={[baseStyle, inlineStyles.italic]}>{part.slice(1, -1)}</Text>;
-    }
-    if (part.startsWith("`") && part.endsWith("`")) {
+    if (part.startsWith("`") && part.endsWith("`"))
       return <Text key={i} style={inlineStyles.inlineCode}>{part.slice(1, -1)}</Text>;
-    }
     return <Text key={i} style={baseStyle}>{part}</Text>;
   });
 }
 
-// ── Block renderers ────────────────────────────────────────────────────────────
-function renderBlock(block: Block, index: number): React.ReactNode {
+// ── Block renderer — isLiveBlock added ────────────────────────────────────────
+/**
+ * isLiveBlock is true ONLY for the last non-blank block while isStreaming=true.
+ * Everything else renders exactly as before.
+ */
+function renderBlock(
+  block: Block,
+  index: number,
+  isLiveBlock: boolean,
+): React.ReactNode {
   switch (block.type) {
 
     case "fence":
+      // Code blocks are never wave-animated (they have their own copy UX)
       return <CodeBlock key={index} code={block.code} language={block.lang} />;
 
     case "table":
@@ -207,44 +194,89 @@ function renderBlock(block: Block, index: number): React.ReactNode {
     case "blockquote":
       return (
         <View key={index} style={blockStyles.blockquote}>
-          {block.lines.map((l, li) => (
-            <Text key={li} style={blockStyles.blockquoteText} selectable>
-              {renderInline(l, blockStyles.blockquoteText)}
-            </Text>
-          ))}
+          {block.lines.map((l, li) => {
+            // Only the very last line of the blockquote gets the wave
+            const isLiveLine = isLiveBlock && li === block.lines.length - 1;
+            return isLiveLine ? (
+              <StreamingText
+                key={li}
+                text={l}
+                isStreaming
+                style={blockStyles.blockquoteText}
+                inline
+              />
+            ) : (
+              <Text key={li} style={blockStyles.blockquoteText} selectable>
+                {renderInline(l, blockStyles.blockquoteText)}
+              </Text>
+            );
+          })}
         </View>
       );
 
     case "ul":
       return (
         <View key={index} style={blockStyles.list}>
-          {block.items.map((item, ii) => (
-            <View key={ii} style={blockStyles.listItem}>
-              <Text style={blockStyles.bullet}>•</Text>
-              <Text style={blockStyles.listText} selectable>
-                {renderInline(item, blockStyles.listText)}
-              </Text>
-            </View>
-          ))}
+          {block.items.map((item, ii) => {
+            const isLiveItem = isLiveBlock && ii === block.items.length - 1;
+            return (
+              <View key={ii} style={blockStyles.listItem}>
+                <Text style={blockStyles.bullet}>•</Text>
+                {isLiveItem ? (
+                  <StreamingText
+                    text={item}
+                    isStreaming
+                    style={blockStyles.listText}
+                    inline
+                  />
+                ) : (
+                  <Text style={blockStyles.listText} selectable>
+                    {renderInline(item, blockStyles.listText)}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
         </View>
       );
 
     case "ol":
       return (
         <View key={index} style={blockStyles.list}>
-          {block.items.map((item, ii) => (
-            <View key={ii} style={blockStyles.listItem}>
-              <Text style={blockStyles.bullet}>{ii + 1}.</Text>
-              <Text style={blockStyles.listText} selectable>
-                {renderInline(item, blockStyles.listText)}
-              </Text>
-            </View>
-          ))}
+          {block.items.map((item, ii) => {
+            const isLiveItem = isLiveBlock && ii === block.items.length - 1;
+            return (
+              <View key={ii} style={blockStyles.listItem}>
+                <Text style={blockStyles.bullet}>{ii + 1}.</Text>
+                {isLiveItem ? (
+                  <StreamingText
+                    text={item}
+                    isStreaming
+                    style={blockStyles.listText}
+                    inline
+                  />
+                ) : (
+                  <Text style={blockStyles.listText} selectable>
+                    {renderInline(item, blockStyles.listText)}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
         </View>
       );
 
     case "paragraph":
-      return (
+      // ── THE KEY CHANGE: live paragraph → StreamingText ──
+      return isLiveBlock ? (
+        <StreamingText
+          key={index}
+          text={block.text}
+          isStreaming
+          style={blockStyles.paragraph}
+          inline
+        />
+      ) : (
         <Text key={index} style={blockStyles.paragraph} selectable>
           {renderInline(block.text, blockStyles.paragraph)}
         </Text>
@@ -261,16 +293,30 @@ function renderBlock(block: Block, index: number): React.ReactNode {
 // ── Main component ─────────────────────────────────────────────────────────────
 interface Props {
   content: string;
+  /** Pass true while the AI is actively streaming this message */
+  isStreaming?: boolean;
 }
 
-export const MarkdownRenderer = memo(({ content }: Props) => {
+export const MarkdownRenderer = memo(({ content, isStreaming = false }: Props) => {
   const blocks = useMemo(() => parse(content), [content]);
-  return <View>{blocks.map((b, i) => renderBlock(b, i))}</View>;
+
+  // Find the last non-blank block — the "live edge" during streaming
+  const lastContentIdx = isStreaming
+    ? blocks.reduce((last, b, i) => (b.type !== "blank" ? i : last), -1)
+    : -1; // -1 = no live block (static render)
+
+  return (
+    <View>
+      {blocks.map((b, i) =>
+        renderBlock(b, i, i === lastContentIdx),
+      )}
+    </View>
+  );
 });
 
 MarkdownRenderer.displayName = "MarkdownRenderer";
 
-// ── Styles ─────────────────────────────────────────────────────────────────────
+// ── Styles (unchanged) ────────────────────────────────────────────────────────
 const inlineStyles = StyleSheet.create({
   bold: {
     fontWeight: "700",

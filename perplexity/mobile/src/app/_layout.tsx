@@ -27,7 +27,7 @@ function RootLayoutNav() {
       router.replace("/(home)");
     } else if (!isAuthenticated && !inAuthGroup) {
       // Redirect to login if user is not logged in but tries to access auth-protected routes
-      router.replace("/(auth)/signUp");
+      router.replace("/(auth)/login");
     }
 
     // Hide splash screen once we know the routing context

@@ -1,9 +1,18 @@
-import { Stack } from "expo-router";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Drawer } from 'expo-router/drawer';
+import { CustomDrawerContent } from '@/features/chat/components/layouts/CustomDrawerContent';
 
 export default function HomeLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />} screenOptions={{ headerShown: false }}>
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: 'Chat',
+          }}
+        />
+      </Drawer>
+    </GestureHandlerRootView>
   );
 }

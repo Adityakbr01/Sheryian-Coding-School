@@ -15,8 +15,8 @@ const palette = {
   // Perplexity-inspired
   darkBg: '#191A1A',
   darkSurface: '#2D2F2F', 
-  perplexityTeal: '#20B2AA',
-  perplexityDarkTeal: '#138988',
+  perplexityTeal: '#1a7e79',
+  perplexityDarkTeal: '#0f807e',
 };
 
 export const lightColors = {

@@ -1,5 +1,6 @@
-import prisma from "../../configs/db";
-import { User } from "../../../generated/prisma";
+
+import prisma from "@/configs/db";
+import { User } from "@prisma/client";
 
 export class AuthRepository {
   async findUserByEmail(email: string): Promise<User | null> {

@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   },
   fadeBar: {
     height: 40,
-    background: "linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(20,20,20,0.85) 100%)",
+    
     // Simulate fade — a solid bar matching the bg with some opacity trick
     backgroundColor: "rgba(20,20,20,0.85)",
   },

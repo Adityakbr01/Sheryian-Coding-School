@@ -30,12 +30,7 @@ const LoginScreen = () => {
   const [alertContent, setAlertContent] = useState({ title: "", message: "" });
   const router = useRouter();
 
-  // Auto redirect if already logged in
-  useEffect(() => {
-    if (!isInitializing && isAuthenticated) {
-      router.replace("/(home)");
-    }
-  }, [isInitializing, isAuthenticated, router]);
+  // Auto redirect is handled by RootLayout
 
   useEffect(() => {
     if (error) {
@@ -45,10 +40,7 @@ const LoginScreen = () => {
   }, [error]);
 
   const handleGoogleLogin = async () => {
-    const success = await googleLogin();
-    if (success) {
-      router.replace("/(home)");
-    }
+    await googleLogin();
   };
 
   const handleEmailLogin = async () => {
@@ -61,10 +53,7 @@ const LoginScreen = () => {
       return;
     }
 
-    const success = await login(email, password);
-    if (success) {
-      router.replace("/(home)");
-    }
+    await login(email, password);
   };
 
   return (

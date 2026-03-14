@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 export const STORAGE_KEYS = {
   THEME: 'user_theme_preference',
   AUTH_TOKEN: 'auth_token',
+  USER: 'user'
 };
 
 /**

@@ -1,96 +1,125 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { create } from 'zustand';
 import { AuthService } from '../services/auth.service';
+import { useChatStore } from '../../chat/store/chat.store';
 
-export const useAuth = () => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [isInitializing, setIsInitializing] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+interface AuthState {
+    isLoading: boolean;
+    isInitializing: boolean;
+    isAuthenticated: boolean;
+    error: string | null;
+    user: any | null;
+    
+    checkAuth: () => Promise<void>;
+    register: (email: string, password?: string, name?: string) => Promise<boolean>;
+    login: (email: string, password?: string) => Promise<boolean>;
+    googleLogin: () => Promise<boolean>;
+    logout: () => Promise<void>;
+}
 
-    // Check for token on mount
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const token = await AuthService.getToken();
-                if (token) {
-                    setIsAuthenticated(true);
-                }
-            } catch (e) {
-                console.error("Failed to fetch auth token during init");
-            } finally {
-                setIsInitializing(false);
+const useAuthStore = create<AuthState>((set) => ({
+    isLoading: false,
+    isInitializing: true,
+    isAuthenticated: false,
+    error: null,
+    user: null,
+
+    checkAuth: async () => {
+        try {
+            const token = await AuthService.getToken();
+            if (token) {
+                const user = await AuthService.getUser();
+                set({ isAuthenticated: true, user });
+            } else {
+                set({ isAuthenticated: false, user: null });
             }
-        };
-        checkAuth();
-    }, []);
+        } catch (e) {
+            console.error("Failed to fetch auth token during init");
+            set({ isAuthenticated: false, user: null });
+        } finally {
+            set({ isInitializing: false });
+        }
+    },
 
-    const register = async (email: string, password?: string, name?: string): Promise<boolean> => {
-        setIsLoading(true);
-        setError(null);
+    register: async (email, password, name) => {
+        set({ isLoading: true, error: null });
         try {
             await AuthService.register(email, password, name);
-            setIsAuthenticated(true);
+            const user = await AuthService.getUser();
+            set({ isAuthenticated: true, user });
             return true;
         } catch (err: any) {
             console.log(err);
-            setError(err.message || 'Registration failed');
+            set({ error: err.message || 'Registration failed' });
             return false;
         } finally {
-            setIsLoading(false);
+            set({ isLoading: false });
         }
-    };
+    },
 
-    const login = async (email: string, password?: string): Promise<boolean> => {
-        setIsLoading(true);
-        setError(null);
+    login: async (email, password) => {
+        set({ isLoading: true, error: null });
         try {
             await AuthService.login(email, password);
-            setIsAuthenticated(true);
+            const user = await AuthService.getUser();
+            set({ isAuthenticated: true, user });
             return true;
         } catch (err: any) {
-            setError(err.message || 'Login failed');
+            set({ error: err.message || 'Login failed' });
             return false;
         } finally {
-
-            setIsLoading(false);
+            set({ isLoading: false });
         }
-    };
+    },
 
-    const googleLogin = async (): Promise<boolean> => {
-        setIsLoading(true);
-        setError(null);
+    googleLogin: async () => {
+        set({ isLoading: true, error: null });
         try {
             await AuthService.googleLogin();
-            setIsAuthenticated(true);
+            const user = await AuthService.getUser();
+            set({ isAuthenticated: true, user });
             return true;
         } catch (err: any) {
-            setError(err.message || 'Google login failed');
+            set({ error: err.message || 'Google login failed' });
             return false;
         } finally {
-            setIsLoading(false);
+            set({ isLoading: false });
         }
-    };
+    },
 
-    const logout = async (): Promise<void> => {
-        setIsLoading(true);
+    logout: async () => {
+        set({ isLoading: true });
         try {
             await AuthService.logout();
-            setIsAuthenticated(false);
+            set({ isAuthenticated: false, user: null });
+            useChatStore.getState().clearStore();
         } catch (err: any) {
             console.error('Logout error:', err);
         } finally {
-            setIsLoading(false);
+            set({ isLoading: false });
         }
-    };
+    },
+    getUser: async () => {
+        try {
+            const user = await AuthService.getUser();
+            set({ user });
+            return user;
+        } catch (e) {
+            console.error("Failed to fetch user info", e);
+            set({ user: null });
+        }
+    },
+}));
 
-    return {
-        isLoading,
-        isInitializing,
-        isAuthenticated,
-        error,
-        register,
-        login,
-        googleLogin,
-        logout,
-    };
+export const useAuth = () => {
+    const store = useAuthStore();
+
+    useEffect(() => {
+        // Only run check if we are initializing
+        if (store.isInitializing) {
+            store.checkAuth();
+        }
+    }, []);
+
+    return store;
 };

@@ -1,12 +1,9 @@
 import { AppText } from "@/components/common/AppText";
 import { useTheme } from "@/hooks/useTheme";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ChatMessage } from "../api/chat.api";
 import AvatarCircle from "../components/AvatarCircle";
@@ -15,78 +12,88 @@ import { EmptyState } from "../components/EmptyState";
 import { MessageBubble } from "../components/MessageBubble";
 import type { Chip } from "../components/SuggestionChip";
 import { TopNav } from "../components/TopNav";
-import { useChat } from "../hooks/useChat";
+import { useChatStore } from "../store/chat.store";
 import styles from "../styles/chat.style";
 
-// ── Constants ──────────────────────────────────────────────────────────────────
 const CHIPS: Chip[] = [
   { id: "1", label: "Perplexity 101", icon: "search-outline" },
-  { id: "2", label: "Finance", icon: "cash-outline" },
-  { id: "3", label: "Latest News", icon: "search-outline" },
-  { id: "4", label: "Shopping", icon: "bag-outline" },
-  { id: "5", label: "Travel", icon: "airplane-outline" },
+  { id: "2", label: "Finance",        icon: "cash-outline"   },
+  { id: "3", label: "Latest News",    icon: "search-outline" },
+  { id: "4", label: "Shopping",       icon: "bag-outline"    },
+  { id: "5", label: "Travel",         icon: "airplane-outline"},
 ];
 
-// The approximate height of ChatInput (box + padding). Adjust if needed.
 const CHAT_INPUT_HEIGHT = 60;
 
-// ── Screen ─────────────────────────────────────────────────────────────────────
 export function HomeScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
   const listRef = useRef<FlatList<ChatMessage>>(null);
-  const { messages, isLoading, sendMessage } = useChat();
 
-  /**
-   * keyboardHeight tracks keyboard height on the UI thread via Reanimated.
-   * useKeyboardHandler fires on every animation frame — same source that
-   * KeyboardStickyView uses — so the list footer and the input always move together.
-   */
+  const messages               = useChatStore((s) => s.messages);
+  const isStreaming             = useChatStore((s) => s.isStreaming);
+  const isLoading               = useChatStore((s) => s.isLoading);
+  const sendMessage             = useChatStore((s) => s.sendMessage);
+  const initialize              = useChatStore((s) => s.initialize);
+  const setupSocketListeners    = useChatStore((s) => s.setupSocketListeners);
+  const cleanupSocketListeners  = useChatStore((s) => s.cleanupSocketListeners);
+
+  useEffect(() => {
+    initialize();
+    setupSocketListeners();
+    return () => cleanupSocketListeners();
+  }, []);
+
+  // ── Keyboard tracking ──────────────────────────────────────────────────────
   const keyboardHeight = useSharedValue(0);
-
   useKeyboardHandler(
     {
-      onMove: (e) => {
-        "worklet";
-        keyboardHeight.value = e.height;
-      },
-      onEnd: (e) => {
-        "worklet";
-        keyboardHeight.value = e.height;
-      },
+      onMove: (e) => { "worklet"; keyboardHeight.value = e.height; },
+      onEnd:  (e) => { "worklet"; keyboardHeight.value = e.height; },
     },
     [],
   );
-
 
   const footerStyle = useAnimatedStyle(() => ({
     height: keyboardHeight.value + CHAT_INPUT_HEIGHT,
   }));
 
+  /**
+   * Determine what the footer indicator should show:
+   *
+   *  isLoading  && !isStreaming  → AI has not started replying yet → show "Thinking…"
+   *  isStreaming                 → AI is actively writing a bubble  → show nothing here
+   *                                (the bubble itself shows "Answering…")
+   *  neither                     → idle → show nothing
+   *
+   * This eliminates the double-avatar situation:
+   *   Before: last bubble had "AI / Answer" header AND footer showed "AI / Typing…"
+   *   After:  while streaming the footer is silent; the bubble header says "Answering…"
+   */
+  const lastMessage = messages[messages.length - 1];
+  const lastIsAssistantStreaming =
+    isStreaming && lastMessage?.role === "assistant";
+
   const AnimatedFooter = useCallback(
     () => (
       <>
-        {isLoading && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 6,
-              marginBottom: 8,
-            }}
-          >
+        {/*
+         * Only show the thinking indicator when we are waiting for the FIRST
+         * token (isLoading true, isStreaming false).
+         * Once streaming starts the last message bubble itself carries the
+         * "Answering…" label — no footer avatar needed.
+         */}
+        {isLoading && !isStreaming && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <AvatarCircle initials="AI" />
-            <AppText variant="body" color="muted">
-              Thinking...
-            </AppText>
+            <AppText variant="body" color="muted">Thinking…</AppText>
           </View>
         )}
-        {/* This spacer animates in sync with the keyboard */}
         <Animated.View style={footerStyle} />
       </>
     ),
-    [isLoading, footerStyle],
+    [isLoading, isStreaming, footerStyle],
   );
 
   const handleSend = useCallback(() => {
@@ -96,9 +103,22 @@ export function HomeScreen() {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
   }, [query, sendMessage]);
 
+  /**
+   * renderItem now passes isStreaming=true only to the LAST assistant message
+   * while the stream is active. Every other bubble renders normally.
+   */
   const renderItem = useCallback(
-    ({ item }: { item: ChatMessage }) => <MessageBubble item={item} />,
-    [],
+    ({ item, index }: { item: ChatMessage; index: number }) => (
+      <MessageBubble
+        item={item}
+        isStreaming={
+          isStreaming &&
+          index === messages.length - 1 &&
+          item.role === "assistant"
+        }
+      />
+    ),
+    [isStreaming, messages.length],
   );
 
   const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
@@ -106,9 +126,7 @@ export function HomeScreen() {
   const hasMessages = messages.length > 0;
 
   return (
-    <View
-      style={[styles.root, { backgroundColor: colors.background ?? "#111111" }]}
-    >
+    <View style={[styles.root, { backgroundColor: colors.background ?? "#111111" }]}>
       <TopNav insets={insets} />
 
       <View style={{ flex: 1 }}>
@@ -121,28 +139,15 @@ export function HomeScreen() {
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             style={{ flex: 1 }}
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingTop: 16,
-              gap: 14,
-            }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, gap: 14 }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="interactive"
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
-            removeClippedSubviews={true}
-            onContentSizeChange={() =>
-              listRef.current?.scrollToEnd({ animated: false })
-            }
-            onLayout={() =>
-              listRef.current?.scrollToEnd({ animated: false })
-            }
-            /**
-             * The animated spacer lives here — inside the scroll content.
-             * As the keyboard rises, this spacer grows, pushing all messages
-             * upward and keeping the latest one visible above the input box.
-             */
+            removeClippedSubviews
+            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+            onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
             ListFooterComponent={AnimatedFooter}
           />
         )}
