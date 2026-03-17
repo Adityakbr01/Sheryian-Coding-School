@@ -105,7 +105,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   sendMessage: (prompt) => {
     const { activeChatId, userId, messages } = get();
-    console.log("sendMessage called:", { prompt, activeChatId, userId });
     
     if (!userId) {
         console.warn("No userId available to send message!");
@@ -174,7 +173,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     });
 
     socket.on('response_chunk', (data: { chatId: string, content: string }) => {
-      console.log('socket chunk received:', data.content);
       set((state) => {
         const newMsgs = [...state.messages];
         const lastIndex = newMsgs.length - 1;
@@ -189,7 +187,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     });
 
     socket.on('response_end', (data: { chatId: string, totalContent: string }) => {
-      console.log('socket end received:', data.totalContent);
       set((state) => {
         const newMsgs = [...state.messages];
         const lastIndex = newMsgs.length - 1;

@@ -1,3 +1,17 @@
+/**
+ * HomeScreen.tsx — freeze-free streaming
+ *
+ * The single most important change:
+ *   BEFORE: messages = useChatStore(s => s.messages)
+ *           → re-renders on EVERY token (50-100/s) → JS thread saturates → freeze
+ *
+ *   AFTER:  messages = useThrottledMessages(50)
+ *           → re-renders at most every 50ms (20fps) → JS thread free → smooth
+ *
+ * isStreaming / isLoading keep normal subscriptions because they only flip
+ * true→false once per message, not on every token.
+ */
+
 import { AppText } from "@/components/common/AppText";
 import { useTheme } from "@/hooks/useTheme";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -14,16 +28,42 @@ import type { Chip } from "../components/SuggestionChip";
 import { TopNav } from "../components/TopNav";
 import { useChatStore } from "../store/chat.store";
 import styles from "../styles/chat.style";
+import aiImage from "@assets/images/3D-Cartoon-Avatar.jpg";
+import { useThrottledMessages } from "../hooks/useThrottledSelector";
 
 const CHIPS: Chip[] = [
   { id: "1", label: "Perplexity 101", icon: "search-outline" },
   { id: "2", label: "Finance",        icon: "cash-outline"   },
   { id: "3", label: "Latest News",    icon: "search-outline" },
   { id: "4", label: "Shopping",       icon: "bag-outline"    },
-  { id: "5", label: "Travel",         icon: "airplane-outline"},
+  { id: "5", label: "Travel",         icon: "airplane-outline" },
 ];
 
 const CHAT_INPUT_HEIGHT = 60;
+
+// ── ListFooter: outside component so FlatList ref is always stable ─────────
+const ListFooter = React.memo(
+  ({
+    isLoading,
+    isStreaming,
+    footerStyle,
+  }: {
+    isLoading: boolean;
+    isStreaming: boolean;
+    footerStyle: any;
+  }) => (
+    <>
+      {isLoading && !isStreaming && (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
+          <AvatarCircle initials="AI" source={aiImage} />
+          <AppText variant="body" color="muted">Thinking…</AppText>
+        </View>
+      )}
+      <Animated.View style={footerStyle} />
+    </>
+  ),
+);
+ListFooter.displayName = "ListFooter";
 
 export function HomeScreen() {
   const { colors } = useTheme();
@@ -31,13 +71,18 @@ export function HomeScreen() {
   const [query, setQuery] = useState("");
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
-  const messages               = useChatStore((s) => s.messages);
-  const isStreaming             = useChatStore((s) => s.isStreaming);
-  const isLoading               = useChatStore((s) => s.isLoading);
-  const sendMessage             = useChatStore((s) => s.sendMessage);
-  const initialize              = useChatStore((s) => s.initialize);
-  const setupSocketListeners    = useChatStore((s) => s.setupSocketListeners);
-  const cleanupSocketListeners  = useChatStore((s) => s.cleanupSocketListeners);
+  // ── CRITICAL: throttled at 20fps — not on every token ─────────────────────
+  // Before this fix, every token caused a React re-render. At 50-100 tokens/s
+  // the JS thread was fully saturated — causing the freeze + drawer lock.
+  const messages = useThrottledMessages(50);
+
+  // These only change once per message (not per token) — normal selectors OK
+  const isStreaming            = useChatStore((s) => s.isStreaming);
+  const isLoading              = useChatStore((s) => s.isLoading);
+  const sendMessage            = useChatStore((s) => s.sendMessage);
+  const initialize             = useChatStore((s) => s.initialize);
+  const setupSocketListeners   = useChatStore((s) => s.setupSocketListeners);
+  const cleanupSocketListeners = useChatStore((s) => s.cleanupSocketListeners);
 
   useEffect(() => {
     initialize();
@@ -45,7 +90,7 @@ export function HomeScreen() {
     return () => cleanupSocketListeners();
   }, []);
 
-  // ── Keyboard tracking ──────────────────────────────────────────────────────
+  // ── Keyboard ───────────────────────────────────────────────────────────────
   const keyboardHeight = useSharedValue(0);
   useKeyboardHandler(
     {
@@ -59,70 +104,71 @@ export function HomeScreen() {
     height: keyboardHeight.value + CHAT_INPUT_HEIGHT,
   }));
 
-  /**
-   * Determine what the footer indicator should show:
-   *
-   *  isLoading  && !isStreaming  → AI has not started replying yet → show "Thinking…"
-   *  isStreaming                 → AI is actively writing a bubble  → show nothing here
-   *                                (the bubble itself shows "Answering…")
-   *  neither                     → idle → show nothing
-   *
-   * This eliminates the double-avatar situation:
-   *   Before: last bubble had "AI / Answer" header AND footer showed "AI / Typing…"
-   *   After:  while streaming the footer is silent; the bubble header says "Answering…"
-   */
-  const lastMessage = messages[messages.length - 1];
-  const lastIsAssistantStreaming =
-    isStreaming && lastMessage?.role === "assistant";
+  // ── Scroll ─────────────────────────────────────────────────────────────────
+  const userScrolledUp    = useRef(false);
+  const lastContentHeight = useRef(0);
 
-  const AnimatedFooter = useCallback(
+  const scrollToBottom = useCallback((animated = true) => {
+    if (!userScrolledUp.current) {
+      listRef.current?.scrollToEnd({ animated });
+    }
+  }, []);
+
+  const handleContentSizeChange = useCallback(
+    (_w: number, h: number) => {
+      if (h !== lastContentHeight.current) {
+        lastContentHeight.current = h;
+        scrollToBottom(false);
+      }
+    },
+    [scrollToBottom],
+  );
+
+  const handleScroll = useCallback((e: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    const distanceFromBottom =
+      contentSize.height - contentOffset.y - layoutMeasurement.height;
+    userScrolledUp.current = distanceFromBottom > 40;
+  }, []);
+
+  const handleSend = useCallback(() => {
+    if (!query.trim()) return;
+    userScrolledUp.current = false;
+    sendMessage(query);
+    setQuery("");
+    setTimeout(() => scrollToBottom(true), 50);
+  }, [query, sendMessage, scrollToBottom]);
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  const renderFooter = useCallback(
     () => (
-      <>
-        {/*
-         * Only show the thinking indicator when we are waiting for the FIRST
-         * token (isLoading true, isStreaming false).
-         * Once streaming starts the last message bubble itself carries the
-         * "Answering…" label — no footer avatar needed.
-         */}
-        {isLoading && !isStreaming && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <AvatarCircle initials="AI" />
-            <AppText variant="body" color="muted">Thinking…</AppText>
-          </View>
-        )}
-        <Animated.View style={footerStyle} />
-      </>
+      <ListFooter
+        isLoading={isLoading}
+        isStreaming={isStreaming}
+        footerStyle={footerStyle}
+      />
     ),
     [isLoading, isStreaming, footerStyle],
   );
 
-  const handleSend = useCallback(() => {
-    if (!query.trim()) return;
-    sendMessage(query);
-    setQuery("");
-    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
-  }, [query, sendMessage]);
+  // ── renderItem ─────────────────────────────────────────────────────────────
+  const messagesLength = messages.length;
 
-  /**
-   * renderItem now passes isStreaming=true only to the LAST assistant message
-   * while the stream is active. Every other bubble renders normally.
-   */
   const renderItem = useCallback(
     ({ item, index }: { item: ChatMessage; index: number }) => (
       <MessageBubble
         item={item}
         isStreaming={
           isStreaming &&
-          index === messages.length - 1 &&
+          index === messagesLength - 1 &&
           item.role === "assistant"
         }
       />
     ),
-    [isStreaming, messages.length],
+    [isStreaming, messagesLength],
   );
 
   const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
-
   const hasMessages = messages.length > 0;
 
   return (
@@ -142,13 +188,17 @@ export function HomeScreen() {
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, gap: 14 }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="interactive"
-            initialNumToRender={10}
-            maxToRenderPerBatch={5}
-            windowSize={5}
-            removeClippedSubviews
-            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-            onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
-            ListFooterComponent={AnimatedFooter}
+            initialNumToRender={15}
+            maxToRenderPerBatch={8}
+            updateCellsBatchingPeriod={50}
+            windowSize={10}
+            removeClippedSubviews={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={100}
+            onContentSizeChange={handleContentSizeChange}
+            onLayout={() => scrollToBottom(true)}
+            maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+            ListFooterComponent={renderFooter}
           />
         )}
       </View>

@@ -1,7 +1,6 @@
+import { aiService } from '@/modules/ai/ai.service';
 import logger from '@/utils/logger';
 import { Server, Socket } from 'socket.io';
-import { AiService } from '@/modules/ai/ai.service';
-import { AuthRequest } from '@/middlewares/auth.middleware';
 
 let io: Server | null = null;
 
@@ -16,8 +15,6 @@ export function initSocketIO(server: any) {
     logger.info('Socket.io initialized');
 
     io.on('connection', (socket: Socket) => {
-        logger.info('A user connected:', socket.id);
-
         socket.on("join_chat", (chatId: string) => {
             socket.join(chatId);
             logger.info(`Socket ${socket.id} joined chat: ${chatId}`);
@@ -30,7 +27,7 @@ export function initSocketIO(server: any) {
 
             try {
                 // Ensure chat exists or create one, handled by AiService
-                await AiService.handleSocketChat(userId, chatId, prompt, socket);
+                await aiService.handleSocketChat(userId, chatId, prompt, socket);
             } catch (error: any) {
                 logger.error('Error handling socket message', error);
                 socket.emit('error', `Failed to process message: ${error.message || error}`);

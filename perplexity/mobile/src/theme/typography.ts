@@ -1,32 +1,34 @@
 import { Platform, TextStyle } from 'react-native';
 
 const fontFamily = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  default: 'sans-serif',
+  ios: 'NeueMachina-Medium',
+  android: 'NeueMachina-Medium',
+  default: 'System',
 });
 
-export const typography: Record<string, TextStyle> = {
-  h1: {
-    fontFamily,
-    fontSize: 28,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  h2: {
-    fontFamily,
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  body: {
-    fontFamily,
-    fontSize: 16,
-    fontWeight: '400',
-  },
-  caption: {
-    fontFamily,
-    fontSize: 13,
-    fontWeight: '400',
-  },
+export const typography = {
+    fonts: {
+        juana: "Fontspring-Juana",
+        neueMedium: "NeueMachina-Medium",
+        neueLight: "NeueMachina-Light",
+        neueRegular: "NeueMachina-Regular",
+        neueBold: "NeueMachina-Bold",
+        helveticaMedium: "HelveticaNow-Medium",
+        helveticaRegular: "HelveticaNow-Regular",
+        helveticaLight: "HelveticaNow-Light",
+        helveticaBold: "HelveticaNow-Bold",
+    },
+    sizes: {
+        h1: 28,
+        h2: 24,
+        body: 16,
+        button: 18,
+        small: 15,
+    },
+    weights: {
+        bold: "700" as const,
+        semiBold: "600" as const,
+        medium: "500" as const,
+        regular: "400" as const,
+    }
 };

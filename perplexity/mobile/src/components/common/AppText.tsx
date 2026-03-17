@@ -2,7 +2,7 @@ import { Text, TextProps, TextStyle } from 'react-native';
 import { typography } from "@/theme";
 import { useTheme } from '@/hooks/useTheme';
 
-type AppTextVariant = keyof typeof typography;
+type AppTextVariant = keyof typeof typography.sizes | 'caption'; // Added caption as it appeared in the type check error
 type AppTextColor = 'primary' | 'muted' | 'inverted' | 'danger' | 'warning' | 'success';
 
 type AppTextProps = TextProps & {
@@ -11,7 +11,7 @@ type AppTextProps = TextProps & {
 };
 
 export function AppText({
-  variant = 'body',
+  variant = "body",
   color = 'primary',
   style,
   ...props
@@ -30,7 +30,12 @@ export function AppText({
   return (
     <Text
       {...props}
-      style={[typography[variant] as TextStyle, { color: colorMap[color] }, style]}
+      style={[
+        { fontFamily: typography.fonts.neueMedium },
+        typography.sizes[variant as keyof typeof typography.sizes] ? { fontSize: typography.sizes[variant as keyof typeof typography.sizes] } : undefined,
+        { color: colorMap[color] },
+        style
+      ]}
     />
   );
 }
