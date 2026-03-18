@@ -20,13 +20,19 @@ export const processThirdParty = async (data: IJobData, updateProgress: (progres
         const rapidApiHost = process.env.RAPIDAPI_HOST || 'youtube-media-downloader.p.rapidapi.com';
 
         if (rapidApiKey) {
-            return await processRapidAPI(url, isAudio, rapidApiKey, rapidApiHost, updateProgress);
-        } else {
-            // Fallback to Cobalt API if RapidAPI is not configured
-            return await processCobaltFallback(url, isAudio, updateProgress);
+            try {
+                return await processRapidAPI(url, isAudio, rapidApiKey, rapidApiHost, updateProgress);
+            } catch (rapidError: any) {
+                console.warn(`[API Provider] RapidAPI failed (403/Quota/Error): ${rapidError.message}. Falling back to Cobalt...`);
+            }
         }
 
+        // Ensure we try the fallback if RapidAPI was skipped OR failed
+        console.info(`[API Provider] Attempting Cobalt fallback for: ${url}`);
+        return await processCobaltFallback(url, isAudio, updateProgress);
+
     } catch (error: any) {
+        console.error(error);
         throw new AppError(`Third-party service failed: ${error.message}`, 502);
     }
 };

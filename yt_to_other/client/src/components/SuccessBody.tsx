@@ -1,11 +1,7 @@
 import type { DownloadFormat } from "@/features/downloader/types";
 import {
-    ArrowDownToLine, CheckCircle2,
-    Loader2
+    ArrowDownToLine, CheckCircle2
 } from "lucide-react";
-import { useState } from "react";
-import { useDownloadFile } from "./useDownloadFile";
-
 
 // ─── Dialog: SuccessBody ──────────────────────────────────────────────────────
 interface SuccessBodyProps {
@@ -18,34 +14,19 @@ interface SuccessBodyProps {
     format: DownloadFormat;
 }
 
-
-
-function SuccessBody({ result, format }: SuccessBodyProps) {
-    const { downloadFile } = useDownloadFile();
-    const [saving, setSaving] = useState(false);
-    const [saveError, setSaveError] = useState<string | null>(null);
-
+export function SuccessBody({ result, format }: SuccessBodyProps) {
     const isDirectUrl = result.isDirectUrl ?? false;
+
+    // We try to suggest a filename, but browsers ignore this for cross-origin CORS requests usually.
+    // It is still good practice to have it for same-origin or if headers allow.
     const ext = isDirectUrl
-        ? ".mp4" // CDN URLs don't end in an extension, assume mp4
-        : result.downloadUrl.slice(-4); // "/api/files/uuid.mp4" → ".mp4"
+        ? ".mp4"
+        : result.downloadUrl.slice(-4);
 
     const safeTitle = (result.title ?? "download")
         .replace(/[\\/:*?"<>|]/g, "_")
         .slice(0, 80);
     const filename = `${safeTitle}${ext}`;
-
-    const handleSave = async () => {
-        setSaving(true);
-        setSaveError(null);
-        try {
-            await downloadFile(result.downloadUrl, filename, isDirectUrl);
-        } catch (err: any) {
-            setSaveError("Download failed. Try again.");
-        } finally {
-            setSaving(false);
-        }
-    };
 
     return (
         <div className="space-y-4 flex flex-col justify-content gap-6">
@@ -78,24 +59,17 @@ function SuccessBody({ result, format }: SuccessBodyProps) {
                 </div>
             </div>
 
-            {/* Error message if save failed */}
-            {saveError && (
-                <p className="text-[0.78rem] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-center">
-                    {saveError}
-                </p>
-            )}
-
-            {/* Save button — goes through proxy for FASTER, direct blob for SECURE */}
-            <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center justify-center gap-2 w-full py-4 cursor-pointer rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white text-[0.88rem] font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60"
+            {/* Direct Download Link */}
+            <a
+                href={result.downloadUrl}
+                download={filename}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-4 cursor-pointer rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white text-[0.88rem] font-semibold hover:opacity-90 active:scale-[0.98] transition-all no-underline"
             >
-                {saving
-                    ? <><Loader2 size={16} className="animate-spin" /> Saving…</>
-                    : <><ArrowDownToLine size={16} /> Save File</>
-                }
-            </button>
+                <ArrowDownToLine size={16} />
+                Download File
+            </a>
         </div>
     );
 }
