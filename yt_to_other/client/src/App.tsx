@@ -1,12 +1,12 @@
 import {
-  AlertCircle, ArrowDownToLine, CheckCircle2,
+  AlertCircle, ArrowDownToLine,
   Film, Link2, Loader2, Music, Radio,
-  ShieldCheck, Video, X, Zap,
+  ShieldCheck, Video, X, Zap
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import SuccessBody from "./components/SuccessBody";
 import { useDownloader } from "./features/downloader/hooks/useDownloader";
 import { DownloadFormat, DownloadServer, JobState, type IJobResult } from "./features/downloader/types";
-import SuccessBody from "./components/SuccessBody";
 
 export interface IJobStatusResponse {
   jobId: string;
