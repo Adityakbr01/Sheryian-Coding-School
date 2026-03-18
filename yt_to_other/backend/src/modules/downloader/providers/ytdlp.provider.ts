@@ -49,11 +49,46 @@ const BASE_FLAGS: Record<string, any> = {
 };
 
 const COOKIES_FILE = ENV.YTDLP_COOKIES_FILE;
-if (COOKIES_FILE && fs.existsSync(COOKIES_FILE)) {
-    BASE_FLAGS.cookies = COOKIES_FILE;
-    logger.info(`[YtDlpProvider] Using cookies file: ${COOKIES_FILE}`);
+
+logger.info(`[YtDlpProvider] Checking cookies setup...`);
+
+if (!COOKIES_FILE) {
+    logger.error(`[YtDlpProvider] ❌ ENV variable YTDLP_COOKIES_FILE is NOT set`);
 } else {
-    logger.warn(`[YtDlpProvider] Cookies file not found or not set! This may cause issues with YouTube downloads.`);
+    logger.info(`[YtDlpProvider] Cookies path from ENV: ${COOKIES_FILE}`);
+
+    try {
+        const exists = fs.existsSync(COOKIES_FILE);
+
+        if (!exists) {
+            logger.error(`[YtDlpProvider] ❌ Cookies file NOT found at path: ${COOKIES_FILE}`);
+
+            // Debug: list directory files
+            const dir = require("path").dirname(COOKIES_FILE);
+            if (fs.existsSync(dir)) {
+                const files = fs.readdirSync(dir);
+                logger.info(`[YtDlpProvider] 📂 Files in directory (${dir}): ${files.join(", ")}`);
+            } else {
+                logger.error(`[YtDlpProvider] ❌ Directory does NOT exist: ${dir}`);
+            }
+
+        } else {
+            const stats = fs.statSync(COOKIES_FILE);
+
+            logger.info(`[YtDlpProvider] ✅ Cookies file found`);
+            logger.info(`[YtDlpProvider] 📏 Size: ${stats.size} bytes`);
+            logger.info(`[YtDlpProvider] 🕒 Last modified: ${stats.mtime}`);
+
+            if (stats.size < 100) {
+                logger.warn(`[YtDlpProvider] ⚠️ Cookies file seems too small (may be invalid)`);
+            }
+
+            BASE_FLAGS.cookies = COOKIES_FILE;
+        }
+
+    } catch (err) {
+        logger.error(`[YtDlpProvider] ❌ Error while checking cookies file: ${(err as Error).message}`);
+    }
 }
 
 export const processYtDlp = async (
