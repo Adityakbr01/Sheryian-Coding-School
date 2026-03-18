@@ -51,7 +51,7 @@ export function Button({
   const getTextColor = () => {
     if (disabled) return colors.textMuted;
     switch (variant) {
-      case 'primary': return colors.textInverted;
+      case 'primary': return colors.text;
       case 'secondary': return colors.text;
       case 'outline': return colors.text;
       case 'ghost': return colors.text;

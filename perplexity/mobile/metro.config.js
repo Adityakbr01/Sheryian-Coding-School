@@ -1,12 +1,14 @@
-const { getDefaultConfig } = require('expo/metro-config');
+const { getDefaultConfig } = require("expo/metro-config");
+const path = require("path");
 
-/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-config.resolver.extraNodeModules = {
-  ...config.resolver.extraNodeModules,
-  punycode: require.resolve('punycode/'),
-  url: require.resolve('url/'),
+config.resolver.assetExts.push("woff2");
+
+config.resolver.alias = {
+  "@": path.resolve(__dirname, "src"),
+  "@assets": path.resolve(__dirname, "assets"),
+   'woff2': path.resolve(__dirname, 'assets/fonts/woff2'),
 };
 
 module.exports = config;
