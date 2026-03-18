@@ -4,6 +4,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
+<<<<<<< HEAD
       "@/*": [
         "./src/*"
       ],
@@ -18,3 +19,11 @@
     ".expo/types/**/*.d.ts"
   ]
 }
+=======
+      "@/*": ["./src/*"],
+      "@assets/*": ["./assets/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.d.ts"]
+}
+>>>>>>> b3b0e726b5929d65744c14dbfb36e2c345ff6d89
