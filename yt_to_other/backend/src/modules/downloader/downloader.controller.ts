@@ -8,7 +8,8 @@ import { downloadRequestSchema } from './downloader.validator';
 import { ApiResponse } from '@/utils/apiResponse';
 import { logger } from '@/utils/logger';
 import { auditLog } from '@/utils/auditLogger';
-import { DOWNLOAD_DIR } from './providers/ytdlp.provider';
+import { DOWNLOAD_DIR, getVideoStreamUrl } from './providers/ytdlp.provider';
+import fetch from 'node-fetch'; // Ensure node-fetch is available or use native fetch in newer node
 
 // ── POST /api/download ──────────────────────────────────────────────────────
 
@@ -115,50 +116,57 @@ export const serveFile = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // ── GET /api/proxy ──────────────────────────────────────────────────────────
-// Proxies Google CDN streams to bypass CORS restrictions
+// Streaming Proxy: Resolves YouTube URL to a direct stream and pipes it
 export const serveProxy = async (req: Request, res: Response) => {
     const url = req.query.url as string;
-    const filename = req.query.filename as string || 'download.mp4';
+    // filename is optional, getVideoStreamUrl resolves a filename if needed, or we use query param
+    const filenameParam = req.query.filename as string;
 
-    if (!url || !url.startsWith('http')) {
+    if (!url) {
         return res.status(400).send('Valid URL parameter is required');
     }
 
     try {
-        const response = await fetch(url);
+        // 1. Get the direct stream URL using yt-dlp -g (IP bound to server)
+        const { url: directUrl, filename: resolvedFilename, contentLength } = await getVideoStreamUrl(url);
+
+        const finalFilename = filenameParam || resolvedFilename || 'video.mp4';
+
+        logger.info(`[Proxy] Streaming ${url} -> ${directUrl}`);
+
+        // 2. Fetch the stream from the direct URL
+        // Note: fetch here is node-fetch (imported) which returns a Node stream body
+        const response = await fetch(directUrl);
         if (!response.ok) throw new Error(`Upstream error: ${response.status}`);
 
-        // Forward content-type if available, else derive from filename
+        // 3. Set headers
         const contentType = response.headers.get('content-type') || 'application/octet-stream';
-        const contentLength = response.headers.get('content-length');
+        // Use the content length from yt-dlp info if available, as direct stream might not have it or it might be chunked
+        const length = contentLength || response.headers.get('content-length');
 
         res.setHeader('Content-Type', contentType);
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        if (contentLength) res.setHeader('Content-Length', contentLength);
+        res.setHeader('Content-Disposition', `attachment; filename="${finalFilename}"`);
+        if (length) res.setHeader('Content-Length', length);
 
-        // Pipe the body properly
-        // @ts-ignore - buffer() implementation detail for older nodes, but web streams work in recent node
-        // Actually fetch in Node 18+ returns a web stream body.
-        // We can use the stream directly.
+        // 4. Pipe the body
         if (response.body) {
-            // @ts-ignore
-            const reader = response.body.getReader();
-            const pump = async () => {
-                const { done, value } = await reader.read();
-                if (done) {
-                    res.end();
-                    return;
-                }
-                res.write(value);
-                await pump();
-            };
-            await pump();
+            response.body.pipe(res);
+
+            response.body.on('error', (err) => {
+                logger.error(`[Proxy] Stream error: ${err.message}`);
+                if (!res.headersSent) res.end();
+            });
         } else {
             res.end();
         }
 
     } catch (err: any) {
         logger.error(`[Proxy] Error proxying ${url}: ${err.message}`);
-        if (!res.headersSent) res.status(502).send('Proxy error');
+        // Only send error payload if headers haven't been sent
+        if (!res.headersSent) {
+            // Check if it's a known error
+            const status = err.statusCode || 502;
+            res.status(status).send(`Proxy error: ${err.message}`);
+        }
     }
 };

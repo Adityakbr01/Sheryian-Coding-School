@@ -32,7 +32,10 @@ try {
 }
 
 export const DOWNLOAD_DIR = path.join(process.cwd(), 'downloads');
-const FILE_TTL_MS = 60 * 60 * 1000;
+const FILE_TTL_MS = 60 * 60 * 1000; // 1 hour
+if (!fs.existsSync(DOWNLOAD_DIR)) {
+    fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
+}
 
 fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 
@@ -90,6 +93,39 @@ if (!COOKIES_FILE) {
         logger.error(`[YtDlpProvider] ❌ Error while checking cookies file: ${(err as Error).message}`);
     }
 }
+
+/**
+ * Gets the direct stream URL for a video (Streaming Proxy approach)
+ */
+export const getVideoStreamUrl = async (url: string): Promise<{ url: string; filename: string; contentLength?: string }> => {
+    const cleanUrl = stripPlaylistParams(url);
+    logger.info(`[YtDlpProvider] Getting stream URL for: ${cleanUrl}`);
+
+    try {
+        const flags = {
+            ...BASE_FLAGS,
+            dumpJson: true,
+            skipDownload: true,
+            format: 'best', // Get best single file format for streaming
+        };
+
+        // Use the default export wrapper which parses JSON output automatically
+        const info: any = await ytDlp(cleanUrl, flags);
+
+        if (!info.url) {
+            throw new Error('No direct URL found in yt-dlp output');
+        }
+
+        return {
+            url: info.url,
+            filename: info._filename || `${info.id}.${info.ext || 'mp4'}`,
+            contentLength: info.filesize ? String(info.filesize) : undefined
+        };
+    } catch (err: any) {
+        logger.error(`[YtDlpProvider] Failed to get stream URL: ${err.message}`);
+        throw new AppError('Failed to retrieve video stream', 500);
+    }
+};
 
 export const processYtDlp = async (
     data: IJobData,

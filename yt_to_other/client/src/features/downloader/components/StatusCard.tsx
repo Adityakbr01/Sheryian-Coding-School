@@ -7,8 +7,26 @@ interface Props {
     status: IJobStatus;
 }
 
+const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export const StatusCard: React.FC<Props> = ({ status }) => {
     const { state, progress, result, error } = status;
+
+    const getDownloadLink = () => {
+        if (!result?.downloadUrl) return '#';
+        if (result.downloadUrl.startsWith('http')) return result.downloadUrl;
+
+        let base = BASE_API_URL;
+        if (base.endsWith('/')) base = base.slice(0, -1);
+
+        // If base ends with /api and path starts with /api (as is common), strip one /api from base
+        if (base.endsWith('/api') && result.downloadUrl.startsWith('/api')) {
+            base = base.slice(0, -4);
+        }
+
+        const path = result.downloadUrl.startsWith('/') ? result.downloadUrl : `/${result.downloadUrl}`;
+        return `${base}${path}`;
+    };
 
     const getIcon = () => {
         switch (state) {
@@ -57,7 +75,7 @@ export const StatusCard: React.FC<Props> = ({ status }) => {
                     {result.title && <p className="text-sm text-zinc-300 mb-3 truncate">{result.title}</p>}
 
                     <a
-                        href={`http://localhost:3000${result.downloadUrl.startsWith('http') ? '' : result.downloadUrl.startsWith('/') ? '' : '/'}${result.downloadUrl.startsWith('http') ? '' : result.downloadUrl}`}
+                        href={getDownloadLink()}
                         target="_blank"
                         rel="noreferrer"
                         className="block w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-center font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
