@@ -1,12 +1,32 @@
 import Redis from 'ioredis';
-import dotenv from 'dotenv';
+import type { RedisOptions } from 'ioredis';
+import { ENV } from './ENV';
 
-dotenv.config();
+const getRedisConfig = (): RedisOptions => {
+    if (ENV.UPSTASH_REDIS_URL) {
+        try {
+            const url = new URL(ENV.UPSTASH_REDIS_URL);
+            return {
+                host: url.hostname,
+                port: Number(url.port),
+                username: url.username,
+                password: url.password,
+                tls: url.protocol === 'rediss:' ? { rejectUnauthorized: false } : undefined,
+                maxRetriesPerRequest: null,
+            };
+        } catch (e) {
+            console.error("Invalid Redis URL:", e);
+        }
+    }
 
-const redisConfig = {
-    url: process.env.UPSTASH_REDIS_URL,
-    maxRetriesPerRequest: null, // Required specifically for BullMQ
+    return {
+        host: '127.0.0.1',
+        port: 6379,
+        maxRetriesPerRequest: null,
+    };
 };
+
+const redisConfig = getRedisConfig();
 
 // Singleton connection for general purpose use if needed
 const redisConnection = new Redis(redisConfig);

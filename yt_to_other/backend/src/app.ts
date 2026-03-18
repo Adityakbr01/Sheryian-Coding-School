@@ -1,5 +1,8 @@
 import express from 'express';
 import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import downloaderRoutes from '@/modules/downloader/downloader.route';
 import { initCronJobs } from '@/modules/downloader/cron/cleanup.cron';

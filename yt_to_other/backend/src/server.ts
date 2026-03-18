@@ -4,8 +4,9 @@ import { Server } from 'socket.io';
 import { queueEvents } from './modules/downloader/downloader.queue';
 import { fastJobsEmitter, getJobStatus } from './modules/downloader/downloader.service';
 import http from 'http';
+import { ENV } from './config/ENV';
 
-const PORT = process.env.PORT || 3000;
+const PORT = ENV.PORT;
 
 const server = http.createServer(app);
 
