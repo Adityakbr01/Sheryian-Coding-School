@@ -4,6 +4,7 @@ import path from 'path';
 import { IJobData, IJobResult, DownloadFormat } from '../downloader.types';
 import { AppError } from '@/utils/appError';
 import { logger } from '@/utils/logger';
+import { ENV } from '@/config/ENV';
 
 // Lazy-load ffmpeg/ffprobe paths
 const ffmpegPath = require('ffmpeg-static') as string;
@@ -47,10 +48,12 @@ const BASE_FLAGS: Record<string, any> = {
     ],
 };
 
-const COOKIES_FILE = process.env.YTDLP_COOKIES_FILE;
+const COOKIES_FILE = ENV.YTDLP_COOKIES_FILE;
 if (COOKIES_FILE && fs.existsSync(COOKIES_FILE)) {
     BASE_FLAGS.cookies = COOKIES_FILE;
-    logger.info('[YtDlpProvider] Using cookies file for authentication');
+    logger.info(`[YtDlpProvider] Using cookies file: ${COOKIES_FILE}`);
+} else {
+    logger.warn(`[YtDlpProvider] Cookies file not found or not set! This may cause issues with YouTube downloads.`);
 }
 
 export const processYtDlp = async (
