@@ -118,7 +118,8 @@ export const processYtDlp = async (
         flags.audioFormat = 'mp3';
         flags.audioQuality = '0';
     } else {
-        flags.format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+        // Fallback to generic bestvideo+bestaudio if strict mp4/m4a is unavailable
+        flags.format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best';
         flags.mergeOutputFormat = 'mp4';
     }
 
