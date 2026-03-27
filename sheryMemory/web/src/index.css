@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/* ========== FONTS ========== */
+
+@font-face {
+  font-family: "NeuMachina";
+  src: url("/fonts/NeueMachina-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "juana";
+  src: url("/fonts/Fontspring-juana.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "HelveticaNow";
+  src: url("/fonts/HelveticaNowDisplay-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+
+/* ========== TAILWIND v4 THEME ========== */
+
+@theme {
+
+  /* Fonts */
+  --font-NeuMachina: "NeuMachina", sans-serif;
+  --font-HelveticaNow: "HelveticaNow", sans-serif;
+  --font-juana: "juana", sans-serif;
+
+  /* Backgrounds */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-overlay: var(--bg-overlay);
+
+  /* Accent */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  /* Borders */
+  --color-border: var(--border-default);
+
+  /* Card */
+  --color-card: var(--card-bg);
+
+  /* Input */
+  --color-input: var(--input-bg);
+}
+
+
+/* ========== DARK MODE VARIANT ========== */
+
+@custom-variant dark (&:is(.dark *));
+
+
+/* ========== DESIGN TOKENS — Light ========== */
+
+:root {
+  --bg-base: #F8F7F4;
+  --bg-surface: #f2f1ee;
+  --bg-elevated: #eae9e5;
+  --bg-overlay: #e0deda;
+
+  --accent: #c05516;
+  --accent-hover: #e06010;
+  --accent-muted: rgba(254, 131, 37, 0.321);
+  --accent-border: rgba(254, 131, 37, 0.38);
+  --accent-glow: rgba(254, 131, 37, 0.22);
+
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #999999;
+  --text-disabled: #c0c0c0;
+  --text-on-accent: #ffffff;
+
+  --border-subtle: #e5e3df;
+  --border-default: #d4d2ce;
+  --border-strong: #b0aca6;
+
+  --success-bg: rgba(22, 163, 74, 0.08);
+  --success-border: rgba(22, 163, 74, 0.22);
+  --success-text: #16a34a;
+
+  --error-bg: rgba(220, 38, 38, 0.07);
+  --error-border: rgba(220, 38, 38, 0.20);
+  --error-text: #dc2626;
+
+  --tab-bg: #eeede9;
+  --tab-border: #d8d6d2;
+  --tab-text: #777777;
+
+  --input-bg: #ffffff;
+  --input-border: #dddbd7;
+  --input-text: #111111;
+  --input-placeholder: #b0aca6;
+  --input-focus-border: var(--accent-border);
+  --input-focus-ring: rgba(254, 131, 37, 0.08);
+
+  --card-bg: #ffffff;
+  --card-border: #e8e6e2;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.07);
+
+  --btn-disabled-bg: #eeedea;
+  --btn-disabled-text: #c0c0c0;
+  --btn-disabled-border: #e0deda;
+}
+
+
+
+/* ========== DESIGN TOKENS — Dark ========== */
+
+.dark {
+  --bg-base: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-elevated: #161616;
+  --bg-overlay: #1e1e1e;
+
+  --accent: #ba580d;
+  --accent-hover: #e06010;
+  --accent-muted: rgba(254, 131, 37, 0.10);
+  --accent-border: rgba(254, 131, 37, 0.35);
+  --accent-glow: rgba(254, 131, 37, 0.18);
+
+  --text-primary: #f0f0f0;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+  --text-disabled: #333333;
+  --text-on-accent: #ffffff;
+
+  --border-subtle: #1e1e1e;
+  --border-default: #2a2a2a;
+  --border-strong: #3a3a3a;
+
+  --success-bg: rgba(74, 222, 128, 0.07);
+  --success-border: rgba(74, 222, 128, 0.18);
+  --success-text: #4ade80;
+
+  --error-bg: rgba(248, 113, 113, 0.07);
+  --error-border: rgba(248, 113, 113, 0.20);
+  --error-text: #f87171;
+
+  --tab-bg: #161616;
+  --tab-border: #242424;
+  --tab-text: #555555;
+
+  --input-bg: #141414;
+  --input-border: #242424;
+  --input-text: #e0e0e0;
+  --input-placeholder: #3a3a3a;
+  --input-focus-border: var(--accent-border);
+  --input-focus-ring: rgba(254, 131, 37, 0.06);
+
+  --card-bg: #111111;
+  --card-border: #1e1e1e;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.30),
+    0 20px 60px rgba(0, 0, 0, 0.50);
+
+  --btn-disabled-bg: #161616;
+  --btn-disabled-text: #333333;
+  --btn-disabled-border: #222222;
+}
+
+
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  font-family: var(--font-NeuMachina), sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button {
+  cursor: pointer;
+}

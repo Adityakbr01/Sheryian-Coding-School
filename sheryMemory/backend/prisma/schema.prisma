@@ -6,6 +6,7 @@ generator client {
 datasource db {
     provider   = "postgresql"
     extensions = [vector, pg_graphql, pg_stat_statements, pgcrypto, supabase_vault, uuid_ossp(map: "uuid-ossp")]
+    url        = env("DATABASE_URL")
 }
 
 model User {
@@ -29,7 +30,11 @@ model Item {
     type           String // article, video, tweet, pdf, image
     status         String                      @default("pending") // pending, processed, failed
     content        String?                     @db.Text
-    embedding      Unsupported("vector(768)")?
+    summary        String?                     @db.Text
+    aiInsight      String?                     @db.Text
+    imageUrl       String?
+    highlights     Json?
+    embedding      Unsupported("vector(1024)")?
     lastReviewedAt DateTime?
     reviewCount    Int                         @default(0)
 
@@ -40,6 +45,7 @@ model Item {
     collectionId String?
     collection   Collection? @relation(fields: [collectionId], references: [id])
     tags         ItemTag[]
+    userHighlights Highlight[]
 }
 
 model Tag {
@@ -70,12 +76,19 @@ model Collection {
 
 model Highlight {
     id        String   @id @default(cuid())
+    itemId    String
     userId    String
-    url       String
+    section   String   @default("content")
     text      String   @db.Text
+    start     Int
+    end       Int
+    color     String   @default("#fef08a")
     createdAt DateTime @default(now())
 
+    item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
     user User @relation(fields: [userId], references: [id])
+
+    @@index([itemId, section])
 }
 
 model Relation {

@@ -1,7 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
+import http from 'http'
 import { logger } from './utils/logger'
+import { initSocket } from './socket/socket'
 
 // Routes
 import authRoutes from './modules/auth/auth.routes'
@@ -46,7 +48,10 @@ app.use(globalErrorHandler)
 
 const PORT = env.PORT
 
-app.listen(PORT, () => {
+const httpServer = http.createServer(app)
+initSocket(httpServer)
+
+httpServer.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT} in ${env.NODE_ENV} mode`)
     logger.info(`Background worker is running in the same process`)
 })

@@ -1,22 +1,38 @@
 import { Response } from 'express'
-import { HighlightsService } from './highlights.service'
+import { HighlightService } from './highlights.service'
 import { catchAsync } from '../../utils/catchAsync'
 import { ApiResponse } from '../../utils/ApiResponse'
-import { createHighlightSchema } from './highlights.schema'
 import { AuthRequest } from '../../middleware/auth.middleware'
 
 export const createHighlight = catchAsync(async (req: AuthRequest, res: Response) => {
-    const data = createHighlightSchema.parse(req.body)
-    const highlight = await HighlightsService.create(req.user!.userId, data)
-    res.status(201).json(new ApiResponse(201, highlight, 'Highlight saved'))
+  const { itemId, section = 'content', text, start, end, color } = req.body
+  const highlight = await HighlightService.create(req.user!.userId, {
+    itemId, section, text, start, end, color,
+  })
+  res.status(201).json(new ApiResponse(201, highlight, 'Highlight created'))
 })
 
-export const getHighlights = catchAsync(async (req: AuthRequest, res: Response) => {
-    const highlights = await HighlightsService.getAll(req.user!.userId)
-    res.status(200).json(new ApiResponse(200, highlights, 'Highlights fetched'))
+// Get ALL highlights for dashboard (optional ?color= filter)
+export const getAllHighlights = catchAsync(async (req: AuthRequest, res: Response) => {
+  const color = req.query.color as string | undefined
+  const highlights = await HighlightService.getAll(req.user!.userId, color)
+  res.status(200).json(new ApiResponse(200, highlights, 'All highlights fetched'))
+})
+
+// Get highlights for a specific item
+export const getItemHighlights = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { itemId } = req.params
+  const highlights = await HighlightService.getByItemId(req.user!.userId, itemId)
+  res.status(200).json(new ApiResponse(200, highlights, 'Item highlights fetched'))
 })
 
 export const deleteHighlight = catchAsync(async (req: AuthRequest, res: Response) => {
-    await HighlightsService.delete(req.user!.userId, req.params.id)
-    res.status(200).json(new ApiResponse(200, null, 'Highlight deleted'))
+  await HighlightService.delete(req.user!.userId, req.params.id)
+  res.status(200).json(new ApiResponse(200, null, 'Highlight deleted'))
+})
+
+// Clear ALL highlights for a specific item
+export const clearItemHighlights = catchAsync(async (req: AuthRequest, res: Response) => {
+  const result = await HighlightService.clearByItemId(req.user!.userId, req.params.itemId)
+  res.status(200).json(new ApiResponse(200, result, 'All highlights cleared'))
 })

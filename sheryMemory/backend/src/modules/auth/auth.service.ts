@@ -66,4 +66,17 @@ export class AuthService {
 
         return { user: userWithoutPassword, token }
     }
+
+    static async getMe(payload: { userId: string }) {
+        const dbUser = await prisma.user.findUnique({
+            where: { id: payload.userId },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                createdAt: true,
+            },
+        })
+        return dbUser
+    }
 }

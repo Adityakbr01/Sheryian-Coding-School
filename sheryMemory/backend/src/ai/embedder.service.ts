@@ -1,20 +1,20 @@
-import { LangchainClient } from './langchain.client'
+import embeddings from '../config/embedding.config'
 import prisma from '../config/db'
 import { logger } from '../utils/logger'
 
 export class EmbedderService {
     /**
-     * Generates a 768-dimensional vector embedding for the given text
-     * using nomic-embed-text-v1.5 via HuggingFace
+     * Generates a 1024-dimensional vector embedding for the given text
+     * using Mistral AI
      */
     static async generateEmbedding(text: string): Promise<number[] | null> {
         try {
-            const embedder = LangchainClient.getEmbeddingInstance()
+            const embedder = embeddings
 
             // Limit text size to prevent token length overflow on large texts
             const safeText = text.substring(0, 8000)
 
-            logger.info(`[Embedder] Generating 768-d vector for ${safeText.length} chars...`)
+            logger.info(`[Embedder] Generating 1024-d vector for ${safeText.length} chars...`)
             const vector = await embedder.embedQuery(safeText)
             logger.info(`[Embedder] ✅ Generated vector with ${vector.length} dimensions`)
             return vector

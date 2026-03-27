@@ -77,4 +77,22 @@ export class MemoryService {
             }
         })
     }
+
+    /**
+     * Gets a few random or highly-relevant items for the "Daily Knowledge" dashboard widget.
+     * Prioritizes items that have been least reviewed.
+     */
+    static async getResurfacedItems(userId: string, count: number = 2) {
+        // Fetch all processed items
+        const items = await prisma.item.findMany({
+            where: { userId, status: 'processed' },
+            include: { tags: { include: { tag: true } } },
+            orderBy: [{ reviewCount: 'asc' }, { createdAt: 'asc' }],
+            take: count * 3 // Pull a pool
+        });
+
+        // Shuffle the pool to give a fresh "Daily" feel
+        const shuffled = items.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
 }

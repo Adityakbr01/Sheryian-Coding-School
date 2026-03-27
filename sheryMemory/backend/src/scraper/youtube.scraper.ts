@@ -18,10 +18,16 @@ export async function scrapeYouTube(url: string): Promise<ScrapedYouTube> {
         // For a deeper scrape, we could parse the HTML description, 
         // but oEmbed provides a fast metadata representation.
         const content = `YouTube Video by ${author}. Title: ${title}`
+        
+        // Extract native high quality thumbnail ID
+        const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+        const videoId = videoIdMatch ? videoIdMatch[1] : null;
+        const imageUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null
 
         return {
             title,
             content,
+            ...(imageUrl ? { imageUrl } : {})
         }
     } catch (error) {
         console.error(`Failed to scrape YouTube video at ${url}:`, error)

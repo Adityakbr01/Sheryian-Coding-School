@@ -4,9 +4,7 @@ import { env } from '../config/env'
 import prisma from '../config/db'
 
 export interface AuthRequest extends Request {
-    user?: {
-        userId: string
-    }
+    user?: { userId: string }
 }
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {

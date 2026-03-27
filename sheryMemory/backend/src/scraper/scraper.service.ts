@@ -7,6 +7,7 @@ export interface ScrapedData {
     title: string | null
     content: string | null
     type: 'article' | 'video' | 'tweet' | 'pdf' | 'image'
+    imageUrl?: string | null
 }
 
 function detectType(url: string): ScrapedData['type'] {
@@ -21,7 +22,7 @@ export class ScraperService {
     static async scrape(url: string): Promise<ScrapedData> {
         const type = detectType(url)
 
-        let result = { title: null as string | null, content: null as string | null }
+        let result: { title: string | null, content: string | null, imageUrl?: string | null } = { title: null, content: null }
 
         switch (type) {
             case 'video':
@@ -45,7 +46,8 @@ export class ScraperService {
         return {
             title: result.title,
             content: result.content,
-            type
+            type,
+            ...(result.imageUrl ? { imageUrl: result.imageUrl } : {})
         }
     }
 }
