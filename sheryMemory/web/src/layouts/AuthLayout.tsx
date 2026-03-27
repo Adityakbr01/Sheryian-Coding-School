@@ -1,13 +1,13 @@
-import { Outlet, Link } from 'react-router-dom';
-import Pattern from '../components/Pattern';
+import { Outlet, Link } from 'react-router-dom'
+import Pattern from '../components/Pattern'
 
 export function AuthLayout() {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[var(--bg-base)]">
-      <div className="flex flex-col justify-center items-center p-8 lg:p-12">
+    <div className="grid min-h-screen bg-(--bg-base) lg:grid-cols-2">
+      <div className="flex flex-col items-center justify-center p-8 lg:p-12">
         <Link
           to="/"
-          className="absolute top-8 left-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-2"
+          className="absolute top-8 left-8 inline-flex items-center gap-2 text-(--text-secondary) transition-colors hover:text-(--text-primary)"
         >
           &larr; Back home
         </Link>
@@ -17,5 +17,5 @@ export function AuthLayout() {
       </div>
       <Pattern />
     </div>
-  );
+  )
 }

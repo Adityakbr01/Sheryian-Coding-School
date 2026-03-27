@@ -5,7 +5,8 @@ import { ApiResponse } from '../../utils/ApiResponse'
 import { searchQuerySchema } from './search.schema'
 import { AuthRequest } from '../../middleware/auth.middleware'
 
-export const searchItems = catchAsync(async (req: AuthRequest, res: Response) => {
+export const searchItems = catchAsync(
+  async (req: AuthRequest, res: Response) => {
     // 1. Validate query inputs
     const validatedData = searchQuerySchema.parse(req.query)
 
@@ -13,14 +14,21 @@ export const searchItems = catchAsync(async (req: AuthRequest, res: Response) =>
     const userId = req.user!.userId
 
     // 3. Perform Vector Search
-    const results = await SearchService.searchItems(userId, validatedData.q, validatedData.limit)
+    const results = await SearchService.searchItems(
+      userId,
+      validatedData.q,
+      validatedData.limit,
+    )
 
     // 4. Send top results
-    res.status(200).json(
+    res
+      .status(200)
+      .json(
         new ApiResponse(
-            200,
-            results,
-            `Found ${(results as any[]).length || 0} similar items for query: "${validatedData.q}"`
-        )
-    )
-})
+          200,
+          results,
+          `Found ${(results as any[]).length || 0} similar items for query: "${validatedData.q}"`,
+        ),
+      )
+  },
+)

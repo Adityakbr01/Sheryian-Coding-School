@@ -1,22 +1,22 @@
 export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  createdAt?: string;
+  id: string
+  email: string
+  name?: string
+  createdAt?: string
 }
 
 export interface LoginInput {
-  email: string;
-  password?: string;
+  email: string
+  password?: string
 }
 
 export interface RegisterInput {
-  email: string;
-  password?: string;
-  name?: string;
+  email: string
+  password?: string
+  name?: string
 }
 
 export interface AuthResponse {
-  user: User;
-  token?: string;
+  user: User
+  token?: string
 }

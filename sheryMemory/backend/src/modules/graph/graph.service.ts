@@ -44,7 +44,6 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 export class GraphService {
-
   /**
    * Production-grade graph builder with:
    * - Dynamic node sizing based on tag count
@@ -72,7 +71,7 @@ export class GraphService {
     })
 
     // ── Step 2: Build Item Nodes with dynamic sizing ──────────────
-    const nodes: any[] = items.map(item => ({
+    const nodes: any[] = items.map((item) => ({
       id: item.id,
       name: item.title || item.url,
       val: Math.max(2, (item.tags?.length || 0) + 1), // Dynamic size based on tag count
@@ -82,14 +81,14 @@ export class GraphService {
       color: TYPE_COLORS[item.type || 'default'] || TYPE_COLORS.default,
       summary: item.summary || null,
       imageUrl: item.imageUrl || null,
-      tags: item.tags?.map(t => t.tag.name) || [],
+      tags: item.tags?.map((t) => t.tag.name) || [],
     }))
 
     // ── Step 3: Build Tag Nodes ───────────────────────────────────
     const tagMap = new Map<string, { name: string; count: number }>()
 
     for (const item of items) {
-      for (const it of (item.tags || [])) {
+      for (const it of item.tags || []) {
         const tagName = it.tag.name
         const existing = tagMap.get(tagName)
         if (existing) {
@@ -120,7 +119,7 @@ export class GraphService {
 
       // Connect all items with this tag to the tag node
       for (const item of items) {
-        const hasTag = item.tags?.some(t => t.tag.name === tagName)
+        const hasTag = item.tags?.some((t) => t.tag.name === tagName)
         if (hasTag) {
           tagLinks.push({
             source: item.id,
@@ -133,7 +132,7 @@ export class GraphService {
     }
 
     // ── Step 4: Build Semantic Links (only > 0.7 similarity) ─────
-    const itemIds = items.map(i => i.id)
+    const itemIds = items.map((i) => i.id)
 
     const dbRelations = await prisma.relation.findMany({
       where: {
@@ -143,7 +142,7 @@ export class GraphService {
       },
     })
 
-    const semanticLinks = dbRelations.map(rel => ({
+    const semanticLinks = dbRelations.map((rel) => ({
       source: rel.sourceId,
       target: rel.targetId,
       value: rel.score,
@@ -178,8 +177,8 @@ export class GraphService {
         AND 1 - (a.embedding <=> b.embedding) > 0.70
       ON CONFLICT ("sourceId", "targetId") DO UPDATE 
          SET score = EXCLUDED.score;
-    `;
-    
+    `
+
     return { success: true }
   }
 
@@ -187,14 +186,15 @@ export class GraphService {
    * Get items semantically related to a given item.
    * Looks up Relation table for both source→target and target→source.
    */
-  static async getRelatedItems(userId: string, itemId: string, limit: number = 5) {
+  static async getRelatedItems(
+    userId: string,
+    itemId: string,
+    limit: number = 5,
+  ) {
     // Find relations where this item is either source or target
     const relations = await prisma.relation.findMany({
       where: {
-        OR: [
-          { sourceId: itemId },
-          { targetId: itemId },
-        ],
+        OR: [{ sourceId: itemId }, { targetId: itemId }],
         score: { gte: 0.7 },
       },
       orderBy: { score: 'desc' },
@@ -202,25 +202,27 @@ export class GraphService {
     })
 
     // Collect the IDs of related items (the other side of the relation)
-    const relatedIdScores = relations.map(r => ({
+    const relatedIdScores = relations.map((r) => ({
       id: r.sourceId === itemId ? r.targetId : r.sourceId,
       score: r.score,
     }))
 
     // Deduplicate
     const seen = new Set<string>()
-    const unique = relatedIdScores.filter(r => {
-      if (seen.has(r.id)) return false
-      seen.add(r.id)
-      return true
-    }).slice(0, limit)
+    const unique = relatedIdScores
+      .filter((r) => {
+        if (seen.has(r.id)) return false
+        seen.add(r.id)
+        return true
+      })
+      .slice(0, limit)
 
     if (unique.length === 0) return []
 
     // Fetch the actual items (only those belonging to this user)
     const items = await prisma.item.findMany({
       where: {
-        id: { in: unique.map(u => u.id) },
+        id: { in: unique.map((u) => u.id) },
         userId,
       },
       select: {
@@ -237,10 +239,12 @@ export class GraphService {
     })
 
     // Attach similarity scores and sort
-    return items.map(item => ({
-      ...item,
-      similarity: unique.find(u => u.id === item.id)?.score || 0,
-      tags: item.tags.map(t => t.tag.name),
-    })).sort((a, b) => b.similarity - a.similarity)
+    return items
+      .map((item) => ({
+        ...item,
+        similarity: unique.find((u) => u.id === item.id)?.score || 0,
+        tags: item.tags.map((t) => t.tag.name),
+      }))
+      .sort((a, b) => b.similarity - a.similarity)
   }
 }

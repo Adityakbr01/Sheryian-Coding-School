@@ -1,34 +1,35 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collectionsApi } from '../api/collections.api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { collectionsApi } from '../api/collections.api'
 
 export function useCollections() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['collections'],
     queryFn: collectionsApi.list,
-  });
+  })
 
   const createMutation = useMutation({
     mutationFn: collectionsApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] })
     },
-  });
+  })
 
   const deleteMutation = useMutation({
     mutationFn: collectionsApi.remove,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] })
     },
-  });
+  })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string, name: string }) => collectionsApi.update(id, name),
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      collectionsApi.update(id, name),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] })
     },
-  });
+  })
 
   return {
     collections: data?.data || [],
@@ -40,7 +41,7 @@ export function useCollections() {
     isUpdating: updateMutation.isPending,
     deleteCollection: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
-  };
+  }
 }
 
 export function useCollection(id: string) {
@@ -48,11 +49,11 @@ export function useCollection(id: string) {
     queryKey: ['collection', id],
     queryFn: () => collectionsApi.get(id),
     enabled: !!id,
-  });
+  })
 
   return {
     collection: data?.data,
     isLoading,
     error,
-  };
+  }
 }

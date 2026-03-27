@@ -1,95 +1,27 @@
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { Highlighter, X, Download, Trash2, XCircle } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import Mark from 'mark.js'
 import {
   useTextSelection,
   useHighlights,
   HIGHLIGHT_COLORS,
-  type Highlight,
 } from '../hooks/useHighlight'
 
-interface HighlightableContentProps {
+interface MarkdownHighlightableContentProps {
   content: string
   itemId: string
   section?: string
   className?: string
 }
 
-// ── renderHighlightedText (PURE FUNCTION) ──────────────────────────
-// Takes the ORIGINAL content string and a sorted array of highlights,
-// splits content into segments using slice(), wraps highlighted parts
-// with <span>, and returns React elements.
-// RULES:
-//   - NEVER uses innerHTML or DOM mutation
-//   - ALWAYS slices from the original content string
-//   - Handles overlapping highlights by clamping ranges
-//   - Validates ranges before rendering
-function renderHighlightedText(
-  content: string,
-  highlights: Highlight[],
-  onClickHighlight: (e: React.MouseEvent, id: string) => void,
-): React.ReactNode[] {
-  if (!content) return []
-  if (highlights.length === 0) return [content]
-
-  // Sort by start offset, then by end offset (shorter first)
-  const sorted = [...highlights]
-    .filter(
-      (hl) => hl.start >= 0 && hl.end > hl.start && hl.start < content.length,
-    )
-    .sort((a, b) => a.start - b.start || a.end - b.end)
-
-  const parts: React.ReactNode[] = []
-  let cursor = 0
-
-  for (const hl of sorted) {
-    // Clamp to content boundaries
-    const start = Math.max(hl.start, cursor) // skip if overlapping
-    const end = Math.min(hl.end, content.length)
-
-    if (start >= end) continue // Skip invalid or fully overlapping
-
-    // Add plain text before this highlight
-    if (start > cursor) {
-      parts.push(
-        <span key={`plain-${cursor}`}>{content.slice(cursor, start)}</span>,
-      )
-    }
-
-    // Add the highlighted segment — ALWAYS from content.slice(), never from hl.text
-    parts.push(
-      <span
-        key={`hl-${hl.id}`}
-        onClick={(e) => onClickHighlight(e, hl.id)}
-        className="relative cursor-pointer rounded-sm transition-all duration-200 hover:brightness-90"
-        style={{
-          backgroundColor: hl.color,
-          boxShadow: `0 0 0 1px ${hl.color}`,
-          padding: '1px 2px',
-        }}
-        title="Click to edit highlight"
-      >
-        {content.slice(start, end)}
-      </span>,
-    )
-
-    cursor = end
-  }
-
-  // Add remaining plain text
-  if (cursor < content.length) {
-    parts.push(<span key={`plain-${cursor}`}>{content.slice(cursor)}</span>)
-  }
-
-  return parts
-}
-
-// ── Main Component ────────────────────────────────────────────────
-export function HighlightableContent({
+export function MarkdownHighlightableContent({
   content,
   itemId,
   section = 'content',
   className = '',
-}: HighlightableContentProps) {
+}: MarkdownHighlightableContentProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { selection, clearSelection } = useTextSelection(containerRef)
   const {
@@ -103,9 +35,7 @@ export function HighlightableContent({
   } = useHighlights(itemId, section)
 
   const [activeHighlight, setActiveHighlight] = useState<string | null>(null)
-  const [toolbarPos, setToolbarPos] = useState<{ x: number; y: number } | null>(
-    null,
-  )
+  const [toolbarPos, setToolbarPos] = useState<{ x: number; y: number } | null>(null)
   const [showToolbar, setShowToolbar] = useState(false)
   const recolorPickerRef = useRef<HTMLInputElement>(null)
   const newPickerRef = useRef<HTMLInputElement>(null)
@@ -115,6 +45,61 @@ export function HighlightableContent({
   const activeHlRef = useRef(activeHighlight)
   selectionRef.current = selection
   activeHlRef.current = activeHighlight
+
+  // ── Apply highlights using mark.js ──────────────────────────────
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    // Create mark instance for the container
+    const instance = new Mark(containerRef.current)
+
+    // First, unmark any previous custom marks from our instance
+    instance.unmark({
+      className: 'hl-span',
+      done: () => {
+        // Then apply all current highlights
+        if (highlights.length === 0) return
+
+        highlights.forEach((hl) => {
+          instance.markRanges([{ start: hl.start, length: hl.end - hl.start }], {
+            element: 'span',
+            className: 'hl-span',
+            each: (node) => {
+              const el = node as HTMLElement
+              el.style.backgroundColor = hl.color
+              el.style.boxShadow = `0 0 0 1px ${hl.color}`
+              el.style.padding = '1px 2px'
+              el.style.borderRadius = '2px'
+              el.classList.add('cursor-pointer', 'transition-all', 'hover:brightness-90', 'relative')
+              el.title = 'Click to edit highlight'
+
+              // Handle click to show toolbar for this highlight
+              el.onclick = (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const rect = el.getBoundingClientRect()
+                const containerRect = containerRef.current?.getBoundingClientRect()
+                if (containerRect) {
+                  setToolbarPos({
+                    x: rect.left + rect.width / 2 - containerRect.left,
+                    y: rect.top - containerRect.top - 56,
+                  })
+                }
+                setActiveHighlight(hl.id)
+                setShowToolbar(true)
+              }
+            }
+          })
+        })
+      }
+    })
+
+    return () => {
+      // Clean up instance marks on unmount or re-render
+      instance.unmark({ className: 'hl-span' })
+    }
+  }, [highlights, content])
+
 
   // ── Native change listener for recolor picker ──────────────
   useEffect(() => {
@@ -194,24 +179,6 @@ export function HighlightableContent({
     [selection, addHighlight, setLastColor, clearSelection],
   )
 
-  // ── Click on existing highlight ────────────────────────────
-  const handleHighlightClick = useCallback(
-    (e: React.MouseEvent, hlId: string) => {
-      e.stopPropagation()
-      const rect = (e.target as HTMLElement).getBoundingClientRect()
-      const containerRect = containerRef.current?.getBoundingClientRect()
-      if (containerRect) {
-        setToolbarPos({
-          x: rect.left + rect.width / 2 - containerRect.left,
-          y: rect.top - containerRect.top - 56,
-        })
-      }
-      setActiveHighlight(hlId)
-      setShowToolbar(true)
-    },
-    [],
-  )
-
   // ── Close toolbar on outside click ─────────────────────────
   useEffect(() => {
     const handleClick = () => {
@@ -224,17 +191,23 @@ export function HighlightableContent({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [activeHighlight, selection])
 
-  // ── Memoized highlighted content ───────────────────────────
-  const renderedContent = useMemo(
-    () => renderHighlightedText(content, highlights, handleHighlightClick),
-    [content, highlights, handleHighlightClick],
-  )
-
   return (
     <div className={`relative ${className}`}>
-      {/* Highlightable Content Zone — no DOM mutation, pure React state */}
-      <div ref={containerRef} className="whitespace-pre-wrap select-text">
-        {renderedContent}
+      {/* 
+        Container for markdown.
+        We use prose wrapper to apply Tailwind Typography styles.
+      */}
+      <div
+        ref={containerRef}
+        className="prose prose-neutral dark:prose-invert max-w-none select-text marker:text-(--text-muted) prose-a:text-(--accent) hover:prose-a:text-(--accent-hover) prose-headings:font-bold prose-img:rounded-xl"
+      >
+        {content ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+          </ReactMarkdown>
+        ) : (
+          <p className="text-(--text-secondary) italic">No content available.</p>
+        )}
       </div>
 
       {/* ── Floating Toolbar ─────────────────────────────────── */}
@@ -340,7 +313,6 @@ export function HighlightableContent({
               </>
             )}
           </div>
-
           {/* Tooltip arrow */}
           <div className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b border-(--border-subtle) bg-(--bg-elevated)" />
         </div>

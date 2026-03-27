@@ -1,37 +1,36 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 /* ========== FONTS ========== */
 
 @font-face {
-  font-family: "NeuMachina";
-  src: url("/fonts/NeueMachina-Regular.ttf") format("truetype");
+  font-family: 'NeuMachina';
+  src: url('/fonts/NeueMachina-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "juana";
-  src: url("/fonts/Fontspring-juana.ttf") format("truetype");
+  font-family: 'juana';
+  src: url('/fonts/Fontspring-juana.ttf') format('truetype');
   font-weight: 300;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "HelveticaNow";
-  src: url("/fonts/HelveticaNowDisplay-Bold.woff2") format("woff2");
+  font-family: 'HelveticaNow';
+  src: url('/fonts/HelveticaNowDisplay-Bold.woff2') format('woff2');
   font-weight: 700;
   font-display: swap;
 }
 
-
 /* ========== TAILWIND v4 THEME ========== */
 
 @theme {
-
   /* Fonts */
-  --font-NeuMachina: "NeuMachina", sans-serif;
-  --font-HelveticaNow: "HelveticaNow", sans-serif;
-  --font-juana: "juana", sans-serif;
+  --font-NeuMachina: 'NeuMachina', sans-serif;
+  --font-HelveticaNow: 'HelveticaNow', sans-serif;
+  --font-juana: 'juana', sans-serif;
 
   /* Backgrounds */
   --color-bg-base: var(--bg-base);
@@ -58,16 +57,14 @@
   --color-input: var(--input-bg);
 }
 
-
 /* ========== DARK MODE VARIANT ========== */
 
 @custom-variant dark (&:is(.dark *));
 
-
 /* ========== DESIGN TOKENS — Light ========== */
 
 :root {
-  --bg-base: #F8F7F4;
+  --bg-base: #f8f7f4;
   --bg-surface: #f2f1ee;
   --bg-elevated: #eae9e5;
   --bg-overlay: #e0deda;
@@ -93,7 +90,7 @@
   --success-text: #16a34a;
 
   --error-bg: rgba(220, 38, 38, 0.07);
-  --error-border: rgba(220, 38, 38, 0.20);
+  --error-border: rgba(220, 38, 38, 0.2);
   --error-text: #dc2626;
 
   --tab-bg: #eeede9;
@@ -109,15 +106,12 @@
 
   --card-bg: #ffffff;
   --card-border: #e8e6e2;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
-    0 12px 40px rgba(0, 0, 0, 0.07);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.07);
 
   --btn-disabled-bg: #eeedea;
   --btn-disabled-text: #c0c0c0;
   --btn-disabled-border: #e0deda;
 }
-
-
 
 /* ========== DESIGN TOKENS — Dark ========== */
 
@@ -129,7 +123,7 @@
 
   --accent: #ba580d;
   --accent-hover: #e06010;
-  --accent-muted: rgba(254, 131, 37, 0.10);
+  --accent-muted: rgba(254, 131, 37, 0.1);
   --accent-border: rgba(254, 131, 37, 0.35);
   --accent-glow: rgba(254, 131, 37, 0.18);
 
@@ -148,7 +142,7 @@
   --success-text: #4ade80;
 
   --error-bg: rgba(248, 113, 113, 0.07);
-  --error-border: rgba(248, 113, 113, 0.20);
+  --error-border: rgba(248, 113, 113, 0.2);
   --error-text: #f87171;
 
   --tab-bg: #161616;
@@ -164,15 +158,12 @@
 
   --card-bg: #111111;
   --card-border: #1e1e1e;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.30),
-    0 20px 60px rgba(0, 0, 0, 0.50);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
 
   --btn-disabled-bg: #161616;
   --btn-disabled-text: #333333;
   --btn-disabled-border: #222222;
 }
-
-
 
 html,
 body {
@@ -183,7 +174,9 @@ body {
   font-family: var(--font-NeuMachina), sans-serif;
   background-color: var(--bg-base);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 button {

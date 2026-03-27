@@ -13,7 +13,10 @@ import collectionsRoutes from './modules/collections/collections.routes'
 import highlightsRoutes from './modules/highlights/highlights.routes'
 import memoryRoutes from './modules/memory/memory.routes'
 import graphRoutes from './modules/graph/graph.routes'
-import { globalErrorHandler, notFoundHandler } from './middleware/error.middleware'
+import {
+  globalErrorHandler,
+  notFoundHandler,
+} from './middleware/error.middleware'
 import { env } from './config/env'
 
 // Background Workers — importing starts them automatically
@@ -27,11 +30,13 @@ app.use(express.json())
 
 // HTTP Logging using Morgan & Winston
 const morganFormat = env.NODE_ENV === 'production' ? 'combined' : 'dev'
-app.use(morgan(morganFormat, {
+app.use(
+  morgan(morganFormat, {
     stream: {
-        write: (message) => logger.http(message.trim())
-    }
-}))
+      write: (message) => logger.http(message.trim()),
+    },
+  }),
+)
 
 // API Routes
 app.use('/api/auth', authRoutes)
@@ -52,7 +57,6 @@ const httpServer = http.createServer(app)
 initSocket(httpServer)
 
 httpServer.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT} in ${env.NODE_ENV} mode`)
-    logger.info(`Background worker is running in the same process`)
+  logger.info(`Server is running on port ${PORT} in ${env.NODE_ENV} mode`)
+  logger.info(`Background worker is running in the same process`)
 })
-

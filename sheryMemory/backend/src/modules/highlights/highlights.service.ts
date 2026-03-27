@@ -5,15 +5,20 @@ export class HighlightService {
   /**
    * Create a new highlight for an item.
    */
-  static async create(userId: string, data: {
-    itemId: string;
-    section: string;
-    text: string;
-    start: number;
-    end: number;
-    color: string;
-  }) {
-    logger.info(`[Highlights] ✨ Creating highlight for item ${data.itemId} section="${data.section}"`)
+  static async create(
+    userId: string,
+    data: {
+      itemId: string
+      section: string
+      text: string
+      start: number
+      end: number
+      color: string
+    },
+  ) {
+    logger.info(
+      `[Highlights] ✨ Creating highlight for item ${data.itemId} section="${data.section}"`,
+    )
 
     const highlight = await prisma.highlight.create({
       data: {
@@ -44,7 +49,13 @@ export class HighlightService {
       orderBy: { createdAt: 'desc' },
       include: {
         item: {
-          select: { id: true, title: true, url: true, type: true, imageUrl: true },
+          select: {
+            id: true,
+            title: true,
+            url: true,
+            type: true,
+            imageUrl: true,
+          },
         },
       },
     })
@@ -84,7 +95,9 @@ export class HighlightService {
       where: { userId, itemId },
     })
 
-    logger.info(`[Highlights] 🧹 Cleared ${deleted.count} highlights for item ${itemId}`)
+    logger.info(
+      `[Highlights] 🧹 Cleared ${deleted.count} highlights for item ${itemId}`,
+    )
     return { count: deleted.count }
   }
 }

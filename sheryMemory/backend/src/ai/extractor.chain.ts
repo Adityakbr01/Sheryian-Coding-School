@@ -23,31 +23,42 @@ Do NOT include any markdown code block wrappers like \`\`\`json around your resp
 `)
 
 export interface ExtractedMetadata {
-    summary: string | null;
-    aiInsight: string | null;
-    highlights: Array<{ text: string, annotation: string }> | null;
+  summary: string | null
+  aiInsight: string | null
+  highlights: Array<{ text: string; annotation: string }> | null
 }
 
-export async function extractMetadata(text: string): Promise<ExtractedMetadata> {
-    try {
-        const chain = extractorPromptTemplate.pipe(LangchainClient.getChatInstance() as any)
-        
-        // Jina markdown can be long; we truncate to first 12000 chars to avoid token limits
-        const safeText = text.substring(0, 12000)
-        const response = await chain.invoke({ text: safeText }) as any
-        
-        let rawContent = response.content as string
-        rawContent = rawContent.replace(/^```(json)?/, '').replace(/```$/, '').trim()
-        
-        const data = JSON.parse(rawContent)
-        
-        return {
-            summary: data.summary || null,
-            aiInsight: data.aiInsight || null,
-            highlights: Array.isArray(data.highlights) ? data.highlights : null
-        }
-    } catch (error) {
-        console.error('Failed to extract metadata:', error)
-        return { summary: null, aiInsight: null, highlights: null }
+export async function extractMetadata(
+  text: string,
+): Promise<ExtractedMetadata> {
+  try {
+    const chain = extractorPromptTemplate.pipe(
+      LangchainClient.getChatInstance() as any,
+    )
+
+    // Jina markdown can be long; we truncate to first 12000 chars to avoid token limits
+    const safeText = text.substring(0, 12000)
+    const response = (await chain.invoke({ text: safeText })) as any
+
+    let rawContent = response.content as string
+    rawContent = rawContent
+      .replace(/^```(json)?/, '')
+      .replace(/```$/, '')
+      .trim()
+
+    const data = JSON.parse(rawContent)
+
+    return {
+      summary: data.summary || null,
+      aiInsight: data.aiInsight || null,
+      highlights: Array.isArray(data.highlights) ? data.highlights : null,
     }
+  } catch (error: any) {
+    if (error?.status === 429 || error?.message?.includes('429')) {
+      console.warn('⚠️ Gemini Quota Exceeded (429 Too Many Requests). Skipping AI metadata extraction gracefully to protect database worker pool.')
+    } else {
+      console.error('Failed to extract metadata:', error)
+    }
+    return { summary: null, aiInsight: null, highlights: null }
+  }
 }

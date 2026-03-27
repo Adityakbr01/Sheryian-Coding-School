@@ -5,15 +5,24 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const envSchema = z.object({
-    DATABASE_URL: z.string().url(),
-    JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters long'),
-    REDIS_URL: z.string().url().default('redis://localhost:6379'),
-    //AI Keys
-    GEMINI_API_KEY: z.string().min(1).optional(),
-    GEMINI_MODEL: z.string().default('models/gemini-3-flash-preview'),
-    HUGGINGFACE_API_KEY: z.string().min(1).optional(), //for nomic-embed-text-v1.5
-    PORT: z.coerce.number().default(5000),
-    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  DATABASE_URL: z.string().url(),
+  JWT_SECRET: z
+    .string()
+    .min(10, 'JWT_SECRET must be at least 10 characters long'),
+  REDIS_URL: z.string().url().default('redis://localhost:6379'),
+  //AI Keys
+  GEMINI_API_KEY: z.string().min(1).optional(),
+  GEMINI_MODEL: z.string().default('models/gemini-2.5-flash-lite'),
+  HUGGINGFACE_API_KEY: z.string().min(1).optional(), //for nomic-embed-text-v1.5
+  PORT: z.coerce.number().default(5000),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
+
+  // ImageKit
+  IMAGEKIT_PUBLIC_KEY: z.string().optional(),
+  IMAGEKIT_PRIVATE_KEY: z.string().optional(),
+  IMAGEKIT_URL_ENDPOINT: z.string().optional(),
 })
 
 export type EnvConfig = z.infer<typeof envSchema>
@@ -22,8 +31,8 @@ export type EnvConfig = z.infer<typeof envSchema>
 const parsedEnv = envSchema.safeParse(process.env)
 
 if (!parsedEnv.success) {
-    console.error('❌ Invalid environment variables:', parsedEnv.error.format())
-    process.exit(1)
+  console.error('❌ Invalid environment variables:', parsedEnv.error.format())
+  process.exit(1)
 }
 
 export const env = parsedEnv.data

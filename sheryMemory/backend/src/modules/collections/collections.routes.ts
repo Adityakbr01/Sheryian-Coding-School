@@ -1,13 +1,13 @@
 import { Router } from 'express'
 import { authMiddleware } from '../../middleware/auth.middleware'
 import {
-    createCollection,
-    getCollections,
-    getCollection,
-    updateCollection,
-    deleteCollection,
-    addItemToCollection,
-    removeItemFromCollection
+  createCollection,
+  getCollections,
+  getCollection,
+  updateCollection,
+  deleteCollection,
+  addItemToCollection,
+  removeItemFromCollection,
 } from './collections.controller'
 
 const router = Router()

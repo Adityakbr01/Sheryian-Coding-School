@@ -1,7 +1,12 @@
-import type { LoginInput, RegisterInput, AuthResponse, User } from '../types/auth.types';
-import Cookies from 'js-cookie';
+import type {
+  LoginInput,
+  RegisterInput,
+  AuthResponse,
+  User,
+} from '../types/auth.types'
+import Cookies from 'js-cookie'
 
-const API_URL = 'http://localhost:5000/api'; // Or your backend URL
+const API_URL = 'http://localhost:5000/api' // Or your backend URL
 
 export const authApi = {
   login: async (data: LoginInput): Promise<AuthResponse> => {
@@ -9,14 +14,14 @@ export const authApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    });
-    
+    })
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to login');
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to login')
     }
-    
-    return response.json();
+
+    return response.json()
   },
 
   register: async (data: RegisterInput): Promise<AuthResponse> => {
@@ -24,33 +29,33 @@ export const authApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    });
+    })
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to register');
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to register')
     }
 
-    return response.json();
+    return response.json()
   },
 
   getMe: async (): Promise<{ data: User }> => {
-    const token = Cookies.get('token');
-    if (!token) throw new Error('No token found');
+    const token = Cookies.get('token')
+    if (!token) throw new Error('No token found')
 
     const response = await fetch(`${API_URL}/auth/me`, {
       method: 'GET',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-    });
+    })
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch user');
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to fetch user')
     }
 
-    return response.json();
-  }
-};
+    return response.json()
+  },
+}

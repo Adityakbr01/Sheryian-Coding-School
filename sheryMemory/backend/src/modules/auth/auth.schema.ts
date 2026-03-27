@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
 export const registerSchema = z.object({
-    email: z.string().email('Please provide a valid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters long'),
-    name: z.string().min(1, 'Name is required').optional(),
+  email: z.string().email('Please provide a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  name: z.string().min(1, 'Name is required').optional(),
 })
 
 export const loginSchema = z.object({
-    email: z.string().email('Please provide a valid email address'),
-    password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Please provide a valid email address'),
+  password: z.string().min(1, 'Password is required'),
 })
 
 export type RegisterInput = z.infer<typeof registerSchema>

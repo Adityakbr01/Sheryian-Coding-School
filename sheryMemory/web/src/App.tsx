@@ -1,8 +1,8 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider } from 'react-router-dom';
-import { ThemeProvider } from 'next-themes';
-import { queryClient } from './lib/queryClient';
-import { router } from './routes';
+import { QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider } from 'react-router-dom'
+import { ThemeProvider } from 'next-themes'
+import { queryClient } from './lib/queryClient'
+import { router } from './routes'
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         <RouterProvider router={router} />
       </QueryClientProvider>
     </ThemeProvider>
-  );
+  )
 }
 
-export default App;
+export default App

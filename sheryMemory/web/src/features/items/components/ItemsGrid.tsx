@@ -1,107 +1,147 @@
-import type { Item } from '../types/items.types';
-import { useItems } from '../hooks/useItems';
-import { ExternalLink, Trash2, Video, FileText, Link as LinkIcon, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import appInfo from '@/constants/appInfo';
+import type { Item } from '../types/items.types'
+import { useItems } from '../hooks/useItems'
+import {
+  ExternalLink,
+  Trash2,
+  Video,
+  FileText,
+  Link as LinkIcon,
+  X,
+} from 'lucide-react'
+import { Link } from 'react-router-dom'
+import appInfo from '@/constants/appInfo'
 
-export function ItemsGrid({ filter = 'recent' }: { filter?: 'recent' | 'relevant' }) {
-  const { items, isLoading, deleteItem } = useItems();
+export function ItemsGrid({
+  filter = 'recent',
+}: {
+  filter?: 'recent' | 'relevant'
+}) {
+  const { items, isLoading, deleteItem } = useItems()
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12 text-[var(--text-secondary)]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
+      <div className="flex items-center justify-center p-12 text-(--text-secondary)">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--accent)"></div>
       </div>
-    );
+    )
   }
 
   if (!items || items.length === 0) {
     return (
-      <div className="text-center p-16 border-2 border-dashed border-[var(--border-default)] rounded-2xl bg-[var(--bg-surface)] mt-4">
-        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No memories yet</h3>
-        <p className="text-[var(--text-secondary)]">Save your first URL to start building your {appInfo.NAME}.</p>
+      <div className="mt-4 rounded-2xl border-2 border-dashed border-(--border-default) bg-(--bg-surface) p-16 text-center">
+        <h3 className="mb-2 text-xl font-bold text-(--text-primary)">
+          No memories yet
+        </h3>
+        <p className="text-(--text-secondary)">
+          Save your first URL to start building your {appInfo.NAME}.
+        </p>
       </div>
-    );
+    )
   }
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this memory?")) {
-      deleteItem(id);
+    if (window.confirm('Are you sure you want to delete this memory?')) {
+      deleteItem(id)
     }
-  };
+  }
 
   const displayedItems = [...items].sort((a, b) => {
     if (filter === 'recent') {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     } else {
       // Relevance heuristic: surface old/forgotten tags over newest ones (Resurfacing mechanic)
-      const aScore = ((a as any).reviewCount || 0) * 1000 + new Date(a.createdAt).getTime();
-      const bScore = ((b as any).reviewCount || 0) * 1000 + new Date(b.createdAt).getTime();
-      return aScore - bScore;
+      const aScore =
+        ((a as any).reviewCount || 0) * 1000 + new Date(a.createdAt).getTime()
+      const bScore =
+        ((b as any).reviewCount || 0) * 1000 + new Date(b.createdAt).getTime()
+      return aScore - bScore
     }
-  });
+  })
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+    <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
       {displayedItems.map((item: Item) => (
-        <ItemCard key={item.id} item={item} onDelete={() => handleDelete(item.id)} />
+        <ItemCard
+          key={item.id}
+          item={item}
+          onDelete={() => handleDelete(item.id)}
+        />
       ))}
     </div>
-  );
+  )
 }
 
 function ItemCard({ item, onDelete }: { item: Item; onDelete: () => void }) {
   const TypeIcon = () => {
     switch (item.type) {
-      case 'video': return <Video className="w-3 h-3 mr-1" />;
-      case 'article': return <FileText className="w-3 h-3 mr-1" />;
-      case 'tweet': return <X className="w-3 h-3 mr-1" />;
-      default: return <LinkIcon className="w-3 h-3 mr-1" />;
+      case 'video':
+        return <Video className="mr-1 h-3 w-3" />
+      case 'article':
+        return <FileText className="mr-1 h-3 w-3" />
+      case 'tweet':
+        return <X className="mr-1 h-3 w-3" />
+      default:
+        return <LinkIcon className="mr-1 h-3 w-3" />
     }
   }
 
   return (
-    <article className="group relative bg-[var(--bg-surface)] rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-[var(--border-strong)]/10 transition-all duration-300 flex flex-col min-h-[200px] border border-[var(--border-subtle)]">
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex justify-between items-start mb-4">
+    <article className="group relative flex min-h-[200px] flex-col overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--bg-surface) transition-all duration-300 hover:shadow-(--border-strong)/10 hover:shadow-xl">
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-4 flex items-start justify-between">
           <div className="flex gap-2">
-            <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider ${item.status === 'processed' ? 'bg-[var(--success-bg)] text-[var(--success-text)]' :
-              item.status === 'failed' ? 'bg-[var(--error-bg)] text-[var(--error-text)]' :
-                'bg-[#fbbf24]/10 text-[#d97706]'
-              }`}>
+            <span
+              className={`rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase ${
+                item.status === 'processed'
+                  ? 'bg-(--success-bg) text-(--success-text)'
+                  : item.status === 'failed'
+                    ? 'bg-(--error-bg) text-(--error-text)'
+                    : 'bg-[#fbbf24]/10 text-[#d97706]'
+              }`}
+            >
               {item.status}
             </span>
-            <span className="flex items-center px-2.5 py-1 bg-[var(--tab-bg)] text-[var(--tab-text)] text-[10px] font-bold rounded-md uppercase tracking-wider border border-[var(--tab-border)]">
+            <span className="flex items-center rounded-md border border-(--tab-border) bg-(--tab-bg) px-2.5 py-1 text-[10px] font-bold tracking-wider text-(--tab-text) uppercase">
               <TypeIcon />
               {item.type}
             </span>
           </div>
-          <button onClick={onDelete} className="text-[var(--text-muted)] hover:text-[var(--error-text)] transition-colors p-1 cursor-pointer z-10 hover:bg-[var(--error-bg)] rounded-lg">
-            <Trash2 className="w-4 h-4" />
+          <button
+            onClick={onDelete}
+            className="z-10 cursor-pointer rounded-lg p-1 text-(--text-muted) transition-colors hover:bg-(--error-bg) hover:text-(--error-text)"
+          >
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
 
         <Link to={`/items/${item.id}`}>
-          <h3 className="font-manrope font-bold text-lg mb-2 text-[var(--text-primary)] leading-snug group-hover:text-[var(--accent)] transition-colors cursor-pointer">
+          <h3 className="font-manrope mb-2 cursor-pointer text-lg leading-snug font-bold text-(--text-primary) transition-colors group-hover:text-(--accent)">
             {item.title || item.url}
           </h3>
         </Link>
 
         {item.content && (
-          <p className="text-[var(--text-secondary)] text-sm line-clamp-2 mb-6 opacity-90">
+          <p className="mb-6 line-clamp-2 text-sm text-(--text-secondary) opacity-90">
             {item.content}
           </p>
         )}
 
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-[var(--border-subtle)]">
+        <div className="mt-auto flex items-center justify-between border-t border-(--border-subtle) pt-4">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Added to memory</span>
+            <span className="text-[10px] font-medium tracking-wider text-(--text-muted) uppercase">
+              Added to memory
+            </span>
           </div>
-          <a href={item.url} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors cursor-pointer border border-transparent hover:border-[var(--border-subtle)]">
-            <ExternalLink className="w-4 h-4" />
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-transparent text-(--text-secondary) transition-colors hover:border-(--border-subtle) hover:bg-(--bg-elevated) hover:text-(--accent)"
+          >
+            <ExternalLink className="h-4 w-4" />
           </a>
         </div>
       </div>
     </article>
-  );
+  )
 }

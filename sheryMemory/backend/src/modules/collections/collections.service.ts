@@ -1,107 +1,114 @@
 import prisma from '../../config/db'
-import { CreateCollectionInput, UpdateCollectionInput } from './collections.schema'
+import {
+  CreateCollectionInput,
+  UpdateCollectionInput,
+} from './collections.schema'
 import { AppError } from '../../utils/AppError'
 
 export class CollectionsService {
-    static async create(userId: string, data: CreateCollectionInput) {
-        return prisma.collection.create({
-            data: {
-                userId,
-                name: data.name
-            }
-        })
+  static async create(userId: string, data: CreateCollectionInput) {
+    return prisma.collection.create({
+      data: {
+        userId,
+        name: data.name,
+      },
+    })
+  }
+
+  static async getAll(userId: string) {
+    return prisma.collection.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { items: true } },
+      },
+    })
+  }
+
+  static async getById(userId: string, id: string) {
+    const collection = await prisma.collection.findFirst({
+      where: { id, userId },
+      include: {
+        items: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            tags: { include: { tag: true } },
+          },
+        },
+      },
+    })
+
+    if (!collection) {
+      throw new AppError('Collection not found', 404)
     }
 
-    static async getAll(userId: string) {
-        return prisma.collection.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                _count: { select: { items: true } }
-            }
-        })
+    return collection
+  }
+
+  static async update(userId: string, id: string, data: UpdateCollectionInput) {
+    const collection = await prisma.collection.findFirst({
+      where: { id, userId },
+    })
+
+    if (!collection) {
+      throw new AppError('Collection not found', 404)
     }
 
-    static async getById(userId: string, id: string) {
-        const collection = await prisma.collection.findFirst({
-            where: { id, userId },
-            include: {
-                items: {
-                    orderBy: { createdAt: 'desc' },
-                    include: {
-                        tags: { include: { tag: true } }
-                    }
-                }
-            }
-        })
+    return prisma.collection.update({
+      where: { id },
+      data: { name: data.name },
+    })
+  }
 
-        if (!collection) {
-            throw new AppError('Collection not found', 404)
-        }
+  static async delete(userId: string, id: string) {
+    const collection = await prisma.collection.findFirst({
+      where: { id, userId },
+    })
 
-        return collection
+    if (!collection) {
+      throw new AppError('Collection not found', 404)
     }
 
-    static async update(userId: string, id: string, data: UpdateCollectionInput) {
-        const collection = await prisma.collection.findFirst({
-            where: { id, userId }
-        })
+    // Remove collection reference from items first, then delete
+    await prisma.item.updateMany({
+      where: { collectionId: id },
+      data: { collectionId: null },
+    })
 
-        if (!collection) {
-            throw new AppError('Collection not found', 404)
-        }
+    await prisma.collection.delete({ where: { id } })
+    return { success: true }
+  }
 
-        return prisma.collection.update({
-            where: { id },
-            data: { name: data.name }
-        })
-    }
+  static async addItem(userId: string, collectionId: string, itemId: string) {
+    // Verify both exist and belong to the user
+    const [collection, item] = await Promise.all([
+      prisma.collection.findFirst({ where: { id: collectionId, userId } }),
+      prisma.item.findFirst({ where: { id: itemId, userId } }),
+    ])
 
-    static async delete(userId: string, id: string) {
-        const collection = await prisma.collection.findFirst({
-            where: { id, userId }
-        })
+    if (!collection) throw new AppError('Collection not found', 404)
+    if (!item) throw new AppError('Item not found', 404)
 
-        if (!collection) {
-            throw new AppError('Collection not found', 404)
-        }
+    return prisma.item.update({
+      where: { id: itemId },
+      data: { collectionId },
+    })
+  }
 
-        // Remove collection reference from items first, then delete
-        await prisma.item.updateMany({
-            where: { collectionId: id },
-            data: { collectionId: null }
-        })
+  static async removeItem(
+    userId: string,
+    collectionId: string,
+    itemId: string,
+  ) {
+    const item = await prisma.item.findFirst({
+      where: { id: itemId, userId, collectionId },
+    })
 
-        await prisma.collection.delete({ where: { id } })
-        return { success: true }
-    }
+    if (!item) throw new AppError('Item not found in this collection', 404)
 
-    static async addItem(userId: string, collectionId: string, itemId: string) {
-        // Verify both exist and belong to the user
-        const [collection, item] = await Promise.all([
-            prisma.collection.findFirst({ where: { id: collectionId, userId } }),
-            prisma.item.findFirst({ where: { id: itemId, userId } })
-        ])
-
-        if (!collection) throw new AppError('Collection not found', 404)
-        if (!item) throw new AppError('Item not found', 404)
-
-        return prisma.item.update({
-            where: { id: itemId },
-            data: { collectionId }
-        })
-    }
-
-    static async removeItem(userId: string, collectionId: string, itemId: string) {
-        const item = await prisma.item.findFirst({
-            where: { id: itemId, userId, collectionId }
-        })
-
-        if (!item) throw new AppError('Item not found in this collection', 404)
-
-        return prisma.item.update({
-            where: { id: itemId },
-            data: { collectionId: null }
-        })
-    }
+    return prisma.item.update({
+      where: { id: itemId },
+      data: { collectionId: null },
+    })
+  }
 }

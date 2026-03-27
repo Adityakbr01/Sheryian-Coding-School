@@ -1,38 +1,47 @@
-import { Link } from 'react-router-dom';
-import { ThemeToggle } from './ThemeToggle';
-import { useAuth } from '../features/auth/hooks/useAuth';
+import { Link } from 'react-router-dom'
+import { ThemeToggle } from './ThemeToggle'
+import { useAuth } from '../features/auth/hooks/useAuth'
 
 export function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 backdrop-blur">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+    <header className="sticky top-0 z-50 w-full border-b border-(--border-subtle) bg-(--bg-surface)/80 backdrop-blur">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <Link
+          to="/"
+          className="text-xl font-bold tracking-tight text-(--text-primary)"
+        >
           SheryMemory
         </Link>
         <nav className="flex items-center gap-4">
           <ThemeToggle />
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-medium">
+              <Link
+                to="/dashboard"
+                className="font-medium text-(--text-secondary) transition-colors hover:text-(--text-primary)"
+              >
                 Dashboard
               </Link>
               <button
                 onClick={() => logout()}
-                className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-4 py-2 rounded-md hover:bg-[var(--border-strong)] transition-colors font-medium cursor-pointer"
+                className="cursor-pointer rounded-md border border-(--border-subtle) bg-(--bg-elevated) px-4 py-2 font-medium text-(--text-primary) transition-colors hover:bg-(--border-strong)"
               >
                 Log out
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-medium">
+              <Link
+                to="/login"
+                className="font-medium text-(--text-secondary) transition-colors hover:text-(--text-primary)"
+              >
                 Log in
               </Link>
               <Link
                 to="/register"
-                className="bg-[var(--accent)] text-[var(--text-on-accent)] px-4 py-2 rounded-md hover:bg-[var(--accent-hover)] transition-colors font-medium"
+                className="rounded-md bg-(--accent) px-4 py-2 font-medium text-(--text-on-accent) transition-colors hover:bg-(--accent-hover)"
               >
                 Sign up
               </Link>
@@ -41,5 +50,5 @@ export function Navbar() {
         </nav>
       </div>
     </header>
-  );
+  )
 }

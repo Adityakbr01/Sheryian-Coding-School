@@ -1,46 +1,48 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
-export type SidebarItem = 'overview' | 'items' | 'collections';
+export type SidebarItem = 'overview' | 'items' | 'collections'
 
 interface SidebarProps {
-  activeTab: SidebarItem;
-  onChange: (tab: SidebarItem) => void;
+  activeTab: SidebarItem
+  onChange: (tab: SidebarItem) => void
 }
 
 export function Sidebar({ activeTab, onChange }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'items', label: 'All Memories', icon: '📝' },
     { id: 'collections', label: 'Collections', icon: '📁' },
-  ] as const;
+  ] as const
 
   return (
     <>
       {/* Mobile Toggle */}
-      <div className="md:hidden pb-4 border-b border-[var(--border-subtle)] mb-6 w-full">
-        <button 
+      <div className="mb-6 w-full border-b border-(--border-subtle) pb-4 md:hidden">
+        <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-[var(--text-primary)] font-medium p-3 bg-[var(--bg-elevated)] rounded-lg w-full border border-[var(--border-subtle)] hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-(--border-subtle) bg-(--bg-elevated) p-3 font-medium text-(--text-primary) transition-colors hover:bg-(--border-subtle)"
         >
-          <span className="text-xl leading-none">{isOpen ? '✕' : '☰'}</span> 
+          <span className="text-xl leading-none">{isOpen ? '✕' : '☰'}</span>
           <span>{isOpen ? 'Close Navigation' : 'Open Navigation'}</span>
         </button>
       </div>
 
-      <aside className={`md:flex flex-col w-full md:w-64 flex-shrink-0 ${isOpen ? 'flex' : 'hidden'} gap-2 mb-8 md:mb-0 md:pr-8`}>
+      <aside
+        className={`w-full flex-shrink-0 flex-col md:flex md:w-64 ${isOpen ? 'flex' : 'hidden'} mb-8 gap-2 md:mb-0 md:pr-8`}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => {
-              onChange(tab.id);
-              setIsOpen(false);
+              onChange(tab.id)
+              setIsOpen(false)
             }}
-            className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all text-left cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30 shadow-[var(--accent)]/5 shadow-sm'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] border border-transparent'
+                ? 'border border-(--accent)/30 bg-(--accent)/10 text-(--accent) shadow-(--accent)/5 shadow-sm'
+                : 'border border-transparent text-(--text-secondary) hover:bg-(--bg-elevated) hover:text-(--text-primary)'
             }`}
           >
             <span className="text-2xl drop-shadow-sm">{tab.icon}</span>
@@ -49,5 +51,5 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
         ))}
       </aside>
     </>
-  );
+  )
 }

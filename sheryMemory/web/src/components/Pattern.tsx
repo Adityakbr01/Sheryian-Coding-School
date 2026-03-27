@@ -1,12 +1,12 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 const Pattern = () => {
-    return (
-        <StyledWrapper>
-            <div className="container" />
-        </StyledWrapper>
-    );
+  return (
+    <StyledWrapper>
+      <div className="container" />
+    </StyledWrapper>
+  )
 }
 
 const StyledWrapper = styled.div`
@@ -17,10 +17,12 @@ const StyledWrapper = styled.div`
     --c1: #f8b195;
     --c2: #355c7d;
 
-    --_g: var(--c2) 4% 14%, var(--c1) 14% 24%, var(--c2) 22% 34%,
-      var(--c1) 34% 44%, var(--c2) 44% 56%, var(--c1) 56% 66%, var(--c2) 66% 76%,
+    --_g:
+      var(--c2) 4% 14%, var(--c1) 14% 24%, var(--c2) 22% 34%, var(--c1) 34% 44%,
+      var(--c2) 44% 56%, var(--c1) 56% 66%, var(--c2) 66% 76%,
       var(--c1) 76% 86%, var(--c2) 86% 96%;
-    background: radial-gradient(
+    background:
+      radial-gradient(
         100% 100% at 100% 0,
         var(--c1) 4%,
         var(--_g),
@@ -36,6 +38,7 @@ const StyledWrapper = styled.div`
         )
         var(--c1);
     background-size: var(--s) var(--s);
-  }`;
+  }
+`
 
-export default Pattern;
+export default Pattern

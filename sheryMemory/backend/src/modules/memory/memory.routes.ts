@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { authMiddleware } from '../../middleware/auth.middleware'
-import { getDueItems, markReviewed, getResurfacedItems } from './memory.controller'
+import {
+  getDueItems,
+  markReviewed,
+  getResurfacedItems,
+} from './memory.controller'
 
 const router = Router()
 
