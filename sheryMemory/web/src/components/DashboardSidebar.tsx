@@ -123,7 +123,7 @@ export function DashboardSidebar({
             onChange('chat')
             setOpen(false)
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--accent)/30 bg-(--accent)/10 py-2.5 text-sm font-semibold text-(--accent) transition-all hover:bg-(--accent)/20 hover:scale-[1.02] active:scale-95"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--accent)/30 bg-(--accent)/10 py-2.5 text-sm font-semibold text-(--accent) transition-all hover:bg-(--accent)/20 active:scale-95"
         >
           <Sparkle className="h-4 w-4" /> Find with AI
         </button>

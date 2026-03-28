@@ -41,7 +41,7 @@ export class ItemsService {
 
     const whereParams = {
       userId,
-      ...(collectionId ? { collectionId } : {}),
+      ...(collectionId === 'uncategorized' ? { collectionId: null } : collectionId ? { collectionId } : {}),
       ...(type && type !== 'all' ? { type } : {}),
       ...(status && status !== 'all' ? { status } : {}),
       ...(tagsArray && tagsArray.length > 0 ? {

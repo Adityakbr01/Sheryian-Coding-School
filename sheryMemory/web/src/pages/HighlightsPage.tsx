@@ -14,6 +14,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 import { HIGHLIGHT_COLORS } from '../features/items/hooks/useHighlight'
+import { CustomSelect } from '../components/CustomSelect'
 
 // ── Types ─────────────────────────────────────────────────────────
 interface HighlightWithItem {
@@ -173,17 +174,19 @@ export function HighlightsPage() {
         </div>
 
         {/* Sort Dropdown */}
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-(--text-muted)" />
-          <select
+        <div className="flex z-10 items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 shrink-0 text-(--text-muted)" />
+          <CustomSelect
             value={sortBy}
-            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
-            className="rounded-xl border border-(--border-subtle) bg-(--bg-elevated) px-3 py-2.5 text-sm text-(--text-primary) outline-none focus:ring-2 focus:ring-(--accent)/50"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="color">Group by Color</option>
-          </select>
+            onChange={(val) => { setSortBy(val as any); setPage(1); }}
+            options={[
+              { value: 'newest', label: 'Newest First' },
+              { value: 'oldest', label: 'Oldest First' },
+              { value: 'color', label: 'Group by Color' },
+            ]}
+            align="right"
+            className="w-44 shrink-0"
+          />
         </div>
       </div>
 
@@ -192,11 +195,10 @@ export function HighlightsPage() {
         <Filter className="h-4 w-4 text-(--text-muted)" />
         <button
           onClick={() => { setActiveColor(null); setPage(1); }}
-          className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
-            !activeColor
+          className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${!activeColor
               ? 'bg-(--accent) text-white shadow-(--accent)/20 shadow-lg'
               : 'border border-(--border-subtle) bg-(--bg-elevated) text-(--text-secondary) hover:border-(--accent)/30'
-          }`}
+            }`}
         >
           All
         </button>
@@ -208,17 +210,16 @@ export function HighlightsPage() {
                 setActiveColor(activeColor === c.value ? null : c.value)
                 setPage(1)
               }}
-              className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
-                activeColor === c.value
+              className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${activeColor === c.value
                   ? 'shadow-md ring-2 ring-offset-2 ring-offset-(--bg-base)'
                   : 'border border-(--border-subtle) bg-(--bg-elevated) hover:border-(--accent)/30'
-              }`}
+                }`}
               style={
                 activeColor === c.value
                   ? {
-                      backgroundColor: c.value,
-                      color: '#1e293b',
-                    }
+                    backgroundColor: c.value,
+                    color: '#1e293b',
+                  }
                   : {}
               }
             >

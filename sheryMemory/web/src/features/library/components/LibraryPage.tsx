@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Filter } from 'lucide-react'
 import { ItemCard } from '../../items/components/ItemsGrid'
 import Cookies from 'js-cookie'
+import { CustomSelect } from '../../../components/CustomSelect'
+import { useCollections } from '../../collections/hooks/useCollections'
 
 const API_URL = 'http://localhost:5000/api'
 const getHeaders = () => {
@@ -34,10 +36,17 @@ type ItemData = any // fallback for compilation
 export function LibraryPage() {
   const [items, setItems] = useState<ItemData[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterType, setFilterType] = useState('all') // 'all', 'article', 'video', 'tweet'
-  const [filterStatus, setFilterStatus] = useState('all') // 'all', 'pending', 'processed'
+  const [filterType, setFilterType] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterCollection, setFilterCollection] = useState('all')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const { collections } = useCollections()
+
+  const collectionOptions = useMemo(() => [
+    { value: 'all', label: 'All Collections' },
+    { value: 'uncategorized', label: 'Uncategorized' },
+  ], [collections])
 
   const fetchItems = async () => {
     try {
@@ -45,6 +54,7 @@ export function LibraryPage() {
       const params = new URLSearchParams()
       if (filterType !== 'all') params.append('type', filterType)
       if (filterStatus !== 'all') params.append('status', filterStatus)
+      if (filterCollection !== 'all') params.append('collectionId', filterCollection)
       params.append('page', page.toString())
       params.append('limit', '12')
 
@@ -65,7 +75,7 @@ export function LibraryPage() {
 
   useEffect(() => {
     fetchItems()
-  }, [filterType, filterStatus, page])
+  }, [filterType, filterStatus, filterCollection, page])
 
   return (
     <div className="flex h-full flex-col gap-6">
@@ -78,45 +88,57 @@ export function LibraryPage() {
             Library
           </h2>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-(--border-subtle) bg-(--bg-surface) p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-(--text-muted)" />
             <span className="text-sm font-semibold text-(--text-secondary)">Type:</span>
-            <select
+            <CustomSelect
               value={filterType}
-              onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
-              className="rounded-lg border border-(--border-subtle) bg-(--bg-base) px-3 py-1.5 text-sm text-(--text-primary) outline-none focus:border-(--accent)"
-            >
-              <option value="all">All Types</option>
-              <option value="article">Articles</option>
-              <option value="video">Videos</option>
-              <option value="pdf">PDFs</option>
-              <option value="image">Images</option>
-              <option value="tweet">Tweets</option>
-            </select>
+              onChange={(val) => { setFilterType(val); setPage(1); }}
+              options={[
+                { value: 'all', label: 'All Types' },
+                { value: 'article', label: 'Articles' },
+                { value: 'video', label: 'Videos' },
+                { value: 'pdf', label: 'PDFs' },
+                { value: 'image', label: 'Images' },
+                { value: 'tweet', label: 'Tweets' },
+              ]}
+              className="w-40"
+            />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-(--text-secondary)">Status:</span>
-            <select
+            <CustomSelect
               value={filterStatus}
-              onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-              className="rounded-lg border border-(--border-subtle) bg-(--bg-base) px-3 py-1.5 text-sm text-(--text-primary) outline-none focus:border-(--accent)"
-            >
-              <option value="all">All Status</option>
-              <option value="processed">Processed</option>
-              <option value="pending">Pending</option>
-            </select>
+              onChange={(val) => { setFilterStatus(val); setPage(1); }}
+              options={[
+                { value: 'all', label: 'All Status' },
+                { value: 'processed', label: 'Processed' },
+                { value: 'pending', label: 'Pending' },
+              ]}
+              className="w-40"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-(--text-secondary)">Collection:</span>
+            <CustomSelect
+              value={filterCollection}
+              onChange={(val) => { setFilterCollection(val); setPage(1); }}
+              options={collectionOptions}
+              className="w-48"
+            />
           </div>
         </div>
       </header>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-           {[...Array(6)].map((_, i) => (
-             <SkeletonItemCard key={i} />
-           ))}
+          {[...Array(6)].map((_, i) => (
+            <SkeletonItemCard key={i} />
+          ))}
         </div>
       ) : items.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

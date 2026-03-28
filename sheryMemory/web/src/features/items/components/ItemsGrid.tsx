@@ -15,11 +15,13 @@ import appInfo from '@/constants/appInfo'
 
 export function ItemsGrid({
   filter = 'recent',
+  collectionId,
 }: {
   filter?: 'recent' | 'relevant'
+  collectionId?: string
 }) {
   const [page, setPage] = useState(1)
-  const { items, pagination, isLoading, deleteItem } = useItems(undefined, page, 12)
+  const { items, pagination, isLoading, deleteItem } = useItems(collectionId, page, 12)
 
   if (isLoading) {
     return (
