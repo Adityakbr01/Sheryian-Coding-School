@@ -169,7 +169,6 @@ export default function ItemDetailPage() {
   const sidebarY = useTransform(scrollY, [0, 800], [0, -40])
   const smoothSidebarY = useSpring(sidebarY, { damping: 20, stiffness: 100 })
   const contentY = useTransform(scrollY, [0, 500], [0, 20])
-  const contentFade = useTransform(scrollY, [0, 400], [1, 0.8])
 
   if (isLoading) {
     return (
@@ -190,7 +189,7 @@ export default function ItemDetailPage() {
         </p>
         <Link
           to="/dashboard"
-          className="flex items-center gap-2 rounded-full bg-(--accent) px-6 py-2 font-bold text-(--text-on-accent) shadow-md transition-transform hover:scale-105"
+          className="flex items-center gap-2 rounded-full bg-(--accent) px-6 py-2 font-bold text-(--text-on-accent) shadow-md transition-transform"
         >
           <ArrowLeft className="h-4 w-4" /> Go Back
         </Link>
@@ -212,7 +211,6 @@ export default function ItemDetailPage() {
       <motion.button
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate(-1)}
         className="group fixed top-6 left-6 z-60 flex cursor-pointer items-center gap-2 rounded-full bg-(--accent) px-4 py-1.5 text-sm font-bold text-(--text-on-accent) shadow-(--accent)/20 shadow-xl transition-transform"

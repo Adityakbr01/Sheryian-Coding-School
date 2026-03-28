@@ -1,13 +1,9 @@
 import { useCollections } from '../hooks/useCollections'
 import {
   FolderPlus,
-  Brain,
   MoreVertical,
-  Layout,
   Rocket,
   GripVertical,
-  ScrollText,
-  Wallet,
   FileText,
   ImageIcon,
   Check,

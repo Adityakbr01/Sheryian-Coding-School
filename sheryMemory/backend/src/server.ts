@@ -13,6 +13,7 @@ import collectionsRoutes from './modules/collections/collections.routes'
 import highlightsRoutes from './modules/highlights/highlights.routes'
 import memoryRoutes from './modules/memory/memory.routes'
 import graphRoutes from './modules/graph/graph.routes'
+import chatRoutes from './modules/chat/chat.routes'
 import {
   globalErrorHandler,
   notFoundHandler,
@@ -21,6 +22,7 @@ import { env } from './config/env'
 
 // Background Workers — importing starts them automatically
 import './workers/items.worker'
+import './workers/reminder.worker'
 
 const app = express()
 
@@ -46,6 +48,7 @@ app.use('/api/collections', collectionsRoutes)
 app.use('/api/highlights', highlightsRoutes)
 app.use('/api/memory', memoryRoutes)
 app.use('/api/graph', graphRoutes)
+app.use('/api/chat', chatRoutes)
 
 // Error Handling Middleware (must be registered last)
 app.use(notFoundHandler)

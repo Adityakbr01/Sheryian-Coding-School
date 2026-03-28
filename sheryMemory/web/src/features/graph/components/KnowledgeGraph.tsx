@@ -482,7 +482,7 @@ export function KnowledgeGraph() {
               linkDirectionalParticleWidth={2.5}
               linkDirectionalParticleColor={() => '#6366f1'}
               linkLineDash={(link: any) =>
-                link.label === 'tag' ? [2, 2] : undefined
+                link.label === 'tag' ? [2, 2] : null
               }
               onNodeClick={handleNodeClick}
               onNodeHover={handleNodeHover}

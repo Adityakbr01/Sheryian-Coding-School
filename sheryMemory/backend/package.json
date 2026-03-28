@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/server.ts",
+    "build": "bun build src/server.ts --compile --outfile dist/server --external mock-aws-s3 --external aws-sdk --external nock",
     "worker:processor": "bun run src/workers/processor.worker.ts",
     "worker:resurface": "bun run src/workers/resurface.worker.ts",
     "lint": "eslint .",

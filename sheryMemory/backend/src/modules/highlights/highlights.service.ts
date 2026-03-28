@@ -40,25 +40,45 @@ export class HighlightService {
    * Get ALL highlights for a user (for the dashboard page).
    * Includes the parent item's title for display context.
    */
-  static async getAll(userId: string, color?: string) {
-    return prisma.highlight.findMany({
-      where: {
-        userId,
-        ...(color ? { color } : {}),
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        item: {
-          select: {
-            id: true,
-            title: true,
-            url: true,
-            type: true,
-            imageUrl: true,
+  static async getAll(userId: string, color?: string, page: number = 1, limit: number = 12, search?: string, sortBy?: string) {
+    const whereParams: any = {
+      userId,
+      ...(color && color !== 'all' ? { color } : {}),
+      ...(search ? {
+        OR: [
+          { text: { contains: search, mode: 'insensitive' } },
+          { item: { title: { contains: search, mode: 'insensitive' } } }
+        ]
+      } : {})
+    }
+
+    let orderByParams: any = { createdAt: 'desc' }
+    if (sortBy === 'oldest') {
+      orderByParams = { createdAt: 'asc' }
+    }
+
+    const [total, data] = await prisma.$transaction([
+      prisma.highlight.count({ where: whereParams }),
+      prisma.highlight.findMany({
+        where: whereParams,
+        orderBy: orderByParams,
+        skip: (Number(page) - 1) * Number(limit),
+        take: Number(limit),
+        include: {
+          item: {
+            select: {
+              id: true,
+              title: true,
+              url: true,
+              type: true,
+              imageUrl: true,
+            },
           },
         },
-      },
-    })
+      })
+    ])
+
+    return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) }
   }
 
   /**

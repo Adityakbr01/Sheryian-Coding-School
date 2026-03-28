@@ -12,6 +12,7 @@ export function SaveItemModal({ isOpen, onClose }: SaveItemModalProps) {
   const [url, setUrl] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [collectionId, setCollectionId] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const { saveItem, saveFileItem, isSaving, saveError } = useItems()
   const { collections } = useCollections()
@@ -47,7 +48,7 @@ export function SaveItemModal({ isOpen, onClose }: SaveItemModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="animation-fade-in w-full max-w-md overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--bg-surface) shadow-2xl">
+      <div className="animation-fade-in w-full max-w-md rounded-2xl border border-(--border-subtle) bg-(--bg-surface) shadow-2xl">
         <div className="flex items-center justify-between border-b border-(--border-subtle) p-6">
           <h2 className="text-xl font-bold text-(--text-primary)">
             Save to Memory
@@ -107,22 +108,41 @@ export function SaveItemModal({ isOpen, onClose }: SaveItemModalProps) {
             </div>
           )}
 
-          <div>
+          <div className="relative">
             <label className="mb-1 block text-sm font-medium text-(--text-secondary)">
               Collection (Optional)
             </label>
-            <select
-              value={collectionId}
-              onChange={(e) => setCollectionId(e.target.value)}
-              className="w-full appearance-none rounded-lg border border-(--border-subtle) bg-(--bg-base) px-4 py-3 text-(--text-primary) transition-colors focus:border-(--accent) focus:outline-none"
+            <div
+              className="w-full cursor-pointer flex items-center justify-between rounded-lg border border-(--border-subtle) bg-(--bg-base) px-4 py-3 text-(--text-primary) transition-colors hover:border-(--accent)"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <option value="">-- No Collection --</option>
-              {collections?.map((col: any) => (
-                <option key={col.id} value={col.id}>
-                  {col.name}
-                </option>
-              ))}
-            </select>
+              <span>
+                {collectionId
+                  ? collections?.find((c: any) => c.id === collectionId)?.name || '-- No Collection --'
+                  : '-- No Collection --'}
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            
+            {isDropdownOpen && (
+              <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-(--border-subtle) bg-(--bg-elevated) p-1 shadow-2xl animation-fade-in">
+                <div
+                  className={`cursor-pointer rounded-lg px-4 py-2.5 text-sm text-(--text-primary) transition-colors hover:bg-(--bg-surface) ${collectionId === '' ? 'bg-(--accent)/10 text-(--accent) font-bold' : ''}`}
+                  onClick={() => { setCollectionId(''); setIsDropdownOpen(false) }}
+                >
+                  -- No Collection --
+                </div>
+                {collections?.map((col: any) => (
+                  <div
+                    key={col.id}
+                    className={`cursor-pointer rounded-lg px-4 py-2.5 text-sm text-(--text-primary) transition-colors hover:bg-(--bg-surface) ${collectionId === col.id ? 'bg-(--accent)/10 text-(--accent) font-bold' : ''}`}
+                    onClick={() => { setCollectionId(col.id); setIsDropdownOpen(false) }}
+                  >
+                    {col.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {saveError && (

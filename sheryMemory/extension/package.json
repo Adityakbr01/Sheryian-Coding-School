@@ -1,8 +1,8 @@
 {
   "name": "sherymemory-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scripts": {
-    "build": "npx -y esbuild src/popup/popup.ts --bundle --outfile=dist/popup.js --format=iife --target=chrome100 && npx -y esbuild src/background/service-worker.ts --bundle --outfile=dist/service-worker.js --format=iife --target=chrome100 && npx -y esbuild src/content/content.ts --bundle --outfile=dist/content.js --format=iife --target=chrome100",
+    "build": "npx -y esbuild src/popup/popup.ts --bundle --outfile=dist/popup.js --format=iife --target=chrome100 && npx -y esbuild src/background/service-worker.ts --bundle --outfile=dist/service-worker.js --format=iife --target=chrome100",
     "dev": "npm run build"
   },
   "dependencies": {

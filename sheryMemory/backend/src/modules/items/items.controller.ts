@@ -41,8 +41,15 @@ export class ItemsController {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       if (!req.user) return next(new AppError('Unauthorized', 401))
 
-      const { collectionId } = req.query as { collectionId?: string }
-      const items = await ItemsService.getItems(req.user.userId, collectionId)
+      const { collectionId, type, status, tags, page, limit } = req.query as { collectionId?: string; type?: string; status?: string; tags?: string; page?: string; limit?: string }
+      const items = await ItemsService.getItems(req.user.userId, { 
+        collectionId, 
+        type, 
+        status, 
+        tags, 
+        page: page ? parseInt(page) : undefined, 
+        limit: limit ? parseInt(limit) : undefined 
+      })
       res
         .status(200)
         .json(new ApiResponse(200, items, 'Items retrieved successfully'))

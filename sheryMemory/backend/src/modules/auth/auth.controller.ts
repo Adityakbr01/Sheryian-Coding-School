@@ -22,7 +22,7 @@ export class AuthController {
 
   static getMe = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-      const result = await AuthService.getMe(req.user)
+      const result = await AuthService.getMe(req.user!)
       res
         .status(200)
         .json(new ApiResponse(200, result, 'User fetched successfully'))

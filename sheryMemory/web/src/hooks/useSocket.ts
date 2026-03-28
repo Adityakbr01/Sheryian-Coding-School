@@ -54,6 +54,38 @@ export function useSocket() {
         // Invalidate specific item Detail Pages
         queryClient.invalidateQueries({ queryKey: ['item', data.itemId] })
       })
+
+      // Listen for Memory Resurfacing Notifications
+      socketRef.current.on('memory:resurface', (data: any) => {
+        console.log('🧠 [Memory Resurface]', data)
+        const toast = document.createElement('div')
+        toast.className = 'fixed bottom-4 right-4 z-[9999] w-72 md:w-80 bg-(--bg-surface) border border-(--accent)/50 text-(--text-primary) p-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-8 cursor-pointer overflow-hidden group hover:border-(--accent) transition-all'
+        toast.innerHTML = `
+          <div class="absolute top-0 left-0 w-1 h-full bg-(--accent)"></div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-(--accent)/10 text-(--accent) font-bold text-xs">🧠</span>
+            <span class="font-manrope font-bold text-sm tracking-tight text-(--text-primary)">Memory Surfaced</span>
+          </div>
+          <div class="text-xs text-(--text-secondary) leading-relaxed mb-2">${data.message}</div>
+          <div class="text-xs font-semibold text-(--accent) line-clamp-1 group-hover:underline">${data.item.title || data.item.url}</div>
+        `
+        toast.onclick = () => {
+          toast.remove()
+          window.location.href = '/items/' + data.item.id
+        }
+        document.body.appendChild(toast)
+
+        // Dispatch to internal React system (like the bell icon)
+        window.dispatchEvent(new CustomEvent('memory:notification', { detail: data }))
+
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            toast.style.opacity = '0'
+            toast.style.transform = 'translateY(10px)'
+            setTimeout(() => toast.remove(), 300)
+          }
+        }, 8000)
+      })
     }
 
     // Cleanup on unmount or user change

@@ -10,11 +10,13 @@ import {
   Brain,
   Menu,
   X,
+  Library,
+  Sparkle,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 
-export type DashboardTab = 'home' | 'collections' | 'graph' | 'highlights'
+export type DashboardTab = 'home' | 'collections' | 'graph' | 'highlights' | 'library' | 'chat'
 
 interface DashboardSidebarProps {
   activeTab: DashboardTab
@@ -27,11 +29,12 @@ const NAV_ITEMS: {
   label: string
   icon: React.ElementType
 }[] = [
-  { key: 'home', label: 'Home', icon: Home },
-  { key: 'collections', label: 'Collections', icon: FolderOpen },
-  { key: 'graph', label: 'Graph View', icon: Network },
-  { key: 'highlights', label: 'Highlights', icon: BookOpen },
-]
+    { key: 'home', label: 'Home', icon: Home },
+    { key: 'library', label: 'Library', icon: Library },
+    { key: 'collections', label: 'Collections', icon: FolderOpen },
+    { key: 'graph', label: 'Graph View', icon: Network },
+    { key: 'highlights', label: 'Highlights', icon: BookOpen },
+  ]
 
 export function DashboardSidebar({
   activeTab,
@@ -79,11 +82,10 @@ export function DashboardSidebar({
             <button
               key={key}
               onClick={() => handleNav(key)}
-              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${
-                isActive
-                  ? 'text-(--accent)'
-                  : 'text-(--text-secondary) hover:text-(--text-primary)'
-              }`}
+              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${isActive
+                ? 'text-(--accent)'
+                : 'text-(--text-secondary) hover:text-(--text-primary)'
+                }`}
             >
               {isActive && (
                 <motion.div
@@ -108,9 +110,22 @@ export function DashboardSidebar({
             onNewThought()
             setOpen(false)
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--accent) py-2.5 text-sm font-semibold text-(--text-on-accent) shadow-(--accent)/15 shadow-lg transition-all hover:scale-[1.02] active:scale-95"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--accent) py-2.5 text-sm font-semibold text-(--text-on-accent)  transition-all active:scale-95"
         >
           <Plus className="h-4 w-4" /> New Thought
+        </button>
+      </div>
+
+      {/* Find with AI */}
+      <div className="px-4 py-3">
+        <button
+          onClick={() => {
+            onChange('chat')
+            setOpen(false)
+          }}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--accent)/30 bg-(--accent)/10 py-2.5 text-sm font-semibold text-(--accent) transition-all hover:bg-(--accent)/20 hover:scale-[1.02] active:scale-95"
+        >
+          <Sparkle className="h-4 w-4" /> Find with AI
         </button>
       </div>
 

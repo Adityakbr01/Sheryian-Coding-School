@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Cookies from 'js-cookie'
@@ -43,13 +43,19 @@ const getHeaders = () => ({
 
 // ── API ───────────────────────────────────────────────────────────
 const highlightsApi = {
-  getAll: async (color?: string): Promise<HighlightWithItem[]> => {
+  getAll: async (color?: string, page?: number, limit?: number, search?: string, sortBy?: string): Promise<{ data: HighlightWithItem[], totalPages: number, total: number }> => {
     const url = new URL(`${API_URL}/highlights`)
     if (color) url.searchParams.append('color', color)
+    if (page) url.searchParams.append('page', page.toString())
+    if (limit) url.searchParams.append('limit', limit.toString())
+    if (search) url.searchParams.append('search', search)
+    if (sortBy) url.searchParams.append('sortBy', sortBy)
+
     const res = await fetch(url.toString(), { headers: getHeaders() })
     if (!res.ok) throw new Error('Failed to fetch highlights')
     const json = await res.json()
-    return json.data
+    // new api returns { data: { data, total, page, totalPages } }
+    return { data: json.data.data || json.data, totalPages: json.data.totalPages || 1, total: json.data.total || 0 }
   },
   remove: async (id: string): Promise<void> => {
     const res = await fetch(`${API_URL}/highlights/${id}`, {
@@ -71,13 +77,18 @@ export function HighlightsPage() {
   const [activeColor, setActiveColor] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'color'>('newest')
+  const [page, setPage] = useState(1)
 
-  // Fetch all highlights
-  const { data: allHighlights = [], isLoading } = useQuery({
-    queryKey: ['highlights-all', activeColor],
-    queryFn: () => highlightsApi.getAll(activeColor || undefined),
+  // Fetch paginated highlights
+  const { data: highlightsResponse, isLoading } = useQuery({
+    queryKey: ['highlights-all', activeColor, page, searchQuery, sortBy],
+    queryFn: () => highlightsApi.getAll(activeColor || undefined, page, 12, searchQuery, sortBy),
     staleTime: 30 * 1000,
   })
+
+  const highlights = highlightsResponse?.data || []
+  const totalPages = highlightsResponse?.totalPages || 1
+  const totalHighlights = highlightsResponse?.total || 0
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -86,47 +97,6 @@ export function HighlightsPage() {
       queryClient.invalidateQueries({ queryKey: ['highlights-all'] })
     },
   })
-
-  // ── Filtered + Sorted ──────────────────────────────────────
-  const highlights = useMemo(() => {
-    let filtered = allHighlights
-
-    // Text search filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (h) =>
-          h.text.toLowerCase().includes(q) ||
-          (h.item.title || '').toLowerCase().includes(q),
-      )
-    }
-
-    // Sort
-    if (sortBy === 'newest') {
-      filtered = [...filtered].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-    } else if (sortBy === 'oldest') {
-      filtered = [...filtered].sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      )
-    } else if (sortBy === 'color') {
-      filtered = [...filtered].sort((a, b) => a.color.localeCompare(b.color))
-    }
-
-    return filtered
-  }, [allHighlights, searchQuery, sortBy])
-
-  // ── Color stats for sidebar filter ─────────────────────────
-  const colorStats = useMemo(() => {
-    const map = new Map<string, number>()
-    allHighlights.forEach((h) => {
-      map.set(h.color, (map.get(h.color) || 0) + 1)
-    })
-    return map
-  }, [allHighlights])
 
   // ── Export all ─────────────────────────────────────────────
   const handleExport = () => {
@@ -142,7 +112,7 @@ export function HighlightsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `all-highlights.json`
+    a.download = `page-highlights.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -161,8 +131,8 @@ export function HighlightsPage() {
                 Highlights
               </h2>
               <p className="text-xs text-(--text-secondary)">
-                {allHighlights.length} saved highlight
-                {allHighlights.length !== 1 ? 's' : ''} across your brain
+                {totalHighlights} saved highlight
+                {totalHighlights !== 1 ? 's' : ''} across your brain
               </p>
             </div>
           </div>
@@ -175,7 +145,7 @@ export function HighlightsPage() {
             className="flex items-center gap-2 rounded-xl border border-(--border-subtle) bg-(--bg-elevated) px-4 py-2 text-xs font-semibold text-(--text-secondary) transition-all hover:border-(--accent)/30 hover:text-(--accent) disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" />
-            Export All
+            Export Page
           </button>
         </div>
       </div>
@@ -188,13 +158,13 @@ export function HighlightsPage() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
             placeholder="Search highlights..."
             className="w-full rounded-xl border border-(--border-subtle) bg-(--bg-elevated) py-2.5 pr-8 pl-10 text-sm text-(--text-primary) placeholder-(--text-muted) transition-all outline-none focus:border-(--accent) focus:ring-2 focus:ring-(--accent)/50"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => { setSearchQuery(''); setPage(1); }}
               className="absolute top-1/2 right-3 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
             >
               <X className="h-3.5 w-3.5" />
@@ -207,7 +177,7 @@ export function HighlightsPage() {
           <SlidersHorizontal className="h-4 w-4 text-(--text-muted)" />
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
             className="rounded-xl border border-(--border-subtle) bg-(--bg-elevated) px-3 py-2.5 text-sm text-(--text-primary) outline-none focus:ring-2 focus:ring-(--accent)/50"
           >
             <option value="newest">Newest First</option>
@@ -221,23 +191,23 @@ export function HighlightsPage() {
       <div className="mb-8 flex flex-wrap items-center gap-2">
         <Filter className="h-4 w-4 text-(--text-muted)" />
         <button
-          onClick={() => setActiveColor(null)}
+          onClick={() => { setActiveColor(null); setPage(1); }}
           className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
             !activeColor
               ? 'bg-(--accent) text-white shadow-(--accent)/20 shadow-lg'
               : 'border border-(--border-subtle) bg-(--bg-elevated) text-(--text-secondary) hover:border-(--accent)/30'
           }`}
         >
-          All ({allHighlights.length})
+          All
         </button>
         {HIGHLIGHT_COLORS.map((c) => {
-          const count = colorStats.get(c.value) || 0
           return (
             <button
               key={c.value}
-              onClick={() =>
+              onClick={() => {
                 setActiveColor(activeColor === c.value ? null : c.value)
-              }
+                setPage(1)
+              }}
               className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
                 activeColor === c.value
                   ? 'shadow-md ring-2 ring-offset-2 ring-offset-(--bg-base)'
@@ -247,7 +217,6 @@ export function HighlightsPage() {
                 activeColor === c.value
                   ? {
                       backgroundColor: c.value,
-                      ringColor: c.value,
                       color: '#1e293b',
                     }
                   : {}
@@ -264,7 +233,7 @@ export function HighlightsPage() {
                     : 'text-(--text-secondary)'
                 }
               >
-                {c.name} ({count})
+                {c.name}
               </span>
             </button>
           )
@@ -362,6 +331,29 @@ export function HighlightsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!isLoading && totalPages > 1 && (
+        <div className="mt-12 flex items-center justify-center gap-4">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-(--text-secondary) bg-(--bg-surface) border border-(--border-subtle) hover:bg-(--bg-elevated) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+          <span className="text-sm font-medium text-(--text-primary)">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-(--text-secondary) bg-(--bg-surface) border border-(--border-subtle) hover:bg-(--bg-elevated) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

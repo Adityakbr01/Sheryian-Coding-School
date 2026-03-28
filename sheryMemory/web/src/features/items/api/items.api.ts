@@ -60,9 +60,11 @@ export const itemsApi = {
     return response.json()
   },
 
-  list: async (collectionId?: string): Promise<{ data: Item[] }> => {
+  list: async (collectionId?: string, page?: number, limit?: number): Promise<{ data: Item[]; total?: number; page?: number; totalPages?: number }> => {
     const url = new URL(`${API_URL}/items`)
     if (collectionId) url.searchParams.append('collectionId', collectionId)
+    if (page) url.searchParams.append('page', page.toString())
+    if (limit) url.searchParams.append('limit', limit.toString())
 
     const response = await fetch(url.toString(), {
       method: 'GET',

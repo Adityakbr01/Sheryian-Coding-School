@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Item } from '../types/items.types'
 import { useItems } from '../hooks/useItems'
 import {
@@ -7,6 +8,7 @@ import {
   FileText,
   Link as LinkIcon,
   X,
+  ImageIcon,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import appInfo from '@/constants/appInfo'
@@ -16,7 +18,8 @@ export function ItemsGrid({
 }: {
   filter?: 'recent' | 'relevant'
 }) {
-  const { items, isLoading, deleteItem } = useItems()
+  const [page, setPage] = useState(1)
+  const { items, pagination, isLoading, deleteItem } = useItems(undefined, page, 12)
 
   if (isLoading) {
     return (
@@ -59,25 +62,52 @@ export function ItemsGrid({
   })
 
   return (
-    <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-      {displayedItems.map((item: Item) => (
-        <ItemCard
-          key={item.id}
-          item={item}
-          onDelete={() => handleDelete(item.id)}
-        />
-      ))}
+    <div className="flex flex-col gap-6">
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+        {displayedItems.map((item: Item) => (
+          <ItemCard
+            key={item.id}
+            item={item}
+            onDelete={() => handleDelete(item.id)}
+          />
+        ))}
+      </div>
+      
+      {pagination && (pagination.totalPages || 0) > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-(--text-secondary) bg-(--bg-surface) border border-(--border-subtle) hover:bg-(--bg-elevated) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+          <span className="text-sm font-medium text-(--text-primary)">
+            Page {page} of {pagination.totalPages || 1}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(pagination.totalPages || 1, p + 1))}
+            disabled={page >= (pagination.totalPages || 1)}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-(--text-secondary) bg-(--bg-surface) border border-(--border-subtle) hover:bg-(--bg-elevated) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   )
 }
 
-function ItemCard({ item, onDelete }: { item: Item; onDelete: () => void }) {
+export function ItemCard({ item, onDelete }: { item: Item; onDelete?: () => void }) {
   const TypeIcon = () => {
     switch (item.type) {
       case 'video':
         return <Video className="mr-1 h-3 w-3" />
       case 'article':
+      case 'pdf':
         return <FileText className="mr-1 h-3 w-3" />
+      case 'image':
+        return <ImageIcon className="mr-1 h-3 w-3" />
       case 'tweet':
         return <X className="mr-1 h-3 w-3" />
       default:
@@ -106,12 +136,14 @@ function ItemCard({ item, onDelete }: { item: Item; onDelete: () => void }) {
               {item.type}
             </span>
           </div>
-          <button
-            onClick={onDelete}
-            className="z-10 cursor-pointer rounded-lg p-1 text-(--text-muted) transition-colors hover:bg-(--error-bg) hover:text-(--error-text)"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="z-10 cursor-pointer rounded-lg p-1 text-(--text-muted) transition-colors hover:bg-(--error-bg) hover:text-(--error-text)"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <Link to={`/items/${item.id}`}>

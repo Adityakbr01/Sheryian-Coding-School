@@ -22,8 +22,15 @@ export const createHighlight = catchAsync(
 // Get ALL highlights for dashboard (optional ?color= filter)
 export const getAllHighlights = catchAsync(
   async (req: AuthRequest, res: Response) => {
-    const color = req.query.color as string | undefined
-    const highlights = await HighlightService.getAll(req.user!.userId, color)
+    const { color, page, limit, search, sortBy } = req.query as { color?: string; page?: string; limit?: string; search?: string; sortBy?: string };
+    const highlights = await HighlightService.getAll(
+      req.user!.userId,
+      color,
+      page ? parseInt(page) : undefined,
+      limit ? parseInt(limit) : undefined,
+      search,
+      sortBy
+    )
     res
       .status(200)
       .json(new ApiResponse(200, highlights, 'All highlights fetched'))

@@ -4,7 +4,19 @@ export async function apiRequest(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<any> {
-    const { token } = await chrome.storage.local.get('token')
+    let { token } = await chrome.storage.local.get('token')
+
+    if (!token) {
+        try {
+            const cookie = await chrome.cookies.get({ url: 'http://localhost', name: 'token' })
+            if (cookie?.value) {
+                token = cookie.value
+                await chrome.storage.local.set({ token })
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
 
     const res = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
@@ -29,16 +41,32 @@ export async function login(email: string, password: string) {
     return res.data
 }
 
-export async function saveItem(url: string) {
-    return apiRequest('/items', {
-        method: 'POST',
-        body: JSON.stringify({ url }),
+export async function getMe() {
+    return apiRequest('/auth/me', {
+        method: 'GET',
     })
 }
 
-export async function saveHighlight(url: string, text: string) {
-    return apiRequest('/highlights', {
+export async function saveItem(url: string, collectionId?: string) {
+    const body: any = { url }
+    if (collectionId) {
+        body.collectionId = collectionId
+    }
+    return apiRequest('/items', {
         method: 'POST',
-        body: JSON.stringify({ url, text }),
+        body: JSON.stringify(body),
+    })
+}
+
+export async function getCollections() {
+    return apiRequest('/collections', {
+        method: 'GET',
+    })
+}
+
+export async function createCollection(name: string) {
+    return apiRequest('/collections', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
     })
 }

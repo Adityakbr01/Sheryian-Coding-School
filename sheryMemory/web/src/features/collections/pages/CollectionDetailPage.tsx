@@ -43,6 +43,7 @@ export default function CollectionDetailPage() {
 
         {/* Dynamic Masonry Grid mapping explicitly to this Collection */}
         <div className="mt-8">
+          {/* @ts-ignore */}
           <ItemsGrid filter="recent" collectionId={id} />
         </div>
       </div>

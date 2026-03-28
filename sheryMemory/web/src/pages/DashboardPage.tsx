@@ -5,11 +5,13 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import type { DashboardTab } from '../components/DashboardSidebar'
 import { DashboardSidebar } from '../components/DashboardSidebar'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import { ChatPage } from '../features/chat/components/ChatPage'
 import { CollectionsGrid } from '../features/collections/components/CollectionsGrid'
 import { KnowledgeGraph } from '../features/graph/components/KnowledgeGraph'
 import { ItemsGrid } from '../features/items/components/ItemsGrid'
 import { SaveItemModal } from '../features/items/components/SaveItemModal'
 import { useSemanticSearch } from '../features/items/hooks/useItems'
+import { LibraryPage } from '../features/library/components/LibraryPage'
 import { useResurfacedItems } from '../features/memory/hooks/useMemory'
 import { useSocket } from '../hooks/useSocket'
 import { HighlightsPage } from './HighlightsPage'
@@ -20,9 +22,8 @@ import {
   Network,
   Plus,
   Search,
-  Sparkles,
   Sun,
-  Wand2,
+  Wand2
 } from 'lucide-react'
 import { motion } from 'motion/react'
 
@@ -42,6 +43,17 @@ export default function DashboardPage() {
     )
   })
   const [feedFilter, setFeedFilter] = useState<'recent' | 'relevant'>('recent')
+
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+
+  useEffect(() => {
+    const handleNotification = (e: any) => {
+      setNotifications((prev) => [e.detail, ...prev])
+    }
+    window.addEventListener('memory:notification', handleNotification)
+    return () => window.removeEventListener('memory:notification', handleNotification)
+  }, [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -151,13 +163,52 @@ export default function DashboardPage() {
               <Moon className="h-5 w-5" />
             )}
           </button>
-          <button className="relative hidden cursor-pointer text-(--text-secondary) transition-colors hover:text-(--accent) md:block">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full border-2 border-(--bg-surface) bg-(--error-text)"></span>
-          </button>
-          <button className="hidden cursor-pointer text-(--text-secondary) transition-colors hover:text-(--accent) md:block">
-            <Sparkles className="h-5 w-5" />
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative hidden cursor-pointer text-(--text-secondary) transition-colors hover:text-(--accent) md:block"
+            >
+              <Bell className="h-5 w-5" />
+              {notifications.length > 0 && (
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full border-2 border-(--bg-surface) bg-(--accent)"></span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {showNotifications && (
+              <div className="absolute top-full right-0 mt-4 w-80 overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--bg-surface) py-2 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-(--border-subtle) px-4 py-2">
+                  <span className="text-[10px] font-bold tracking-wider text-(--accent) uppercase">Notifications</span>
+                  {notifications.length > 0 && (
+                    <button onClick={() => setNotifications([])} className="cursor-pointer text-[10px] text-(--text-muted) transition-colors hover:text-(--accent)">Clear All</button>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-(--text-muted)">No new notifications</div>
+                  ) : (
+                    notifications.map((notif, i) => (
+                      <button 
+                        key={i} 
+                        onClick={() => {
+                          setShowNotifications(false);
+                          navigate(`/items/${notif.item?.id}`);
+                        }}
+                        className="flex w-full cursor-pointer flex-col gap-1 border-b border-(--border-subtle) px-4 py-3 text-left transition-colors hover:bg-(--bg-overlay) last:border-0"
+                      >
+                        <div className="flex items-center gap-2">
+                           <span className="text-sm">🧠</span>
+                           <span className="text-xs font-semibold text-(--text-primary)">Memory Surfaced</span>
+                        </div>
+                        <span className="text-xs text-(--text-secondary)">{notif.message}</span>
+                        <span className="line-clamp-1 text-xs font-medium text-(--accent)">{notif.item?.title || notif.item?.url}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-(--accent) text-lg font-bold text-(--text-on-accent) uppercase shadow-sm ring-2 ring-(--bg-base)">
             {user.name?.[0] || user.email?.[0]}
           </div>
@@ -286,6 +337,12 @@ export default function DashboardPage() {
 
         {/* Highlights View */}
         {activeTab === 'highlights' && <HighlightsPage />}
+
+        {/* Library View */}
+        {activeTab === 'library' && <LibraryPage />}
+
+        {/* Chat View */}
+        {activeTab === 'chat' && <ChatPage />}
       </main>
 
       {/* Floating Action Context (FAB) */}

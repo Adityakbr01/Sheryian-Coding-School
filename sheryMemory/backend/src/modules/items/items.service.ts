@@ -35,21 +35,36 @@ export class ItemsService {
   /**
    * Retrieves all items for a given user, optionally filtered by collection.
    */
-  static async getItems(userId: string, collectionId?: string) {
-    return prisma.item.findMany({
-      where: {
-        userId,
-        ...(collectionId ? { collectionId } : {}),
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        tags: {
-          include: {
-            tag: true,
+  static async getItems(userId: string, filters?: { collectionId?: string; type?: string; status?: string; tags?: string; page?: number; limit?: number }) {
+    const { collectionId, type, status, tags, page = 1, limit = 12 } = filters || {};
+    const tagsArray = tags ? tags.split(',').map(t => t.trim()) : undefined;
+
+    const whereParams = {
+      userId,
+      ...(collectionId ? { collectionId } : {}),
+      ...(type && type !== 'all' ? { type } : {}),
+      ...(status && status !== 'all' ? { status } : {}),
+      ...(tagsArray && tagsArray.length > 0 ? {
+        tags: { some: { tag: { name: { in: tagsArray } } } }
+      } : {})
+    };
+
+    const [total, data] = await prisma.$transaction([
+      prisma.item.count({ where: whereParams }),
+      prisma.item.findMany({
+        where: whereParams,
+        orderBy: { createdAt: 'desc' },
+        skip: (Number(page) - 1) * Number(limit),
+        take: Number(limit),
+        include: {
+          tags: {
+            include: { tag: true },
           },
         },
-      },
-    })
+      })
+    ]);
+
+    return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) };
   }
 
   /**

@@ -165,7 +165,16 @@ export const itemsWorker = new Worker(
 
       logger.info(`[Worker] 🎉 COMPLETED item: ${itemId}`)
 
-      // STEP 7: Emit WebSocket Event for Real-time Frontend Updates
+      // STEP 7: Schedule Memory Resurfacing Reminders
+      try {
+        const { scheduleTimeReminders } = await import('../modules/memory/reminder.queue')
+        await scheduleTimeReminders(updatedItem.userId, itemId)
+        logger.info(`[Worker] ⏰ Scheduled memory resurfacing reminders`)
+      } catch (scheduleErr) {
+        logger.warn(`[Worker] ⚠️ Could not schedule reminders:`, scheduleErr)
+      }
+
+      // STEP 8: Emit WebSocket Event for Real-time Frontend Updates
       try {
         const itemOwner = await prisma.item.findUnique({
           where: { id: itemId },

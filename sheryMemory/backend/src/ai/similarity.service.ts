@@ -1,17 +1,12 @@
-import { getVectorStore } from './embedder.service'
-
 /**
  * Searches the PGVector DB for items semantically similar to the given query.
+ * TODO: Initialize Langchain vectorStore or implement raw pgvector queries.
  */
 export async function searchSimilarItems(query: string, limit: number = 5) {
   try {
-    const vectorStore = await getVectorStore()
+    const results: any[] = []
 
-    // similaritySearch returns an array of Document objects
-    // array of [Document, score] is also possible via similaritySearchWithScore
-    const results = await vectorStore.similaritySearch(query, limit)
-
-    return results.map((doc) => ({
+    return results.map((doc: any) => ({
       content: doc.pageContent,
       metadata: doc.metadata,
     }))

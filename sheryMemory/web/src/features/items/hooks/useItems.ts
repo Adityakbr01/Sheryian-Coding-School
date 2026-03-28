@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { itemsApi } from '../api/items.api'
 
-export function useItems(collectionId?: string) {
+export function useItems(collectionId?: string, page?: number, limit?: number) {
   const queryClient = useQueryClient()
 
   // Fetch items
   const { data, isLoading, error } = useQuery({
-    queryKey: ['items', collectionId],
-    queryFn: () => itemsApi.list(collectionId),
+    queryKey: ['items', collectionId, page, limit],
+    queryFn: () => itemsApi.list(collectionId, page, limit),
   })
 
   // Save new item
@@ -47,8 +47,19 @@ export function useItems(collectionId?: string) {
     },
   })
 
+  const responseData: any = data?.data
+  const itemsData = Array.isArray(responseData) 
+    ? responseData 
+    : Array.isArray(responseData?.data) 
+      ? responseData?.data 
+      : Array.isArray(responseData?.items) 
+        ? responseData?.items 
+        : []
+  const paginationData = responseData?.pagination || (data as any)?.pagination || undefined
+
   return {
-    items: data?.data || [],
+    items: itemsData,
+    pagination: paginationData,
     isLoading,
     error,
     saveItem: saveMutation.mutate,

@@ -42,12 +42,21 @@ function createTooltip() {
                 text: selectedText
             },
             (response) => {
+                if (chrome.runtime.lastError) {
+                    tooltip!.innerHTML = '❌ Extension Error'
+                    console.error('SheryMemory Error:', chrome.runtime.lastError.message)
+                    setTimeout(() => { tooltip!.innerHTML = '🧠 Save Highlight' }, 2000)
+                    return
+                }
+
                 if (response?.success) {
                     tooltip!.innerHTML = '✅ Saved!'
                     setTimeout(hideTooltip, 1200)
                 } else {
-                    tooltip!.innerHTML = '❌ Failed'
-                    setTimeout(() => { tooltip!.innerHTML = '🧠 Save Highlight' }, 1500)
+                    const errStr = response?.error ? response.error.substring(0, 15) : 'Failed'
+                    tooltip!.innerHTML = `❌ ${errStr}`
+                    console.error('SheryMemory Save Failed:', response?.error)
+                    setTimeout(() => { tooltip!.innerHTML = '🧠 Save Highlight' }, 2000)
                 }
             }
         )

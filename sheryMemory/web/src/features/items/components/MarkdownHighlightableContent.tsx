@@ -318,31 +318,36 @@ export function MarkdownHighlightableContent({
         </div>
       )}
 
-      {/* ── Highlights Footer Bar ────────────────────────────── */}
+       {/* ── Highlights Footer Bar ────────────────────────────── */}
       {highlights.length > 0 && (
-        <div className="mt-6 flex items-center justify-between rounded-xl border border-(--border-subtle) bg-(--bg-elevated)/60 px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <Highlighter className="h-4 w-4 text-(--accent)" />
-            <span className="text-xs font-bold text-(--text-primary)">
-              {highlights.length} highlight{highlights.length !== 1 ? 's' : ''}
-            </span>
-            <span className="text-[10px] text-(--text-muted)">
-              Press H to quick-highlight
-            </span>
+        <div className="mt-8 flex items-center justify-between rounded-xl border border-(--border-subtle) bg-(--bg-elevated)/40 px-5 py-3 backdrop-blur-md shadow-sm">
+          <div className="flex items-center gap-3 font-HelveticaNow">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-(--accent)/10">
+              <Highlighter className="h-3.5 w-3.5 text-(--accent)" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-(--text-primary) leading-tight">
+                {highlights.length} highlight{highlights.length === 1 ? '' : 's'}
+              </span>
+              <span className="text-[10px] font-medium text-(--text-muted) leading-tight">
+                Press <kbd className="rounded border border-(--border-strong) bg-(--bg-surface) px-1 pb-[1px] font-sans text-[9px] shadow-sm uppercase">H</kbd> to quick-highlight
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-3 font-HelveticaNow">
             <button
               onClick={exportHighlights}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-[10px] font-bold text-(--text-secondary) transition-colors hover:bg-(--bg-overlay) hover:text-(--accent)"
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-(--text-secondary) transition-all hover:bg-(--bg-overlay) hover:text-(--text-primary)"
             >
-              <Download className="h-3 w-3" />
+              <Download className="h-3.5 w-3.5" />
               Export
             </button>
             <button
               onClick={clearAllHighlights}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-[10px] font-bold text-red-400 transition-colors hover:bg-red-500/10"
+              className="group flex cursor-pointer items-center gap-1.5 rounded-lg border border-red-500/10 bg-red-500/5 px-3 py-1.5 text-xs font-bold text-red-500 transition-all hover:bg-red-500/15"
             >
-              <XCircle className="h-3 w-3" />
+              <XCircle className="h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100" />
               Clear All
             </button>
           </div>
