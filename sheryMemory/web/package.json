@@ -28,6 +28,7 @@
     "remark-gfm": "^4.0.1",
     "socket.io-client": "^4.8.3",
     "styled-components": "^6.3.12",
+    "web-haptics": "^0.0.6",
     "zustand": "^5.0.12"
   },
   "devDependencies": {

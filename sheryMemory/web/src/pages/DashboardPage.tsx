@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import type { DashboardTab } from '../components/DashboardSidebar'
 import { DashboardSidebar } from '../components/DashboardSidebar'
+import { MobileBottomTabBar } from '../components/MobileBottomTabBar'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { ChatPage } from '../features/chat/components/ChatPage'
 import { CollectionsGrid } from '../features/collections/components/CollectionsGrid'
@@ -20,7 +21,6 @@ import {
   Bell,
   Moon,
   Network,
-  Plus,
   Search,
   Sun,
   Wand2
@@ -88,8 +88,15 @@ export default function DashboardPage() {
 
   return (
     <div className="font-body min-h-screen bg-(--bg-base) text-(--text-primary) selection:bg-(--accent)/20">
-      {/* SideNavBar Anchor */}
+      {/* SideNavBar Anchor (desktop) */}
       <DashboardSidebar
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        onNewThought={() => setIsModalOpen(true)}
+      />
+
+      {/* MobileBottomTabBar (mobile only) */}
+      <MobileBottomTabBar
         activeTab={activeTab}
         onChange={setActiveTab}
         onNewThought={() => setIsModalOpen(true)}
@@ -216,7 +223,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content Stage */}
-      <main className="px-6 pt-24 pb-12 md:ml-56 md:px-10">
+      <main className="px-6 pt-24 pb-24 md:ml-56 md:px-10 md:pb-12">
         {activeTab === 'home' && (
           <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-12">
             {/* Left Column: Knowledge Feed */}
@@ -230,7 +237,7 @@ export default function DashboardPage() {
                     Main Feed
                   </h2>
                 </div>
-                <div className="relative flex gap-1 rounded-full border border-(--border-subtle) bg-(--bg-elevated) p-1">
+                <div className="relative flex gap-1 rounded-full w-fit border border-(--border-subtle) bg-(--bg-elevated) p-1">
                   {(['recent', 'relevant'] as const).map((tab) => (
                     <button
                       key={tab}
@@ -345,15 +352,7 @@ export default function DashboardPage() {
         {activeTab === 'chat' && <ChatPage />}
       </main>
 
-      {/* Floating Action Context (FAB) */}
-      <div className="fixed right-8 bottom-8 z-50 md:hidden">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-(--accent) text-(--text-on-accent) shadow-(--accent)/40 shadow-2xl"
-        >
-          <Plus className="h-6 w-6" />
-        </button>
-      </div>
+
 
       <SaveItemModal
         isOpen={isModalOpen}
