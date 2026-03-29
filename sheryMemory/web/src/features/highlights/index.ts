@@ -1,0 +1,5 @@
+export { HighlightsPage as default } from './pages/HighlightsPage'
+export * from './pages/HighlightsPage'
+export * from './types/highlights.types'
+export * from './hooks/useHighlights'
+export * from './api/highlights.api'

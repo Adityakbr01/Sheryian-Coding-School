@@ -1,114 +1,70 @@
-import prisma from '../../config/db'
 import {
   CreateCollectionInput,
   UpdateCollectionInput,
 } from './collections.schema'
 import { AppError } from '../../utils/AppError'
+import { CollectionsDao } from './collections.dao'
 
-export class CollectionsService {
-  static async create(userId: string, data: CreateCollectionInput) {
-    return prisma.collection.create({
-      data: {
-        userId,
-        name: data.name,
-      },
-    })
-  }
+export const CollectionsService = {
+  async create(userId: string, data: CreateCollectionInput) {
+    return CollectionsDao.create(userId, data)
+  },
 
-  static async getAll(userId: string) {
-    return prisma.collection.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: { select: { items: true } },
-      },
-    })
-  }
+  async getAll(userId: string) {
+    return CollectionsDao.findAllByUser(userId)
+  },
 
-  static async getById(userId: string, id: string) {
-    const collection = await prisma.collection.findFirst({
-      where: { id, userId },
-      include: {
-        items: {
-          orderBy: { createdAt: 'desc' },
-          include: {
-            tags: { include: { tag: true } },
-          },
-        },
-      },
-    })
-
+  async getById(userId: string, id: string) {
+    const collection = await CollectionsDao.findById(id, userId)
     if (!collection) {
       throw new AppError('Collection not found', 404)
     }
-
     return collection
-  }
+  },
 
-  static async update(userId: string, id: string, data: UpdateCollectionInput) {
-    const collection = await prisma.collection.findFirst({
-      where: { id, userId },
-    })
-
+  async update(userId: string, id: string, data: UpdateCollectionInput) {
+    const collection = await CollectionsDao.findBasicById(id, userId)
     if (!collection) {
       throw new AppError('Collection not found', 404)
     }
+    return CollectionsDao.update(id, data)
+  },
 
-    return prisma.collection.update({
-      where: { id },
-      data: { name: data.name },
-    })
-  }
-
-  static async delete(userId: string, id: string) {
-    const collection = await prisma.collection.findFirst({
-      where: { id, userId },
-    })
-
+  async delete(userId: string, id: string) {
+    const collection = await CollectionsDao.findBasicById(id, userId)
     if (!collection) {
       throw new AppError('Collection not found', 404)
     }
 
     // Remove collection reference from items first, then delete
-    await prisma.item.updateMany({
-      where: { collectionId: id },
-      data: { collectionId: null },
-    })
+    await CollectionsDao.unlinkItemsFromCollection(id)
+    await CollectionsDao.delete(id)
 
-    await prisma.collection.delete({ where: { id } })
     return { success: true }
-  }
+  },
 
-  static async addItem(userId: string, collectionId: string, itemId: string) {
+  async addItem(userId: string, collectionId: string, itemId: string) {
     // Verify both exist and belong to the user
     const [collection, item] = await Promise.all([
-      prisma.collection.findFirst({ where: { id: collectionId, userId } }),
-      prisma.item.findFirst({ where: { id: itemId, userId } }),
+      CollectionsDao.findBasicById(collectionId, userId),
+      CollectionsDao.findItemById(itemId, userId),
     ])
 
     if (!collection) throw new AppError('Collection not found', 404)
     if (!item) throw new AppError('Item not found', 404)
 
-    return prisma.item.update({
-      where: { id: itemId },
-      data: { collectionId },
-    })
-  }
+    return CollectionsDao.updateItemCollection(itemId, collectionId)
+  },
 
-  static async removeItem(
+  async removeItem(
     userId: string,
     collectionId: string,
     itemId: string,
   ) {
-    const item = await prisma.item.findFirst({
-      where: { id: itemId, userId, collectionId },
-    })
-
+    const item = await CollectionsDao.findItemById(itemId, userId, collectionId)
     if (!item) throw new AppError('Item not found in this collection', 404)
 
-    return prisma.item.update({
-      where: { id: itemId },
-      data: { collectionId: null },
-    })
-  }
+    return CollectionsDao.updateItemCollection(itemId, null)
+  },
 }
+

@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq'
-import { redisConnection } from '../../queue/connection'
+import { redisConnection } from '../../config/redis';
 
 // --- CONFIGURATION ---
 export const REMINDER_TEST_MODE = true; // Set to false for production

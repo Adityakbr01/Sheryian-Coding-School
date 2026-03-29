@@ -18,8 +18,8 @@ function detectType(url: string): ScrapedData['type'] {
   return 'article'
 }
 
-export class ScraperService {
-  static async scrape(url: string): Promise<ScrapedData> {
+export const ScraperService = {
+  async scrape(url: string): Promise<ScrapedData> {
     console.log("Scraping URL:", url)
     const type = detectType(url)
     console.log("Detected type:", type)
@@ -57,5 +57,6 @@ export class ScraperService {
       type,
       ...(result.imageUrl ? { imageUrl: result.imageUrl } : {}),
     }
-  }
+  },
 }
+

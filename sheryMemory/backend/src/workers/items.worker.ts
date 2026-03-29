@@ -1,14 +1,14 @@
 import { Worker, Job } from 'bullmq'
-import { redisConnection } from '../queue/connection'
 import { ITEMS_QUEUE_NAME } from '../queue/items.queue'
 import prisma from '../config/db'
 import { ScraperService } from '../scraper/scraper.service'
 import { generateTags } from '../ai/tagger.chain'
-import { EmbedderService } from '../ai/embedder.service'
+import { generateEmbedding, storeItemEmbedding } from '../ai/embedder.service'
 import { SimilarityService } from '../modules/search/similarity.service'
 import { extractMetadata } from '../ai/extractor.chain'
 import { logger } from '../utils/logger'
 import { getIo } from '../socket/socket'
+import { redisConnection } from '../config/redis'
 
 /**
  * The BullMQ worker that processes background jobs from the Items Queue.
@@ -137,9 +137,9 @@ export const itemsWorker = new Worker(
             `[Worker] 🧩 Generated Rich Text Embedding Input (${richTextForEmbedding.length} chars)`,
           )
           const vector =
-            await EmbedderService.generateEmbedding(richTextForEmbedding)
+            await generateEmbedding(richTextForEmbedding)
           if (vector) {
-            await EmbedderService.storeItemEmbedding(itemId, vector)
+            await storeItemEmbedding(itemId, vector)
             logger.info(`[Worker] ✅ ${vector.length}-d vector stored`)
 
             // Auto-link semantically related items ONLY IF it's not a private document like a PDF/Image CV
@@ -201,7 +201,7 @@ export const itemsWorker = new Worker(
           where: { id: itemId },
           data: { status: 'failed' },
         })
-        .catch(() => {})
+        .catch(() => { })
 
       throw error
     }

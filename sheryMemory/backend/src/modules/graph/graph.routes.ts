@@ -1,13 +1,14 @@
 import { Router } from 'express'
+import * as GraphController from './graph.controller'
 import { authMiddleware } from '../../middleware/auth.middleware'
-import { getGraph, syncGraph, getRelatedItems } from './graph.controller'
 
 const router = Router()
 
 router.use(authMiddleware)
 
-router.get('/', getGraph)
-router.get('/related/:itemId', getRelatedItems) // GET /api/graph/related/:itemId?limit=5
-router.post('/sync', syncGraph)
+router.get('/', GraphController.getGraph)
+router.get('/related/:itemId', GraphController.getRelatedItems)
+router.post('/sync', GraphController.syncGraph)
+
 
 export default router

@@ -1,4 +1,4 @@
-import { LangchainClient } from './langchain.client'
+import { LangchainClient } from '../config/langchain.client'
 import { tagPromptTemplate } from './prompts/tag.prompt'
 
 export async function generateTags(text: string): Promise<string[]> {

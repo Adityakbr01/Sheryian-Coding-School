@@ -61,5 +61,5 @@ initSocket(httpServer)
 
 httpServer.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT} in ${env.NODE_ENV} mode`)
-  logger.info(`Background worker is running in the same process`)
+  logger.info(`Background worker is running in the same process`) //Todo fix that in Production
 })

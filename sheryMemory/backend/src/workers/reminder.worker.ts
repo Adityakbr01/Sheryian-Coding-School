@@ -1,8 +1,8 @@
 import { Worker, Job } from 'bullmq'
-import { redisConnection } from '../queue/connection'
 import { REMINDER_QUEUE_NAME } from '../modules/memory/reminder.queue'
 import { ReminderService } from '../modules/memory/reminder.service'
 import { logger } from '../utils/logger'
+import { redisConnection } from '../config/redis'
 
 const worker = new Worker(
   REMINDER_QUEUE_NAME,

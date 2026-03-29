@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { searchItems } from './search.controller'
+import * as SearchController from './search.controller'
 import { authMiddleware } from '../../middleware/auth.middleware'
 
 const router = Router()
@@ -7,6 +7,7 @@ const router = Router()
 // All search routes require authentication
 router.use(authMiddleware)
 
-router.get('/', searchItems)
+router.get('/', SearchController.searchItems)
+
 
 export default router

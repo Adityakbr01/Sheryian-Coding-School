@@ -2,12 +2,20 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
 import prisma from '../config/db'
+import { AppError } from '../utils/AppError'
+import { catchAsync } from '../utils/catchAsync'
 
 export interface AuthRequest extends Request {
-  user?: { userId: string }
+  user?: {
+    userId: string
+  }
 }
 
-export const authMiddleware = async (
+/**
+ * Middleware to verify stateless JWT tokens and attach the decoded user payload
+ * to the request object. Throws standardized AppErrors for all unauthorized cases.
+ */
+export const authMiddleware = catchAsync(async (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
@@ -15,7 +23,7 @@ export const authMiddleware = async (
   const authHeader = req.headers.authorization
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: No token provided' })
+    throw new AppError('Unauthorized: No token provided', 401)
   }
 
   const token = authHeader.split(' ')[1]
@@ -23,24 +31,24 @@ export const authMiddleware = async (
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as { userId: string }
 
-    // Verify the user actually exists in the database
-    // (handles cases where DB was reset but frontend still holds an old token)
+    // Optionally --> verify user existence in DB to ensure the user wasn't deleted
+    // This maintains "stateless" session behavior but adds a safety check.
     const userExists = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { id: true },
     })
 
     if (!userExists) {
-      return res
-        .status(401)
-        .json({
-          error: 'Unauthorized: User no longer exists. Please register again.',
-        })
+      throw new AppError('Unauthorized: User no longer exists. Please register again.', 401)
     }
 
     req.user = decoded
     next()
-  } catch (error) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' })
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new AppError('Unauthorized: Token expired. Please login again.', 401)
+    }
+    throw new AppError('Unauthorized: Invalid token', 401)
   }
-}
+})
+

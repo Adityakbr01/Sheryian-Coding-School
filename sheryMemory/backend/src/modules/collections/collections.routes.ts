@@ -1,25 +1,17 @@
 import { Router } from 'express'
+import * as CollectionsController from './collections.controller'
 import { authMiddleware } from '../../middleware/auth.middleware'
-import {
-  createCollection,
-  getCollections,
-  getCollection,
-  updateCollection,
-  deleteCollection,
-  addItemToCollection,
-  removeItemFromCollection,
-} from './collections.controller'
 
 const router = Router()
 
 router.use(authMiddleware)
 
-router.post('/', createCollection)
-router.get('/', getCollections)
-router.get('/:id', getCollection)
-router.patch('/:id', updateCollection)
-router.delete('/:id', deleteCollection)
-router.post('/:id/items', addItemToCollection)
-router.delete('/:id/items/:itemId', removeItemFromCollection)
+router.post('/', CollectionsController.createCollection)
+router.get('/', CollectionsController.getCollections)
+router.get('/:id', CollectionsController.getCollection)
+router.patch('/:id', CollectionsController.updateCollection)
+router.delete('/:id', CollectionsController.deleteCollection)
+router.post('/:id/items', CollectionsController.addItemToCollection)
+router.delete('/:id/items/:itemId', CollectionsController.removeItemFromCollection)
 
 export default router

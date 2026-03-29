@@ -1,4 +1,4 @@
-import { LangchainClient } from './langchain.client'
+import { LangchainClient } from '../config/langchain.client'
 import { PromptTemplate } from '@langchain/core/prompts'
 
 const extractorPromptTemplate = PromptTemplate.fromTemplate(`

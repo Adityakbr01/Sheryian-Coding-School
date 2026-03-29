@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq'
-import { redisConnection } from './connection'
+import { redisConnection } from '../config/redis'
 
 export const ITEMS_QUEUE_NAME = 'items-processing-queue'
 

@@ -3,7 +3,7 @@ import { BaseLayout } from '../layouts/BaseLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
 import LoginPage from '../features/auth/pages/LoginPage'
 import RegisterPage from '../features/auth/pages/RegisterPage'
-import DashboardPage from '../pages/DashboardPage'
+import DashboardPage from '../features/dashboard/pages/DashboardPage'
 import ItemDetailPage from '../features/items/pages/ItemDetailPage'
 import CollectionDetailPage from '../features/collections/pages/CollectionDetailPage'
 

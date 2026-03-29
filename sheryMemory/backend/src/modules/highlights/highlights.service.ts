@@ -1,11 +1,11 @@
-import prisma from '../../config/db'
 import { logger } from '../../utils/logger'
+import { HighlightsDao } from './highlights.dao'
 
-export class HighlightService {
+export const HighlightService = {
   /**
    * Create a new highlight for an item.
    */
-  static async create(
+  async create(
     userId: string,
     data: {
       itemId: string
@@ -20,27 +20,20 @@ export class HighlightService {
       `[Highlights] ✨ Creating highlight for item ${data.itemId} section="${data.section}"`,
     )
 
-    const highlight = await prisma.highlight.create({
-      data: {
-        userId,
-        itemId: data.itemId,
-        section: data.section,
-        text: data.text,
-        start: data.start,
-        end: data.end,
-        color: data.color,
-      },
+    const highlight = await HighlightsDao.create({
+      userId,
+      ...data,
     })
 
     logger.info(`[Highlights] ✅ Created highlight ${highlight.id}`)
     return highlight
-  }
+  },
 
   /**
    * Get ALL highlights for a user (for the dashboard page).
    * Includes the parent item's title for display context.
    */
-  static async getAll(userId: string, color?: string, page: number = 1, limit: number = 12, search?: string, sortBy?: string) {
+  async getAll(userId: string, color?: string, page: number = 1, limit: number = 12, search?: string, sortBy?: string) {
     const whereParams: any = {
       userId,
       ...(color && color !== 'all' ? { color } : {}),
@@ -57,47 +50,45 @@ export class HighlightService {
       orderByParams = { createdAt: 'asc' }
     }
 
-    const [total, data] = await prisma.$transaction([
-      prisma.highlight.count({ where: whereParams }),
-      prisma.highlight.findMany({
-        where: whereParams,
-        orderBy: orderByParams,
-        skip: (Number(page) - 1) * Number(limit),
-        take: Number(limit),
-        include: {
-          item: {
-            select: {
-              id: true,
-              title: true,
-              url: true,
-              type: true,
-              imageUrl: true,
-            },
+    const { data, total } = await HighlightsDao.paginateHighlights({
+      where: whereParams,
+      orderBy: orderByParams,
+      page: Number(page),
+      limit: Number(limit),
+      include: {
+        item: {
+          select: {
+            id: true,
+            title: true,
+            url: true,
+            type: true,
+            imageUrl: true,
           },
         },
-      })
-    ])
+      },
+    })
 
-    return { data, total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) }
-  }
+    return { 
+      data, 
+      total, 
+      page: Number(page), 
+      limit: Number(limit), 
+      totalPages: Math.ceil(total / Number(limit)) 
+    }
+  },
 
   /**
    * Get all highlights for a specific item belonging to the authenticated user.
    */
-  static async getByItemId(userId: string, itemId: string) {
-    return prisma.highlight.findMany({
-      where: { userId, itemId },
-      orderBy: { start: 'asc' },
-    })
-  }
+  async getByItemId(userId: string, itemId: string) {
+    return HighlightsDao.findByItem(userId, itemId)
+  },
 
   /**
    * Delete a highlight by ID (only if it belongs to the user).
    */
-  static async delete(userId: string, highlightId: string) {
-    const deleted = await prisma.highlight.deleteMany({
-      where: { id: highlightId, userId },
-    })
+  async delete(userId: string, highlightId: string) {
+    const deleted = await HighlightsDao.delete(highlightId, userId)
 
     if (deleted.count === 0) {
       throw new Error('Highlight not found or unauthorized')
@@ -105,19 +96,18 @@ export class HighlightService {
 
     logger.info(`[Highlights] 🗑️ Deleted highlight ${highlightId}`)
     return { success: true }
-  }
+  },
 
   /**
    * Delete ALL highlights for a specific item (clear all).
    */
-  static async clearByItemId(userId: string, itemId: string) {
-    const deleted = await prisma.highlight.deleteMany({
-      where: { userId, itemId },
-    })
+  async clearByItemId(userId: string, itemId: string) {
+    const deleted = await HighlightsDao.deleteByItem(userId, itemId)
 
     logger.info(
       `[Highlights] 🧹 Cleared ${deleted.count} highlights for item ${itemId}`,
     )
     return { count: deleted.count }
-  }
+  },
 }
+

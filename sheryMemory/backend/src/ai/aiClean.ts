@@ -1,4 +1,4 @@
-import { LangchainClient } from "./langchain.client"
+import { LangchainClient } from "../config/langchain.client"
 
 async function aiClean(text: string): Promise<string> {
     try {

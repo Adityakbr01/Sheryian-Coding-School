@@ -13,6 +13,8 @@ import {
 import { Link } from 'react-router-dom'
 import appInfo from '@/constants/appInfo'
 
+import { ItemsGridSkeleton } from './ItemsSkeleton'
+
 export function ItemsGrid({
   filter = 'recent',
   collectionId,
@@ -24,11 +26,7 @@ export function ItemsGrid({
   const { items, pagination, isLoading, deleteItem } = useItems(collectionId, page, 12)
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-12 text-(--text-secondary)">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--accent)"></div>
-      </div>
-    )
+    return <ItemsGridSkeleton />
   }
 
   if (!items || items.length === 0) {
@@ -74,7 +72,7 @@ export function ItemsGrid({
           />
         ))}
       </div>
-      
+
       {pagination && (pagination.totalPages || 0) > 1 && (
         <div className="mt-8 flex items-center justify-center gap-4">
           <button
@@ -123,13 +121,12 @@ export function ItemCard({ item, onDelete }: { item: Item; onDelete?: () => void
         <div className="mb-4 flex items-start justify-between">
           <div className="flex gap-2">
             <span
-              className={`rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase ${
-                item.status === 'processed'
+              className={`rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase ${item.status === 'processed'
                   ? 'bg-(--success-bg) text-(--success-text)'
                   : item.status === 'failed'
                     ? 'bg-(--error-bg) text-(--error-text)'
                     : 'bg-[#fbbf24]/10 text-[#d97706]'
-              }`}
+                }`}
             >
               {item.status}
             </span>
