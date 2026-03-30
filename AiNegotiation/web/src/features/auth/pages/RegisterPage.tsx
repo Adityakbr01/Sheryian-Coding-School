@@ -10,7 +10,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full mt-16 md:mt-0  flex-col gap-6">
       <div className="text-center">
         <h1 className="text-3xl tracking-tight">SheryMemory</h1>
         <p className="mt-2 text-(--text-secondary)">

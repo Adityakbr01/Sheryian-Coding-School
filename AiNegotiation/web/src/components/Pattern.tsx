@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 const Pattern = () => {
   return (
-    <StyledWrapper>
+    <StyledWrapper className='hidden lg:flex'>
       <div className="container" />
     </StyledWrapper>
   )
