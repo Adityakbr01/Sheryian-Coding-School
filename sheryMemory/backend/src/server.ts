@@ -45,6 +45,9 @@ app.use(
 )
 
 // API Routes
+app.use("/api/health", (req, res) => {
+  res.status(200).json({ message: "OK", timestamp: new Date().toISOString() })
+})
 app.use('/api/auth', authRoutes)
 app.use('/api/items', itemsRoutes)
 app.use('/api/search', searchRoutes)
