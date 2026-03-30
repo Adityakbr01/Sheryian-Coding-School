@@ -1,4 +1,7 @@
-const BASE_URL = 'http://localhost:5000/api'
+// const BASE_URL = 'http://localhost:5000/api'
+// API base URL for all backend requests
+export const BASE_URL = 'https://sheryian-coding-school-08un.onrender.com/api'
+
 
 export async function apiRequest(
     endpoint: string,

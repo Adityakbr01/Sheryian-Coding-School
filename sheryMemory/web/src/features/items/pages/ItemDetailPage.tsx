@@ -24,6 +24,7 @@ import { useAuth } from '../../auth/hooks/useAuth'
 import { HighlightableContent } from '../components/HighlightableContent'
 import { MarkdownHighlightableContent } from '../components/MarkdownHighlightableContent'
 import { useDeleteItem, useItem } from '../hooks/useItems'
+import { API_URL } from '@/constants/api'
 
 // ── Related Items Sidebar Component ──────────────────────────────
 interface RelatedItem {
@@ -64,7 +65,7 @@ function ConnectedItemsList({ itemId }: { itemId: string }) {
     queryKey: ['related-items', itemId],
     queryFn: async () => {
       const res = await fetch(
-        `http://localhost:5000/api/graph/related/${itemId}?limit=3`,
+        `${API_URL}/graph/related/${itemId}?limit=3`,
         {
           headers: {
             Authorization: `Bearer ${Cookies.get('token') || ''}`,
