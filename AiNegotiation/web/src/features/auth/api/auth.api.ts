@@ -5,7 +5,7 @@ import type {
   User,
 } from '../types/auth.types'
 
-const API_URL = 'https://ainegotiation.onrender.com/api'
+export const API_URL = 'https://ainegotiation.onrender.com/api'
 
 export const authApi = {
   login: async (data: LoginInput): Promise<AuthResponse> => {

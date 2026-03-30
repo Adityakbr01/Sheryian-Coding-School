@@ -6,13 +6,13 @@ export default function LoginPage() {
   const { isAuthenticated } = useAuth()
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/" replace />
   }
 
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-3xl tracking-tight">SheryMemory</h1>
+        <h1 className="text-3xl tracking-tight">SheryNegotiateAI</h1>
         <p className="mt-2 text-(--text-secondary)">Sign in to your account</p>
       </div>
 

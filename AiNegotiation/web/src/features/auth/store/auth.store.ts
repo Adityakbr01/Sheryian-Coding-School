@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { User } from '../types/auth.types'
+import { API_URL } from '@/lib/api'
 
-const API_URL = 'http://localhost:3001/api'
 
 interface AuthState {
   user: User | null
