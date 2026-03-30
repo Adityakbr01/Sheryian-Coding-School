@@ -32,6 +32,7 @@ const app = express();
 // ── CORS — must be first, before helmet and rate limiter ──────────────────────
 const corsOptions: cors.CorsOptions = {
     origin: [
+        env.CLIENT_URL,
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:5175',

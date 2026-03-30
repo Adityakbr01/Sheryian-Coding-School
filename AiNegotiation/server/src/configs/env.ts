@@ -32,6 +32,8 @@ const envSchema = zod.object({
     adminEmail: zod.string().default('admin@gmail.com'),
     adminPassword: zod.string().default('admin123'),
     adminName: zod.string().default('Admin'),
+
+    CLIENT_URL: zod.string().default('http://localhost:5173'),
 });
 
 const parsed = envSchema.safeParse(process.env);
