@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ChatApi } from '../api/chat.api'
-import type { Session, Message, ChatMode } from '../types/chat.types'
+import type { ChatMode, Message, Session } from '../types/chat.types'
 
 export function useChat() {
   const [sessions, setSessions] = useState<Session[]>([])

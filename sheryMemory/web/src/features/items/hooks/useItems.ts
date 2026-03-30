@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { itemsApi } from '../api/items.api'
 
 export function useItems(collectionId?: string, page?: number, limit?: number) {
@@ -39,21 +39,52 @@ export function useItems(collectionId?: string, page?: number, limit?: number) {
     },
   })
 
-  // Delete item
+  // Delete item with optimistic update
   const deleteMutation = useMutation({
     mutationFn: (id: string) => itemsApi.remove(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ['items', collectionId, page, limit] })
+      const previousItems = queryClient.getQueryData<any>(['items', collectionId, page, limit])
+      // Optimistically update cache
+      queryClient.setQueryData(['items', collectionId, page, limit], (old: any) => {
+        const responseData = old?.data
+        const itemsData = Array.isArray(responseData)
+          ? responseData
+          : Array.isArray(responseData?.data)
+            ? responseData?.data
+            : Array.isArray(responseData?.items)
+              ? responseData?.items
+              : []
+        const newItems = itemsData.filter((item: any) => item.id !== id)
+        if (Array.isArray(responseData)) {
+          return { ...old, data: newItems }
+        } else if (Array.isArray(responseData?.data)) {
+          return { ...old, data: { ...responseData, data: newItems } }
+        } else if (Array.isArray(responseData?.items)) {
+          return { ...old, data: { ...responseData, items: newItems } }
+        }
+        return old
+      })
+      return { previousItems }
+    },
+    onError: (_err, _id, context: any) => {
+      // Rollback cache
+      if (context?.previousItems) {
+        queryClient.setQueryData(['items', collectionId, page, limit], context.previousItems)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] })
     },
   })
 
   const responseData: any = data?.data
-  const itemsData = Array.isArray(responseData) 
-    ? responseData 
-    : Array.isArray(responseData?.data) 
-      ? responseData?.data 
-      : Array.isArray(responseData?.items) 
-        ? responseData?.items 
+  const itemsData = Array.isArray(responseData)
+    ? responseData
+    : Array.isArray(responseData?.data)
+      ? responseData?.data
+      : Array.isArray(responseData?.items)
+        ? responseData?.items
         : []
   const paginationData = responseData?.pagination || (data as any)?.pagination || undefined
 

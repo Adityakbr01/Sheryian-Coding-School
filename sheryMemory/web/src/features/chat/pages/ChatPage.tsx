@@ -43,7 +43,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex h-[calc(100vh-8rem)] w-full overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--bg-base) shadow-sm">
+    <div className="relative flex h-[calc(100vh-5rem)] md:h-[calc(100vh-8rem)] w-full overflow-hidden rounded-xl md:rounded-2xl border border-(--border-subtle) bg-(--bg-base) shadow-sm">
       <ChatSidebar
         sessions={sessions}
         activeSessionId={activeSessionId}
@@ -57,13 +57,13 @@ export function ChatPage() {
       <div className="flex flex-1 flex-col overflow-hidden bg-(--bg-base)">
         <ChatHeader onOpenSidebar={toggleSidebar} />
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3 md:p-6 custom-scrollbar">
           {isLoadingMessages ? (
             <ChatLoading />
           ) : messages.length === 0 ? (
             <ChatEmptyState />
           ) : (
-            <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full">
+            <div className="flex flex-col gap-4 md:gap-6 max-w-4xl mx-auto w-full">
               {messages.map((msg, index) => (
                 <ChatMessage
                   key={msg.id}
@@ -92,4 +92,3 @@ export function ChatPage() {
     </div>
   )
 }
-

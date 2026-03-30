@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { SlideButton } from '@/components/SlideButton'
 
 export function LoginForm() {
   const { login, isLoggingIn, loginError } = useAuth()
@@ -52,20 +53,15 @@ export function LoginForm() {
           />
         </div>
 
-        <button
+        <SlideButton
           type="submit"
-          disabled={isLoggingIn}
-          className="group relative z-[1] mt-2 w-full overflow-hidden rounded-full bg-(--accent) py-2.5 font-medium text-(--text-on-accent) transition-colors hover:bg-(--accent-hover) disabled:border-(--btn-disabled-border) disabled:bg-(--btn-disabled-bg) disabled:text-(--btn-disabled-text)"
+          isLoading={isLoggingIn}
+          loadingText="Logging in..."
+          fullWidth
+          className="mt-2"
         >
-          <span className="relative inline-block overflow-hidden align-middle">
-            <span className="block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full">
-              {isLoggingIn ? 'Logging in...' : 'Log In'}
-            </span>
-            <span className="absolute inset-0 block translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0">
-              {isLoggingIn ? 'Logging in...' : 'Log In'}
-            </span>
-          </span>
-        </button>
+          Log In
+        </SlideButton>
       </form>
     </div>
   )

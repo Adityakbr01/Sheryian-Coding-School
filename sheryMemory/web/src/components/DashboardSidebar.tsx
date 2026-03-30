@@ -12,6 +12,7 @@ import {
   Sparkle,
 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { SlideButton } from './SlideButton'
 
 export type DashboardTab = 'home' | 'collections' | 'graph' | 'highlights' | 'library' | 'chat'
 
@@ -89,35 +90,77 @@ export function DashboardSidebar({
       </nav>
 
       {/* New Thought CTA */}
-      <div className="px-4 py-3">
-        <button
+      <div className="px-4 py-1">
+        <SlideButton
           onClick={() => onNewThought()}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--accent) py-2.5 text-sm font-semibold text-(--text-on-accent)  transition-all active:scale-95"
+          fullWidth
+          className="gap-2"
         >
-          <Plus className="h-4 w-4" /> New Thought
-        </button>
+          <div className="flex items-center justify-center gap-2">
+            <Plus className="h-4 w-4" /> New Thought
+          </div>
+        </SlideButton>
       </div>
 
       {/* Find with AI */}
-      <div className="px-4 py-3">
-        <button
+      <div className="px-4 py-1">
+        <SlideButton
           onClick={() => onChange('chat')}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--accent)/30 bg-(--accent)/10 py-2.5 text-sm font-semibold text-(--accent) transition-all hover:bg-(--accent)/20 active:scale-95"
+          variant="secondary"
+          fullWidth
+          className="gap-2 border-(--accent)/30 bg-(--accent)/10 text-(--accent) hover:bg-(--accent)/20"
         >
-          <Sparkle className="h-4 w-4" /> Find with AI
-        </button>
+          <div className="flex items-center justify-center gap-2">
+            <Sparkle className="h-4 w-4" /> Find with AI
+          </div>
+        </SlideButton>
       </div>
 
       {/* Footer */}
       <div className="space-y-0.5 px-3 pb-5">
-        <button className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-(--text-muted) transition-colors hover:bg-(--bg-overlay) hover:text-(--text-primary)">
+
+        {/* Help Button */}
+        <button
+          disabled
+          title="Coming soon"
+          className="
+      flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px]
+      text-(--text-muted)
+      transition-colors duration-200
+
+      hover:bg-(--bg-overlay)
+      hover:text-(--text-primary)
+
+      disabled:opacity-50
+      disabled:cursor-default
+      disabled:pointer-events-none
+    "
+        >
           <HelpCircle className="h-[18px] w-[18px]" />
           Help
         </button>
-        <button className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-(--text-muted) transition-colors hover:bg-(--bg-overlay) hover:text-(--text-primary)">
+
+        {/* Settings Button */}
+        <button
+          disabled
+          title="Coming soon"
+          className="
+      flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px]
+      text-(--text-muted)
+      transition-colors duration-200
+
+      hover:bg-(--bg-overlay)
+      hover:text-(--text-primary)
+
+      disabled:opacity-50
+      disabled:cursor-default
+      disabled:pointer-events-none
+    "
+        >
           <Settings className="h-[18px] w-[18px]" />
           Settings
         </button>
+
       </div>
     </>
   )

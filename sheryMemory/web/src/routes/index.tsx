@@ -6,6 +6,7 @@ import RegisterPage from '../features/auth/pages/RegisterPage'
 import DashboardPage from '../features/dashboard/pages/DashboardPage'
 import ItemDetailPage from '../features/items/pages/ItemDetailPage'
 import CollectionDetailPage from '../features/collections/pages/CollectionDetailPage'
+import { HomePage } from '../features/home/pages/HomePage'
 
 export const router = createBrowserRouter([
   {
@@ -14,17 +15,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-6 text-center">
-            <h1 className="font-HelveticaNow mb-4 text-5xl font-bold text-(--text-primary)">
-              Explore <span className="text-(--accent)">SheryMemory</span>
-            </h1>
-            <p className="max-w-2xl text-xl text-(--text-secondary)">
-              Start building your secure digital memory box. Please sign in or
-              register to continue.
-            </p>
-          </div>
-        ),
+        element: <HomePage />,
       },
     ],
   },

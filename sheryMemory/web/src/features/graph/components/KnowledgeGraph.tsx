@@ -1,13 +1,22 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import ForceGraph2D from 'react-force-graph-2d'
-import { useGraph } from '../hooks/useGraph'
-import { useNavigate } from 'react-router-dom'
 import {
-  Search, X, RefreshCw, Orbit, Network, Maximize,
-  LocateFixed, Link2, Tag, Sparkles, Activity,
+  Activity,
   ArrowRight, ChevronRight,
+  Link2,
+  LocateFixed,
+  Maximize,
+  Network,
+  Orbit,
+  RefreshCw,
+  Search,
+  Sparkles,
+  Tag,
+  X,
 } from 'lucide-react'
-import type { GraphNode, GraphLink, GraphData } from '../types/graph.types'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import ForceGraph2D from 'react-force-graph-2d'
+import { useNavigate } from 'react-router-dom'
+import { useGraph } from '../hooks/useGraph'
+import type { GraphLink, GraphNode } from '../types/graph.types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants

@@ -1,9 +1,9 @@
 
 import styled from 'styled-components'
 
-const Pattern = () => {
+const Pattern = ({ className }: { className?: string }) => {
   return (
-    <StyledWrapper>
+    <StyledWrapper className={`h-full w-full ${className}`}>
       <div className="container" />
     </StyledWrapper>
   )

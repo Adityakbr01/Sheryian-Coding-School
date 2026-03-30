@@ -1,14 +1,13 @@
-import { Worker, Job } from 'bullmq'
-import { ITEMS_QUEUE_NAME } from '../queue/items.queue'
-import prisma from '../config/db'
-import { ScraperService } from '../scraper/scraper.service'
-import { generateTags } from '../ai/tagger.chain'
+import { Job, Worker } from 'bullmq'
+import { processContentWithAI } from '../ai/content-processor.chain'
 import { generateEmbedding, storeItemEmbedding } from '../ai/embedder.service'
-import { SimilarityService } from '../modules/search/similarity.service'
-import { extractMetadata } from '../ai/extractor.chain'
-import { logger } from '../utils/logger'
-import { getIo } from '../socket/socket'
+import prisma from '../config/db'
 import { redisConnection } from '../config/redis'
+import { SimilarityService } from '../modules/search/similarity.service'
+import { ITEMS_QUEUE_NAME } from '../queue/items.queue'
+import { ScraperService } from '../scraper/scraper.service'
+import { getIo } from '../socket/socket'
+import { logger } from '../utils/logger'
 
 /**
  * The BullMQ worker that processes background jobs from the Items Queue.
@@ -33,77 +32,49 @@ export const itemsWorker = new Worker(
         `[Worker] ✅ Scraped: type=${scrapedData.type}, title="${scrapedData.title?.substring(0, 60)}", content=${scrapedData.content?.length || 0} chars`,
       )
 
-      // STEP 2: Extract Semantic Metadata
-      let aiSummary = null
-      let aiInsight = null
-      let aiHighlights = null
+      // STEP 2: Unified AI Processing (summary, tags, insight, highlights)
+      let aiResult = {
+        summary: null as string | null,
+        insight: null as string | null,
+        highlights: null as any,
+        tags: [] as string[]
+      }
 
       if (scrapedData.content) {
-        logger.info(`[Worker] 🧠 Step 2/6: Extracting precise AI metadata...`)
+        logger.info(`[Worker] 🧠 Step 2/5: Processing content with AI (single call)...`)
         try {
-          const metadata = await extractMetadata(scrapedData.content)
-          aiSummary = metadata.summary
-          aiInsight = metadata.aiInsight
-          aiHighlights = metadata.highlights
-          logger.info(
-            `[Worker] ✅ Extracted deep semantic context successfully`,
-          )
-        } catch (metaErr) {
-          logger.warn(`[Worker] ⚠️ Metadata extraction failed:`, metaErr)
+          const result = await processContentWithAI(scrapedData.content)
+          aiResult = {
+            summary: result.summary,
+            insight: result.insight,
+            highlights: result.highlights,
+            tags: result.tags
+          }
+          logger.info(`[Worker] ✅ Unified AI processing complete`)
+        } catch (aiErr) {
+          logger.warn(`[Worker] ⚠️ AI processing failed:`, aiErr)
         }
       }
 
-      // STEP 3: Update the Item in the Database
-      logger.info(`[Worker] 💾 Step 3/6: Saving scraped and AI data to DB...`)
+      // STEP 3: Update Item & Save Tags
+      logger.info(`[Worker] 💾 Step 3/5: Saving processed data to DB...`)
       const updatedItem = await prisma.item.update({
         where: { id: itemId },
         data: {
           title: scrapedData.title,
           content: scrapedData.content,
           imageUrl: (scrapedData as any).imageUrl || null,
-          summary: aiSummary,
-          aiInsight: aiInsight,
-          highlights: aiHighlights ? (aiHighlights as any) : null,
+          summary: aiResult.summary,
+          aiInsight: aiResult.insight,
+          highlights: aiResult.highlights ? (aiResult.highlights as any) : null,
           type: scrapedData.type,
           status: 'processed',
         },
       })
-      logger.info(`[Worker] ✅ Item updated → status: processed`)
 
-      // 🚀 EMIT EARLY: Unblock the Frontend immediately now that primary text is processed!
-      try {
-        const io = getIo()
-        io.to(updatedItem.userId).emit('item_processed', { itemId })
-        logger.info(
-          `[Worker] 📡 Broadcasted early 'item_processed' socket event (Unblocked UI)`,
-        )
-      } catch (socketErr) {
-        // Ignore silent socket drops on isolated worker processes
-      }
-
-      // STEP 3: Generate AI Tags
-      let tags: string[] = []
-      if (scrapedData.content) {
-        logger.info(`[Worker] 🏷️  Step 4/6: Generating AI tags...`)
-        try {
-          tags = await generateTags(scrapedData.content)
-          logger.info(
-            `[Worker] ✅ Generated ${tags.length} tags: [${tags.join(', ')}]`,
-          )
-        } catch (tagError) {
-          logger.warn(
-            `[Worker] ⚠️  Tag generation failed (non-fatal):`,
-            tagError,
-          )
-        }
-      } else {
-        logger.warn(`[Worker] ⚠️  No content to tag, skipping Step 4`)
-      }
-
-      // STEP 4: Save tags to DB
-      if (tags.length > 0) {
-        logger.info(`[Worker] 💾 Step 5/6: Saving ${tags.length} tags to DB...`)
-        for (const tagName of tags) {
+      // Save tags
+      if (aiResult.tags && aiResult.tags.length > 0) {
+        for (const tagName of aiResult.tags) {
           const tag = await prisma.tag.upsert({
             where: { name: tagName },
             update: {},
@@ -111,98 +82,61 @@ export const itemsWorker = new Worker(
           })
           await prisma.itemTag.create({
             data: { itemId, tagId: tag.id },
-          })
+          }).catch(() => { }) // Ignore duplicates
         }
-        logger.info(`[Worker] ✅ Tags saved`)
-      } else {
-        logger.info(`[Worker] ⏭️  Step 5/6: No tags to save, skipping`)
+        logger.info(`[Worker] ✅ ${aiResult.tags.length} tags saved`)
       }
 
-      // STEP 5: Generate and store vector embeddings
+      // 🚀 EMIT EARLY: Unblock the Frontend immediately
+      try {
+        const io = getIo()
+        io.to(updatedItem.userId).emit('item_processed', { itemId })
+        logger.info(`[Worker] 📡 Broadcasted early 'item_processed' socket event`)
+      } catch (socketErr) { }
+
+      // STEP 4: Vector Embeddings
       if (scrapedData.content) {
-        logger.info(`[Worker] 🧮 Step 6/6: Generating vector embeddings...`)
+        logger.info(`[Worker] 🧮 Step 4/5: Generating vector embeddings...`)
         try {
-          // Create Rich Embedding Text from Metadata
           const richTextParts = [
             scrapedData.title ? `Title: ${scrapedData.title}` : '',
-            aiSummary ? `Summary: ${aiSummary}` : '',
-            tags.length > 0 ? `Tags: ${tags.join(', ')}` : '',
-            `Content: ${scrapedData.content.substring(0, 4000)}`, // Safeguard token limits
+            aiResult.summary ? `Summary: ${aiResult.summary}` : '',
+            aiResult.tags.length > 0 ? `Tags: ${aiResult.tags.join(', ')}` : '',
+            `Content: ${scrapedData.content.substring(0, 4000)}`,
           ]
-          const richTextForEmbedding = richTextParts
-            .filter(Boolean)
-            .join('\n\n')
+          const richTextForEmbedding = richTextParts.filter(Boolean).join('\n\n')
 
-          logger.info(
-            `[Worker] 🧩 Generated Rich Text Embedding Input (${richTextForEmbedding.length} chars)`,
-          )
-          const vector =
-            await generateEmbedding(richTextForEmbedding)
+          const vector = await generateEmbedding(richTextForEmbedding)
           if (vector) {
             await storeItemEmbedding(itemId, vector)
-            logger.info(`[Worker] ✅ ${vector.length}-d vector stored`)
+            logger.info(`[Worker] ✅ Embedding stored`)
 
-            // Auto-link semantically related items ONLY IF it's not a private document like a PDF/Image CV
-            if (scrapedData.type === 'pdf') {
-              logger.info(`[Worker] ⏭️ Skipping similarity linking for PDF to protect global graph privacy.`)
-            } else {
-              logger.info(`[Worker] 🔗 Discovering semantic similarities...`)
+            if (scrapedData.type !== 'pdf') {
+              logger.info(`[Worker] 🔗 Linking similar items...`)
               await SimilarityService.linkSimilarItems(itemId, updatedItem.userId)
-              logger.info(`[Worker] ✅ Similarity linking complete`)
             }
-          } else {
-            logger.warn(`[Worker] ⚠️  Embedding generation returned null`)
           }
         } catch (embedError) {
-          logger.warn(
-            `[Worker] ⚠️  Embedding step failed (non-fatal):`,
-            embedError,
-          )
+          logger.warn(`[Worker] ⚠️ Embedding failed (non-fatal):`, embedError)
         }
-      } else {
-        logger.warn(`[Worker] ⏭️  Step 6/6: No content to embed, skipping`)
       }
 
       logger.info(`[Worker] 🎉 COMPLETED item: ${itemId}`)
 
-      // STEP 7: Schedule Memory Resurfacing Reminders
+      // STEP 5: Reminders & Final Socket
       try {
         const { scheduleTimeReminders } = await import('../modules/memory/reminder.queue')
         await scheduleTimeReminders(updatedItem.userId, itemId)
-        logger.info(`[Worker] ⏰ Scheduled memory resurfacing reminders`)
-      } catch (scheduleErr) {
-        logger.warn(`[Worker] ⚠️ Could not schedule reminders:`, scheduleErr)
-      }
-
-      // STEP 8: Emit WebSocket Event for Real-time Frontend Updates
-      try {
-        const itemOwner = await prisma.item.findUnique({
-          where: { id: itemId },
-          select: { userId: true },
-        })
-        if (itemOwner) {
-          const io = getIo()
-          io.to(itemOwner.userId).emit('item_processed', { itemId })
-          logger.info(
-            `[Worker] 📡 Broadcasted 'item_processed' socket event to user room: ${itemOwner.userId}`,
-          )
-        }
-      } catch (socketErr) {
-        logger.warn(`[Worker] ⚠️ Could not emit socket event:`, socketErr)
-      }
+      } catch (err) { }
 
       logger.info(`[Worker] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
       return { success: true, itemId }
     } catch (error: any) {
       logger.error(`[Worker] ❌ FAILED item ${itemId}:`, error)
-
-      await prisma.item
-        .update({
-          where: { id: itemId },
-          data: { status: 'failed' },
-        })
-        .catch(() => { })
-
+      await prisma.item.update({
+        where: { id: itemId },
+        data: { status: 'failed' },
+      }).catch(() => { })
       throw error
     }
   },

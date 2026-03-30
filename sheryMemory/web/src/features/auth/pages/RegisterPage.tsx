@@ -10,21 +10,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-8 sm:px-0">
       <div className="text-center">
-        <h1 className="text-3xl tracking-tight">SheryMemory</h1>
-        <p className="mt-2 text-(--text-secondary)">
+        <h1 className="font-manrope text-3xl font-extrabold tracking-tight text-(--text-primary) sm:text-4xl">
+          SheryMemory
+        </h1>
+        <p className="mt-2 text-sm text-(--text-secondary) sm:text-base">
           Create your secure memory box
         </p>
       </div>
 
       <RegisterForm />
 
-      <p className="mt-4 text-center text-(--text-muted)">
+      <p className="text-center text-sm text-(--text-muted)">
         Already have an account?{' '}
         <Link
           to="/login"
-          className="font-medium text-(--accent) hover:text-(--accent-hover)"
+          className="font-semibold text-(--accent) transition-colors hover:text-(--accent-hover)"
         >
           Log in
         </Link>
