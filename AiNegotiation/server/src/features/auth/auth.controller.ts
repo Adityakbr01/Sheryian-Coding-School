@@ -9,12 +9,11 @@ import zod from 'zod';
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    secure: true, // ALWAYS true in production
+    sameSite: 'none' as const, // MUST for cross-origin
+    maxAge: 24 * 60 * 60 * 1000,
     path: '/',
 };
-
 const registerSchema = zod.object({
     name: zod.string().min(2),
     email: zod.email(),
