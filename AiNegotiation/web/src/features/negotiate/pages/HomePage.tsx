@@ -51,7 +51,21 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-10 py-8">
+    <div className="mx-auto max-w-4xl space-y-10 py-8 px-4">
+      {/* Implementation Warning */}
+      <div className="relative overflow-hidden rounded-2xl border border-orange-200 bg-orange-50/50 p-4 text-center backdrop-blur-sm dark:border-orange-500/20 dark:bg-orange-500/5">
+        <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-widest text-orange-600 uppercase dark:text-orange-400">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+          </span>
+          System Notice
+        </div>
+        <p className="mt-1 text-sm font-medium text-orange-800 dark:text-orange-300">
+          ⚠️ AI Agent Not Fully Implemented. Current version uses placeholder logic for demonstration.
+        </p>
+      </div>
+
       <div className="text-center">
         <h1 className="font-HelveticaNow mb-3 text-4xl font-bold text-(--text-primary)">
           🛒 NegotiateAI
