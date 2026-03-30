@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
+import { API_URL } from '@/lib/api'
 
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001'
+const SOCKET_URL = API_URL.replace('/api', '')
 
 export function useSocket() {
   const { user } = useAuth()

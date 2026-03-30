@@ -15,6 +15,7 @@ const DIFFICULTY_INFO = {
 export default function HomePage() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
+  console.log(isAuthenticated)
   const { setSession, setLoading } = useNegotiateStore()
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
@@ -40,7 +41,8 @@ export default function HomePage() {
       setSession({ ...res.data, messages: [] })
       navigate(`/game/${res.data.sessionId}`)
     } catch (e: any) {
-      alert(e.message)
+      console.log(e)
+      // alert(e.message)
     } finally {
       setStarting(false)
       setLoading(false)
@@ -79,11 +81,10 @@ export default function HomePage() {
               <button
                 key={p.id}
                 onClick={() => setSelectedProduct(p)}
-                className={`rounded-xl border-2 p-4 text-left transition-all ${
-                  selectedProduct?.id === p.id
-                    ? 'border-(--accent) bg-(--accent-muted)'
-                    : 'border-(--border-default) bg-(--card-bg) hover:border-(--accent)'
-                }`}
+                className={`rounded-xl border-2 p-4 text-left transition-all ${selectedProduct?.id === p.id
+                  ? 'border-(--accent) bg-(--accent-muted)'
+                  : 'border-(--border-default) bg-(--card-bg) hover:border-(--accent)'
+                  }`}
               >
                 <div className="mb-1 text-3xl">{p.emoji}</div>
                 <div className="font-semibold text-(--text-primary)">
@@ -116,11 +117,10 @@ export default function HomePage() {
             <button
               key={key}
               onClick={() => setDifficulty(key)}
-              className={`flex-1 rounded-xl border-2 p-3 text-center transition-all ${
-                difficulty === key
-                  ? 'border-(--accent) bg-(--accent-muted)'
-                  : 'border-(--border-default) bg-(--card-bg) hover:border-(--accent)'
-              }`}
+              className={`flex-1 rounded-xl border-2 p-3 text-center transition-all ${difficulty === key
+                ? 'border-(--accent) bg-(--accent-muted)'
+                : 'border-(--border-default) bg-(--card-bg) hover:border-(--accent)'
+                }`}
             >
               <div className="font-semibold text-(--text-primary)">
                 {info.label}
