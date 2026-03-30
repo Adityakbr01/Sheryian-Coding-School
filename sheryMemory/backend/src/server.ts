@@ -27,7 +27,11 @@ import './workers/reminder.worker'
 const app = express()
 
 // Middleware
-app.use(cors())
+app.use(cors({
+  origin: [env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174"],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+}))
 app.use(express.json())
 
 // HTTP Logging using Morgan & Winston

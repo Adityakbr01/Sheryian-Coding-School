@@ -18,6 +18,7 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
+  CLIENT_URL: z.string().default('http://localhost:5173'),
 
   // ImageKit
   IMAGEKIT_PUBLIC_KEY: z.string().optional(),
