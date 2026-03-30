@@ -1,3 +1,9 @@
+import dns from "dns";
+
+// 🔥 IMPORTANT: Fix MongoDB SRV DNS resolution issue (Bun bug)
+dns.setDefaultResultOrder("ipv4first");
+
+
 import express from 'express';
 import { createServer } from 'http';
 import cors from 'cors';
