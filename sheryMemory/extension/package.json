@@ -2,8 +2,10 @@
   "name": "sherymemory-extension",
   "version": "1.1.0",
   "scripts": {
-    "build": "npx -y esbuild src/popup/popup.ts --bundle --outfile=dist/popup.js --format=iife --target=chrome100 && npx -y esbuild src/background/service-worker.ts --bundle --outfile=dist/service-worker.js --format=iife --target=chrome100",
-    "dev": "npm run build"
+    "clean": "powershell if (Test-Path dist) { Remove-Item dist -Recurse -Force }; if (Test-Path extension.zip) { Remove-Item extension.zip -Force }",
+    "build": "npx -y esbuild src/popup/popup.ts --bundle --outfile=dist/popup.js --format=iife --target=chrome100 && npx -y esbuild src/background/service-worker.ts --bundle --outfile=dist/service-worker.js --format=iife --target=chrome100 && powershell Copy-Item src/popup/popup.html dist/popup.html",
+    "zip": "tar -a -c -f extension.zip dist assets manifest.json",
+    "prod": "npm run clean && npm run build && npm run zip"
   },
   "dependencies": {
     "zod": "^3.23.8"
