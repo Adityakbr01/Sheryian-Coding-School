@@ -1,6 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { NegotiationSession, Message, Mood, Tactic, Difficulty } from '../types/negotiate.types'
+import type {
+  NegotiationSession,
+  Message,
+  Mood,
+  Tactic,
+  Difficulty,
+} from '../types/negotiate.types'
 
 interface NegotiateState {
   session: NegotiationSession | null
@@ -21,7 +27,11 @@ interface NegotiateState {
   setLoading: (v: boolean) => void
   setSending: (v: boolean) => void
   setError: (e: string | null) => void
-  completeSession: (success: boolean, isWalkaway: boolean, finalPrice?: number) => void
+  completeSession: (
+    success: boolean,
+    isWalkaway: boolean,
+    finalPrice?: number,
+  ) => void
   resetSession: () => void
   toggleVoice: () => void
   toggleCamera: () => void
@@ -55,7 +65,9 @@ export const useNegotiateStore = create<NegotiateState>()(
 
       updatePrice: (price) =>
         set((state) =>
-          state.session ? { session: { ...state.session, currentPrice: price } } : {},
+          state.session
+            ? { session: { ...state.session, currentPrice: price } }
+            : {},
         ),
 
       updateMood: (mood) =>
@@ -65,7 +77,9 @@ export const useNegotiateStore = create<NegotiateState>()(
 
       updateRound: (round) =>
         set((state) =>
-          state.session ? { session: { ...state.session, totalRounds: round } } : {},
+          state.session
+            ? { session: { ...state.session, totalRounds: round } }
+            : {},
         ),
 
       addTactic: (tactic) =>
@@ -75,7 +89,9 @@ export const useNegotiateStore = create<NegotiateState>()(
           return {
             session: {
               ...state.session,
-              tacticsUsed: alreadyHas ? state.session.tacticsUsed : [...state.session.tacticsUsed, tactic],
+              tacticsUsed: alreadyHas
+                ? state.session.tacticsUsed
+                : [...state.session.tacticsUsed, tactic],
             },
           }
         }),
@@ -100,7 +116,13 @@ export const useNegotiateStore = create<NegotiateState>()(
         ),
 
       resetSession: () =>
-        set({ session: null, messages: [], isLoading: false, isSending: false, error: null }),
+        set({
+          session: null,
+          messages: [],
+          isLoading: false,
+          isSending: false,
+          error: null,
+        }),
       toggleVoice: () => set((state) => ({ isVoiceOn: !state.isVoiceOn })),
       toggleCamera: () => set((state) => ({ isCameraOn: !state.isCameraOn })),
     }),
@@ -118,4 +140,3 @@ export const useNegotiateStore = create<NegotiateState>()(
 // Selector helper
 export const selectDifficulty = (s: NegotiateState): Difficulty =>
   s.session?.difficulty ?? 'medium'
-

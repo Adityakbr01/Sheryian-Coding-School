@@ -9,7 +9,12 @@ interface Props {
   sellerName?: string
 }
 
-export function ChatWindow({ messages, isSending, streamingReply = '', sellerName = 'RajAI 🧑‍💼' }: Props) {
+export function ChatWindow({
+  messages,
+  isSending,
+  streamingReply = '',
+  sellerName = 'RajAI 🧑‍💼',
+}: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -28,16 +33,22 @@ export function ChatWindow({ messages, isSending, streamingReply = '', sellerNam
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user'
         return (
-          <div key={idx} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+          <div
+            key={idx}
+            className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+            >
               <div className="text-xs text-(--text-muted)">
                 {isUser ? 'You' : sellerName}
               </div>
               <div
-                className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${isUser
+                className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  isUser
                     ? 'rounded-tr-sm bg-(--accent) text-white'
                     : 'rounded-tl-sm bg-(--bg-elevated) text-(--text-primary)'
-                  }`}
+                }`}
               >
                 {msg.content}
               </div>
@@ -57,7 +68,7 @@ export function ChatWindow({ messages, isSending, streamingReply = '', sellerNam
       {/* Streaming reply bubble — shows while chunks arrive */}
       {isSending && streamingReply && (
         <div className="flex justify-start">
-          <div className="flex max-w-[80%] flex-col gap-1 items-start">
+          <div className="flex max-w-[80%] flex-col items-start gap-1">
             <div className="text-xs text-(--text-muted)">{sellerName}</div>
             <div className="rounded-2xl rounded-tl-sm bg-(--bg-elevated) px-4 py-2.5 text-sm leading-relaxed text-(--text-primary)">
               {streamingReply}
@@ -84,4 +95,3 @@ export function ChatWindow({ messages, isSending, streamingReply = '', sellerNam
     </div>
   )
 }
-

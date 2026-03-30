@@ -10,9 +10,7 @@ interface SidebarProps {
 export function Sidebar({ activeTab, onChange }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-  ] as const
+  const tabs = [{ id: 'overview', label: 'Overview', icon: '📊' }] as const
 
   return (
     <>
@@ -37,10 +35,11 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
               onChange(tab.id)
               setIsOpen(false)
             }}
-            className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left font-medium transition-all ${activeTab === tab.id
-              ? 'border border-(--accent)/30 bg-(--accent)/10 text-(--accent) shadow-(--accent)/5 shadow-sm'
-              : 'border border-transparent text-(--text-secondary) hover:bg-(--bg-elevated) hover:text-(--text-primary)'
-              }`}
+            className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left font-medium transition-all ${
+              activeTab === tab.id
+                ? 'border border-(--accent)/30 bg-(--accent)/10 text-(--accent) shadow-(--accent)/5 shadow-sm'
+                : 'border border-transparent text-(--text-secondary) hover:bg-(--bg-elevated) hover:text-(--text-primary)'
+            }`}
           >
             <span className="text-2xl drop-shadow-sm">{tab.icon}</span>
             {tab.label}

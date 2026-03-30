@@ -1,19 +1,14 @@
 import appInfo from '@/constants/appInfo'
-import {
-  Home,
-  FolderOpen,
-  Network,
-  BookOpen,
-  Plus,
-  HelpCircle,
-  Settings,
-  Brain,
-  Library,
-  Sparkle,
-} from 'lucide-react'
+import { Brain, HelpCircle, Home, Plus, Settings, Sparkle } from 'lucide-react'
 import { motion } from 'motion/react'
 
-export type DashboardTab = 'home' | 'collections' | 'graph' | 'highlights' | 'library' | 'chat'
+export type DashboardTab =
+  | 'home'
+  | 'collections'
+  | 'graph'
+  | 'highlights'
+  | 'library'
+  | 'chat'
 
 interface DashboardSidebarProps {
   activeTab: DashboardTab
@@ -25,9 +20,7 @@ const NAV_ITEMS: {
   key: DashboardTab
   label: string
   icon: React.ElementType
-}[] = [
-    { key: 'home', label: 'Home', icon: Home },
-  ]
+}[] = [{ key: 'home', label: 'Home', icon: Home }]
 
 export function DashboardSidebar({
   activeTab,
@@ -63,10 +56,11 @@ export function DashboardSidebar({
             <button
               key={key}
               onClick={() => handleNav(key)}
-              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${isActive
-                ? 'text-(--accent)'
-                : 'text-(--text-secondary) hover:text-(--text-primary)'
-                }`}
+              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${
+                isActive
+                  ? 'text-(--accent)'
+                  : 'text-(--text-secondary) hover:text-(--text-primary)'
+              }`}
             >
               {isActive && (
                 <motion.div
@@ -88,7 +82,7 @@ export function DashboardSidebar({
       <div className="px-4 py-3">
         <button
           onClick={() => onNewThought()}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--accent) py-2.5 text-sm font-semibold text-(--text-on-accent)  transition-all active:scale-95"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--accent) py-2.5 text-sm font-semibold text-(--text-on-accent) transition-all active:scale-95"
         >
           <Plus className="h-4 w-4" /> New Thought
         </button>

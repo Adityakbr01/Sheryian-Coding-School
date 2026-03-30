@@ -1,5 +1,11 @@
 export type Mood = 'neutral' | 'happy' | 'annoyed' | 'desperate'
-export type Tactic = 'emotional' | 'logical' | 'aggressive' | 'passive' | 'flattery' | 'anchor'
+export type Tactic =
+  | 'emotional'
+  | 'logical'
+  | 'aggressive'
+  | 'passive'
+  | 'flattery'
+  | 'anchor'
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
 export interface Message {
@@ -51,4 +57,3 @@ export interface Product {
   minimumPrice: number
   emoji: string
 }
-

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@plugin "@tailwindcss/typography";
+@plugin '@tailwindcss/typography';
 
 /* ========== FONTS ========== */
 
@@ -70,8 +70,8 @@
   --bg-elevated: #eae9e5;
   --bg-overlay: #e0deda;
 
-  --accent: #408A71;
-  --accent-hover: #408A71;
+  --accent: #408a71;
+  --accent-hover: #408a71;
   --accent-muted: rgba(64, 138, 113, 0.321);
   --accent-border: rgba(64, 138, 113, 0.38);
   --accent-glow: rgba(64, 138, 113, 0.22);
@@ -124,7 +124,7 @@
   --bg-overlay: #1e1e1e;
 
   --accent: #1ea578;
-  --accent-hover: #408A71;
+  --accent-hover: #408a71;
   --accent-muted: rgba(64, 138, 113, 0.1);
   --accent-border: rgba(64, 138, 113, 0.35);
   --accent-glow: rgba(64, 138, 113, 0.18);
@@ -223,7 +223,9 @@ button {
   color: var(--accent);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.15s ease, text-decoration 0.15s ease;
+  transition:
+    color 0.15s ease,
+    text-decoration 0.15s ease;
 }
 
 .chat-markdown a:hover {
@@ -304,7 +306,6 @@ button {
 /* ========== GLOBAL FORM CONTROLS ========== */
 
 @layer base {
-
   select,
   .select {
     appearance: none;

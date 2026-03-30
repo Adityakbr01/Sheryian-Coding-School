@@ -16,7 +16,8 @@ export function BaseLayout() {
 
       <footer className="mt-auto border-t border-(--border-subtle) bg-(--bg-surface) py-6">
         <div className="container mx-auto px-4 text-center text-sm text-(--text-muted)">
-          &copy; {new Date().getFullYear()} NegotiateAI — Master the Art of Bargaining 🛒
+          &copy; {new Date().getFullYear()} NegotiateAI — Master the Art of
+          Bargaining 🛒
         </div>
       </footer>
     </div>

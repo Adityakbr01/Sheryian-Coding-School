@@ -46,10 +46,11 @@ export function PriceMeter({ basePrice, currentPrice, minimumPrice }: Props) {
 
       <div className="mt-1 flex justify-between text-xs text-(--text-muted)">
         <span>High</span>
-        <span className="font-medium text-(--text-secondary)">{pct}% negotiated</span>
+        <span className="font-medium text-(--text-secondary)">
+          {pct}% negotiated
+        </span>
         <span>Best Deal</span>
       </div>
     </div>
   )
 }
-

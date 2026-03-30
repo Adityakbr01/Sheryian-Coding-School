@@ -45,7 +45,7 @@ export function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-(--border-subtle) bg-(--bg-elevated) py-2 pl-3 pr-2 text-sm font-medium text-(--text-primary) shadow-sm transition-all hover:border-(--border-default) hover:bg-(--bg-overlay) focus:border-(--accent) focus:ring-2 focus:ring-(--accent)/50 focus:outline-none"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-(--border-subtle) bg-(--bg-elevated) py-2 pr-2 pl-3 text-sm font-medium text-(--text-primary) shadow-sm transition-all hover:border-(--border-default) hover:bg-(--bg-overlay) focus:border-(--accent) focus:ring-2 focus:ring-(--accent)/50 focus:outline-none"
       >
         <span className="truncate">{selectedOption?.label}</span>
         <ChevronDown

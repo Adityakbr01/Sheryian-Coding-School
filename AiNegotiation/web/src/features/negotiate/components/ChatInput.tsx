@@ -10,7 +10,10 @@ interface Props {
 
 const STATUS_LABELS: Record<VoiceStatus, { label: string; color: string }> = {
   idle: { label: '', color: '' },
-  loading_model: { label: 'Loading AI speech model...', color: 'text-blue-500' },
+  loading_model: {
+    label: 'Loading AI speech model...',
+    color: 'text-blue-500',
+  },
   recording: { label: 'Listening...', color: 'text-red-500' },
   transcribing: { label: 'Transcribing with AI...', color: 'text-purple-500' },
   error: { label: 'Error', color: 'text-red-600' },
@@ -49,7 +52,10 @@ export function ChatInput({ isSending, isVoiceOn, onSend }: Props) {
     }
   }
 
-  const isActive = status === 'recording' || status === 'transcribing' || status === 'loading_model'
+  const isActive =
+    status === 'recording' ||
+    status === 'transcribing' ||
+    status === 'loading_model'
   const statusInfo = STATUS_LABELS[status]
 
   return (
@@ -78,7 +84,9 @@ export function ChatInput({ isSending, isVoiceOn, onSend }: Props) {
 
             <div className="flex-1 overflow-hidden">
               {/* Status Label */}
-              <div className={`flex items-center gap-1.5 text-xs font-semibold ${statusInfo.color}`}>
+              <div
+                className={`flex items-center gap-1.5 text-xs font-semibold ${statusInfo.color}`}
+              >
                 {status === 'recording' && (
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
@@ -90,9 +98,13 @@ export function ChatInput({ isSending, isVoiceOn, onSend }: Props) {
 
               {/* Progress / Transcript */}
               <div className="mt-0.5 truncate text-xs text-(--text-muted)">
-                {status === 'loading_model' && (modelProgress || 'First-time download (~40MB)...')}
-                {status === 'recording' && 'Speak now — click mic again when done'}
-                {status === 'transcribing' && (liveTranscript || 'Processing your speech with Whisper AI...')}
+                {status === 'loading_model' &&
+                  (modelProgress || 'First-time download (~40MB)...')}
+                {status === 'recording' &&
+                  'Speak now — click mic again when done'}
+                {status === 'transcribing' &&
+                  (liveTranscript ||
+                    'Processing your speech with Whisper AI...')}
               </div>
             </div>
 
@@ -143,7 +155,12 @@ export function ChatInput({ isSending, isVoiceOn, onSend }: Props) {
         <button
           type="button"
           onClick={toggleVoice}
-          disabled={isSending || !isVoiceOn || status === 'transcribing' || status === 'loading_model'}
+          disabled={
+            isSending ||
+            !isVoiceOn ||
+            status === 'transcribing' ||
+            status === 'loading_model'
+          }
           title={
             !isVoiceOn
               ? 'Enable Voice from the toolbar first'

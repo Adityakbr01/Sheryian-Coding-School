@@ -72,7 +72,8 @@ export function useSocket() {
       socketRef.current.on('memory:resurface', (data: any) => {
         console.log('🧠 [Memory Resurface]', data)
         const toast = document.createElement('div')
-        toast.className = 'fixed bottom-4 right-4 z-[9999] w-72 md:w-80 bg-(--bg-surface) border border-(--accent)/50 text-(--text-primary) p-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-8 cursor-pointer overflow-hidden group hover:border-(--accent) transition-all'
+        toast.className =
+          'fixed bottom-4 right-4 z-[9999] w-72 md:w-80 bg-(--bg-surface) border border-(--accent)/50 text-(--text-primary) p-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-8 cursor-pointer overflow-hidden group hover:border-(--accent) transition-all'
         toast.innerHTML = `
           <div class="absolute top-0 left-0 w-1 h-full bg-(--accent)"></div>
           <div class="flex items-center gap-2 mb-2">
@@ -89,7 +90,9 @@ export function useSocket() {
         document.body.appendChild(toast)
 
         // Dispatch to internal React system (like the bell icon)
-        window.dispatchEvent(new CustomEvent('memory:notification', { detail: data }))
+        window.dispatchEvent(
+          new CustomEvent('memory:notification', { detail: data }),
+        )
 
         setTimeout(() => {
           if (document.body.contains(toast)) {

@@ -8,7 +8,10 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-(--border-subtle) bg-(--bg-surface)/80 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold tracking-tight text-(--text-primary)">
+        <Link
+          to="/"
+          className="text-xl font-bold tracking-tight text-(--text-primary)"
+        >
           🛒 NegotiateAI
         </Link>
         <nav className="flex items-center gap-4">

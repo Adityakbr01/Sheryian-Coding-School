@@ -2,11 +2,8 @@ import {
   BookOpen,
   FolderOpen,
   Home,
-  Library,
-  Network,
   Plus,
-  Sparkle,
-  X,
+  X
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
@@ -23,18 +20,16 @@ const TAB_ITEMS: {
   key: DashboardTab | 'create'
   icon: React.ElementType
   label: string
-}[] = [
-    { key: 'home', icon: Home, label: 'Home' },
-  ]
+}[] = [{ key: 'home', icon: Home, label: 'Home' }]
 
 const MORE_ITEMS: {
   key: DashboardTab
   icon: React.ElementType
   label: string
 }[] = [
-    { key: 'collections', icon: FolderOpen, label: 'Vault' },
-    { key: 'highlights', icon: BookOpen, label: 'Highlights' },
-  ]
+  { key: 'collections', icon: FolderOpen, label: 'Vault' },
+  { key: 'highlights', icon: BookOpen, label: 'Highlights' },
+]
 
 export function MobileBottomTabBar({
   activeTab,
@@ -64,23 +59,15 @@ export function MobileBottomTabBar({
     <>
       {/* ── Bottom Bar ───────────────────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+        className="fixed right-0 bottom-0 left-0 z-40 md:hidden"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {/* Top Gradient Overlay for smooth scroll fade */}
-        <div
-          className="pointer-events-none absolute -top-16 left-0 right-0 h-16
-               bg-linear-to-t from-(--bg-surface)/90 to-transparent"
-        />
+        <div className="pointer-events-none absolute -top-16 right-0 left-0 h-16 bg-linear-to-t from-(--bg-surface)/90 to-transparent" />
 
         {/* 🔥 NAVBAR */}
-        <div
-          className="relative flex h-[60px] items-end justify-around
-               bg-(--bg-surface)/90 backdrop-blur-xl
-               pb-[max(10px,env(safe-area-inset-bottom))]"
-        >
+        <div className="relative flex h-[60px] items-end justify-around bg-(--bg-surface)/90 pb-[max(10px,env(safe-area-inset-bottom))] backdrop-blur-xl">
           {TAB_ITEMS.map(({ key, icon: Icon, label }) => {
-
             /* ── Center FAB ───────────────────────── */
             if (key === 'create') {
               return (
@@ -93,10 +80,7 @@ export function MobileBottomTabBar({
                   aria-label="New Thought"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  <div
-                    className="flex h-[34px] w-[34px] items-center justify-center
-                         rounded-full bg-(--text-primary)"
-                  >
+                  <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-(--text-primary)">
                     <Plus
                       style={{
                         width: 16,
@@ -107,7 +91,7 @@ export function MobileBottomTabBar({
                     />
                   </div>
                   <span
-                    className="text-[10px] font-medium leading-none"
+                    className="text-[10px] leading-none font-medium"
                     style={{ color: 'var(--text-primary)' }}
                   >
                     {label}
@@ -148,7 +132,7 @@ export function MobileBottomTabBar({
                 </motion.div>
 
                 <span
-                  className="text-[10px] font-medium leading-none transition-colors duration-150"
+                  className="text-[10px] leading-none font-medium transition-colors duration-150"
                   style={{
                     color: isActive
                       ? 'var(--text-primary)'
@@ -178,11 +162,7 @@ export function MobileBottomTabBar({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="fixed right-0 bottom-0 left-0 z-50 rounded-t-3xl
-                         border-t border-(--border-subtle)
-                         bg-(--bg-surface) p-6
-                         pb-[max(1.5rem,env(safe-area-inset-bottom))]
-                         shadow-2xl md:hidden"
+              className="fixed right-0 bottom-0 left-0 z-50 rounded-t-3xl border-t border-(--border-subtle) bg-(--bg-surface) p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl md:hidden"
             >
               <div className="mb-5 flex items-center justify-between">
                 <div>
@@ -210,21 +190,25 @@ export function MobileBottomTabBar({
                         handleTabPress(item.key)
                         setIsDrawerOpen(false)
                       }}
-                      className={`flex w-full items-center gap-4 rounded-2xl px-4 py-3.5
-                                 transition-colors active:scale-95
-                                 ${isActive
+                      className={`flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 transition-colors active:scale-95 ${
+                        isActive
                           ? 'bg-(--bg-elevated) text-(--text-primary)'
-                          : 'text-(--text-secondary) hover:bg-(--bg-overlay)'}`}
+                          : 'text-(--text-secondary) hover:bg-(--bg-overlay)'
+                      }`}
                     >
                       <item.icon
                         style={{
                           width: 20,
                           height: 20,
                           strokeWidth: isActive ? 2.2 : 1.8,
-                          color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                          color: isActive
+                            ? 'var(--text-primary)'
+                            : 'var(--text-muted)',
                         }}
                       />
-                      <span className="text-sm font-semibold">{item.label}</span>
+                      <span className="text-sm font-semibold">
+                        {item.label}
+                      </span>
                       {isActive && (
                         <motion.div
                           layoutId="drawerActiveIndicator"

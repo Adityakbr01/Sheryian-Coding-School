@@ -37,7 +37,9 @@ export interface ResponseWithCache<T> {
 }
 
 export const leaderboardApi = {
-  getGlobal: async (): Promise<{ data: ResponseWithCache<LeaderboardEntry[]> }> => {
+  getGlobal: async (): Promise<{
+    data: ResponseWithCache<LeaderboardEntry[]>
+  }> => {
     return apiFetch('/leaderboard')
   },
   getBestDeals: async (): Promise<{ data: ResponseWithCache<BestDeal[]> }> => {
@@ -47,4 +49,3 @@ export const leaderboardApi = {
     return apiFetch('/leaderboard/me')
   },
 }
-

@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:3001/api'
+export const API_URL = 'https://ainegotiation.onrender.com/api'
 
 export async function apiFetch<T>(
   path: string,
@@ -23,4 +23,3 @@ export async function apiFetch<T>(
   if (!res.ok) throw new Error(data.message || 'Request failed')
   return data
 }
-

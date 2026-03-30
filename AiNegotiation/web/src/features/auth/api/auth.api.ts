@@ -1,4 +1,9 @@
-import type { LoginInput, RegisterInput, AuthResponse, User } from '../types/auth.types'
+import type {
+  LoginInput,
+  RegisterInput,
+  AuthResponse,
+  User,
+} from '../types/auth.types'
 
 const API_URL = 'http://localhost:3001/api'
 
