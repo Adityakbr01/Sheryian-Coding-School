@@ -28,7 +28,7 @@ const app = express()
 
 // Middleware
 app.use(cors({
-  origin: [env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174"],
+  origin: [env.CLIENT_URL, "chrome-extension://*", "http://localhost:5173", "http://localhost:5174"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }))
