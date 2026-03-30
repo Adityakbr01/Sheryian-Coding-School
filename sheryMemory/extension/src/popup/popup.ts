@@ -1,10 +1,23 @@
 import { login, saveItem, getCollections, createCollection } from '../api/client'
 import { isLoggedIn, getUser, logout } from '../auth/auth'
 
-// DOM elements
+function log(...args: any[]) {
+    console.log("🔥 [SheryMemory]:", ...args)
+}
+
+function withTimeout<T>(promise: Promise<T>, ms = 30000): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`Request timed out after ${ms / 1000}s`)), ms)
+        promise.then((res) => { clearTimeout(timer); resolve(res) })
+            .catch((err) => { clearTimeout(timer); reject(err) })
+    })
+}
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
 const loginView = document.getElementById('login-view')!
 const saveView = document.getElementById('save-view')!
 const loadingView = document.getElementById('loading-view')!
+const loadingMsg = document.getElementById('loading-msg')
 
 const loginForm = document.getElementById('login-form') as HTMLFormElement
 const emailInput = document.getElementById('email') as HTMLInputElement
@@ -18,37 +31,52 @@ const pageUrl = document.getElementById('page-url')!
 const saveBtn = document.getElementById('save-btn')!
 const saveText = document.getElementById('save-text')!
 
-// Collection Elements
 const toggleCreateBtn = document.getElementById('toggle-create-collection')!
 const selectContainer = document.getElementById('select-collection-container')!
 const createContainer = document.getElementById('create-collection-container')!
 const newCollectionInput = document.getElementById('new-collection-name') as HTMLInputElement
-const submitCreateBtn = document.getElementById('submit-create-collection')!
+const submitCreateBtn = document.getElementById('submit-create-collection') as HTMLButtonElement
 
-// Custom Dropdown Elements
 const customSelectTrigger = document.getElementById('custom-select-trigger')!
 const customSelectValue = document.getElementById('custom-select-value')!
 const customSelectDropdown = document.getElementById('custom-select-dropdown')!
-let selectedCollectionId = ''
-let selectedCollectionName = 'Uncategorized (Inbox)'
 
 const notification = document.getElementById('notification')!
-const toastIcon = document.getElementById('toast-icon')!
 const toastMsg = document.getElementById('toast-msg')!
 
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedCollectionId = ''
+let selectedCollectionName = 'Uncategorized (Inbox)'
 let isCreatingCollection = false
 let collectionsLoaded = false
 
+// ── View switcher ─────────────────────────────────────────────────────────────
 function showView(view: 'login' | 'save' | 'loading') {
     loginView.classList.toggle('hidden', view !== 'login')
     saveView.classList.toggle('hidden', view !== 'save')
     loadingView.classList.toggle('hidden', view !== 'loading')
 }
 
-// Custom Dropdown Logic
-customSelectTrigger.addEventListener('click', () => {
+function setLoadingMsg(msg: string) {
+    if (loadingMsg) loadingMsg.textContent = msg
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer: ReturnType<typeof setTimeout> | null = null
+function showToast(msg: string, type: 'success' | 'error') {
+    if (toastTimer) clearTimeout(toastTimer)
+    notification.className = `toast ${type}`
+    toastMsg.textContent = msg
+    notification.classList.remove('hidden')
+    toastTimer = setTimeout(() => notification.classList.add('hidden'), 4000)
+}
+
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+customSelectTrigger.addEventListener('click', (e) => {
+    e.stopPropagation()
     customSelectDropdown.classList.toggle('hidden')
 })
+
 document.addEventListener('click', (e) => {
     if (!selectContainer.contains(e.target as Node)) {
         customSelectDropdown.classList.add('hidden')
@@ -56,190 +84,233 @@ document.addEventListener('click', (e) => {
 })
 
 function renderOptions(collections: any[]) {
-    customSelectDropdown.innerHTML = `<div class="custom-option ${selectedCollectionId === '' ? 'selected' : ''}" data-value="">Uncategorized (Inbox)</div>`
-    
+    customSelectDropdown.innerHTML = ''
+
+    const inbox = document.createElement('div')
+    inbox.className = 'custom-option'
+    inbox.dataset.value = ''
+    inbox.textContent = 'Uncategorized (Inbox)'
+    customSelectDropdown.appendChild(inbox)
+
     collections.forEach((c: any) => {
         const opt = document.createElement('div')
-        opt.className = `custom-option ${selectedCollectionId === c.id ? 'selected' : ''}`
-        opt.dataset.value = c.id
+        opt.className = 'custom-option'
+        opt.dataset.value = c._id || c.id || ''
         opt.textContent = c.name
         customSelectDropdown.appendChild(opt)
     })
 
-    // Attach row events
-    const allOptions = customSelectDropdown.querySelectorAll('.custom-option')
-    allOptions.forEach(opt => {
+    customSelectDropdown.querySelectorAll('.custom-option').forEach(opt => {
         opt.addEventListener('click', () => {
             selectedCollectionId = (opt as HTMLElement).dataset.value || ''
             selectedCollectionName = opt.textContent || ''
             customSelectValue.textContent = selectedCollectionName
-            
-            // clear selected class
-            allOptions.forEach(o => o.classList.remove('selected'))
-            opt.classList.add('selected')
             customSelectDropdown.classList.add('hidden')
         })
     })
 }
 
-// Toast
-function showToast(msg: string, type: 'success' | 'error') {
-    notification.className = `toast ${type}`
-    toastIcon.innerHTML = type === 'success' 
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-    toastMsg.textContent = msg
-    notification.classList.remove('hidden')
-    
-    setTimeout(() => {
-        notification.classList.add('hidden')
-    }, 4000)
-}
-
-// Fetch Collections
+// ── Collections loader ────────────────────────────────────────────────────────
 async function loadCollections() {
+    log("Loading collections...")
     try {
-        const res = await getCollections()
-        const collections = res.data || []
+        // ✅ 30s — onrender.com free tier cold-starts can take up to 30s
+        const res = await withTimeout(getCollections(), 30000)
+        log("Collections response:", res)
+
+        const collections = Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.data?.collections)
+                ? res.data.collections
+                : []
+
         renderOptions(collections)
         collectionsLoaded = true
     } catch (e: any) {
-        console.error('Failed to load collections:', e)
-        showToast('Could not load collections', 'error')
+        console.error("❌ Collections error:", e)
+        // Non-fatal — render empty list and continue
+        renderOptions([])
+        collectionsLoaded = true
+        showToast("Couldn't load collections — server may be waking up", "error")
     }
 }
 
+// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
+    log("🚀 INIT")
     showView('loading')
+    setLoadingMsg('Connecting...')
 
-    if (await isLoggedIn()) {
-        await showSaveView()
-    } else {
+    try {
+        const loggedIn = await withTimeout(isLoggedIn(), 10000)
+        if (loggedIn) {
+            await showSaveView()
+        } else {
+            showView('login')
+        }
+    } catch (err) {
+        console.error("❌ INIT ERROR:", err)
         showView('login')
     }
 }
 
 async function showSaveView() {
-    const user = await getUser()
-    if (!collectionsLoaded) {
-        await loadCollections()
-    }
+    setLoadingMsg('Loading your collections...')
+    try {
+        await withTimeout(getUser(), 10000)
 
-    // Get current tab info
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    if (tab) {
-        pageTitle.textContent = tab.title || 'Untitled'
-        pageUrl.textContent = tab.url || ''
-    }
+        if (!collectionsLoaded) {
+            await loadCollections()
+        }
 
-    showView('save')
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+        if (tab) {
+            pageTitle.textContent = tab.title || 'Untitled'
+            pageUrl.textContent = tab.url || ''
+        }
+
+        showView('save')
+    } catch (err) {
+        console.error("❌ showSaveView error:", err)
+        showView('login')
+    }
 }
 
-// Login handler
+// ── Login ─────────────────────────────────────────────────────────────────────
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault()
-    loginBtn.textContent = 'Signing in...'
     loginError.classList.add('hidden')
     loginBtn.setAttribute('disabled', 'true')
+    loginBtn.textContent = 'Signing in...'
 
     try {
-        await login(emailInput.value, passwordInput.value)
+        await withTimeout(login(emailInput.value.trim(), passwordInput.value), 30000)
+        collectionsLoaded = false
         await showSaveView()
     } catch (err: any) {
-        loginError.textContent = err.message || 'Login failed. Check credentials.'
+        loginError.textContent = err.message || 'Login failed'
         loginError.classList.remove('hidden')
     } finally {
-        loginBtn.textContent = 'Sign In'
         loginBtn.removeAttribute('disabled')
+        loginBtn.textContent = 'Sign In'
     }
 })
 
-// Toggle Create Collection form
-toggleCreateBtn.addEventListener('click', () => {
-    isCreatingCollection = !isCreatingCollection
-    if (isCreatingCollection) {
-        selectContainer.classList.add('hidden')
-        createContainer.classList.remove('hidden')
-        toggleCreateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel'
-        newCollectionInput.focus()
-    } else {
-        createContainer.classList.add('hidden')
-        selectContainer.classList.remove('hidden')
-        toggleCreateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg> New'
-    }
+// ── Toggle create form ────────────────────────────────────────────────────────
+// ✅ KEY FIX: use inline style.display instead of class toggling
+// The .hidden CSS class may conflict with .create-inline-form { display: flex }
+function openCreateForm() {
+    isCreatingCollection = true
+    selectContainer.style.display = 'none'
+    createContainer.style.display = 'flex'
+    newCollectionInput.value = ''
+    newCollectionInput.focus()
+    toggleCreateBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg> Cancel`
+}
+
+function closeCreateForm() {
+    isCreatingCollection = false
+    createContainer.style.display = 'none'
+    selectContainer.style.display = 'block'
+    newCollectionInput.value = ''
+    toggleCreateBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg> New`
+}
+
+toggleCreateBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    isCreatingCollection ? closeCreateForm() : openCreateForm()
 })
 
-// Submit New Collection
-submitCreateBtn.addEventListener('click', async () => {
+// ── Submit new collection ─────────────────────────────────────────────────────
+submitCreateBtn.addEventListener('click', async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     const name = newCollectionInput.value.trim()
-    if (!name) return
+    if (!name) {
+        showToast("Please enter a collection name", "error")
+        newCollectionInput.focus()
+        return
+    }
 
-    submitCreateBtn.setAttribute('disabled', 'true')
+    submitCreateBtn.disabled = true
     submitCreateBtn.textContent = '...'
-    
+
     try {
-        const res = await createCollection(name)
-        const newCol = res.data
-        
-        // Add to our internal array & rerender
-        selectedCollectionId = newCol.id
+        const res = await withTimeout(createCollection(name), 30000)
+        log("Create collection response:", res)
+
+        // Handle: { data: Collection } per your React API shape
+        const newCol = res?.data?.collection || res?.data || res
+
+        if (!newCol?.name) throw new Error("Unexpected server response")
+
+        selectedCollectionId = newCol._id || newCol.id || ''
         selectedCollectionName = newCol.name
-        customSelectValue.textContent = newCol.name
-        
-        // Quickly re-fetch or just insert
-        // Easiest is to force reload to maintain correct array state
+
+        // Refresh dropdown & re-apply selection
+        collectionsLoaded = false
         await loadCollections()
-        
-        // Reset toggle UI
-        newCollectionInput.value = ''
-        toggleCreateBtn.click()
-        showToast(`Collection "${newCol.name}" created`, 'success')
+        customSelectValue.textContent = selectedCollectionName
+
+        closeCreateForm()
+        showToast(`"${newCol.name}" created ✓`, 'success')
+
     } catch (err: any) {
+        log("Create error:", err)
         showToast(err.message || 'Failed to create collection', 'error')
     } finally {
-        submitCreateBtn.removeAttribute('disabled')
+        submitCreateBtn.disabled = false
         submitCreateBtn.textContent = 'Create'
     }
 })
 
-// Save handler
+// Allow Enter inside input to trigger submit
+newCollectionInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault()
+        submitCreateBtn.click()
+    }
+})
+
+// ── Save item ─────────────────────────────────────────────────────────────────
 saveBtn.addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
     if (!tab?.url) return
 
     saveBtn.setAttribute('disabled', 'true')
-    saveText.textContent = 'Saving Memory...'
-    
-    const collectionId = selectedCollectionId || undefined
+    saveText.textContent = 'Saving...'
 
     try {
-        await saveItem(tab.url, collectionId)
-        saveText.textContent = 'Saved!'
-        showToast('Pushed to SheryMemory successfully.', 'success')
-
-        setTimeout(() => {
-            saveText.textContent = 'Save Memory'
-            saveBtn.removeAttribute('disabled')
-            // Auto close window after 2 seconds on success
-            window.close()
-        }, 2000)
+        await withTimeout(saveItem(tab.url, selectedCollectionId || undefined), 30000)
+        showToast("Saved successfully ✓", "success")
+        setTimeout(() => window.close(), 1200)
     } catch (err: any) {
-        saveText.textContent = 'Failed'
-        showToast(err.message || 'Something went wrong', 'error')
-
-        setTimeout(() => {
-            saveText.textContent = 'Save Memory'
-            saveBtn.removeAttribute('disabled')
-        }, 2000)
+        showToast(err.message || "Save failed", "error")
+    } finally {
+        saveBtn.removeAttribute('disabled')
+        saveText.textContent = 'Save Memory'
     }
 })
 
-// Logout
+// ── Logout ────────────────────────────────────────────────────────────────────
 logoutBtn.addEventListener('click', async () => {
     await logout()
     collectionsLoaded = false
+    selectedCollectionId = ''
+    selectedCollectionName = 'Uncategorized (Inbox)'
     showView('login')
 })
 
-// Initialize
 init()

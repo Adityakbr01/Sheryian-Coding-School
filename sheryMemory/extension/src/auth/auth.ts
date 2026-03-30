@@ -6,7 +6,7 @@ export async function getToken(): Promise<string | null> {
 
     // Try to sync from the web app's cookie
     try {
-        const cookie = await chrome.cookies.get({ url: 'http://localhost', name: 'token' })
+        const cookie = await chrome.cookies.get({ url: 'https://sheryian-coding-school-08un.onrender.com', name: 'token' })
         if (cookie?.value) {
             await chrome.storage.local.set({ token: cookie.value })
             return cookie.value

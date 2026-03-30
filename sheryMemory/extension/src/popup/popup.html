@@ -1,73 +1,90 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=360" />
+  <meta charset="UTF-8">
   <title>SheryMemory Saver</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
   <div id="app">
-    <!-- Loading View -->
-    <div id="loading-view" class="view">
-      <div class="loader-container">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+
+    <!-- 1. LOADING VIEW -->
+    <div id="loading-view" class="view loader-container">
+      <div class="spinner"></div>
+      <!-- ✅ id added so popup.ts can update the message -->
+      <p id="loading-msg">Syncing memories...</p>
+    </div>
+
+    <!-- 2. LOGIN VIEW -->
+    <div id="login-view" class="view hidden">
+      <div class="header text-center mt-md">
+        <div
+          style="margin: 0 auto 12px auto; background: var(--accent); width:48px; height:48px; border-radius:16px; display: flex; align-items: center; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 5.586 3.004 3.004 0 0 0 5.193 2.019c.174.156.345.31.513.462a3.003 3.003 0 1 0 4.584-3.535 4 4 0 0 0 .52-5.586 4 4 0 0 0-2.526-5.77A3 3 0 0 0 12 5" />
+            <path d="M9 12h.01" />
+            <path d="M15 12h.01" />
+            <path d="M12 9h.01" />
+            <path d="M12 15h.01" />
+          </svg>
+        </div>
+        <h1 class="logo-font text-md">SheryMemory</h1>
+        <p class="subtitle">Sign in to your second brain</p>
+      </div>
+
+      <form id="login-form" class="form-container">
+        <div>
+          <label class="label">EMAIL ADDRESS</label>
+          <input type="email" id="email" class="input-field" placeholder="aditya@example.com" required>
+        </div>
+        <div>
+          <label class="label">PASSWORD</label>
+          <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+        </div>
+        <div id="login-error" class="error-toast hidden"></div>
+        <!-- type="submit" is fine here — it's the only submit in this form -->
+        <button type="submit" id="login-btn" class="btn btn-primary w-full size-lg mt-md">
+          Sign In
+        </button>
+      </form>
+
+      <div class="mt-lg text-center">
+        <p class="text-muted text-xs">New to SheryMemory?</p>
+        <a href="https://sheryian-coding-school-08un.onrender.com/register" target="_blank"
+          class="link-btn text-xs mt-xs">Create an account &nearr;</a>
       </div>
     </div>
 
-    <!-- Login View -->
-    <div id="login-view" class="view hidden">
-      <header class="header bg-accent-glow">
-        <h1 class="logo-font">SheryMemory</h1>
-        <p class="subtitle">Your Second Brain</p>
-      </header>
-
-      <form id="login-form" class="form-container">
-        <div class="input-group">
-          <input type="email" id="email" placeholder="Email Address" required autocomplete="email" />
-        </div>
-        <div class="input-group">
-          <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
-        </div>
-        <button type="submit" id="login-btn" class="btn btn-primary">Sign In</button>
-        <div id="login-error" class="error-toast hidden"></div>
-      </form>
-    </div>
-
-    <!-- Main Save View -->
+    <!-- 3. SAVE VIEW -->
     <div id="save-view" class="view hidden">
-      <header class="header row-between border-bottom pb-sm">
-        <h1 class="logo-font text-md">SheryMemory</h1>
-        <div class="user-pill">
-          <div class="user-avatar"></div>
-          <button id="logout-btn" class="btn-icon" title="Logout">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-log-out">
+      <div class="bg-accent-glow">
+        <div class="row-between mb-xs">
+          <span class="text-xs font-bold text-muted tracking-widest">SAVING MEMORY</span>
+          <!-- ✅ type="button" — prevents any accidental form submit -->
+          <button type="button" id="logout-btn" class="btn-icon" title="Sign out">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
-              <line x1="21" x2="9" y1="12" y2="12" />
+              <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
           </button>
         </div>
-      </header>
+        <h2 id="page-title" class="text-md font-bold truncate">Loading title...</h2>
+        <p id="page-url" class="text-xs text-muted truncate mt-xs" style="opacity: 0.7;">https://example.com</p>
+      </div>
 
-      <section class="page-info card mt-md">
-        <h3 class="label">CURRENT PAGE</h3>
-        <p id="page-title" class="page-title text-primary font-heading line-clamp-2">Loading...</p>
-        <p id="page-url" class="page-url text-muted text-xs truncate">...</p>
-      </section>
-
-      <section class="collection-picker mt-md">
-        <div class="row-between mb-xs">
-          <label class="label mb-0">SAVE TO COLLECTION</label>
-          <button id="toggle-create-collection" class="link-btn text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-plus">
+      <div class="form-container">
+        <div class="row-between">
+          <label class="label">COLLECTION</label>
+          <!-- ✅ type="button" — CRITICAL: prevents this from submitting any parent form -->
+          <button type="button" id="toggle-create-collection" class="link-btn text-xs" style="font-size: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14" />
               <path d="M12 5v14" />
             </svg>
@@ -75,49 +92,45 @@
           </button>
         </div>
 
-        <div id="select-collection-container" class="custom-select w-full">
-          <div id="custom-select-trigger" class="input-field row-between cursor-pointer">
-            <span id="custom-select-value">Uncategorized (Inbox)</span>
+        <!-- Existing Select -->
+        <div id="select-collection-container" class="custom-select">
+          <div id="custom-select-trigger" class="input-field cursor-pointer row-between">
+            <span id="custom-select-value" class="truncate">Uncategorized (Inbox)</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="m6 9 6 6 6-6" />
             </svg>
           </div>
-          <div id="custom-select-dropdown" class="custom-dropdown hidden">
-            <div class="custom-option selected" data-value="">Uncategorized (Inbox)</div>
-            <!-- Collections injected here -->
-          </div>
+          <div id="custom-select-dropdown" class="custom-dropdown hidden"></div>
         </div>
 
-        <div id="create-collection-container" class="hidden">
-          <div class="create-inline-form">
-            <input type="text" id="new-collection-name" class="input-field flex-1" placeholder="Collection name..." />
-            <button id="submit-create-collection" class="btn btn-secondary btn-sm h-full">Create</button>
-          </div>
+        <!-- Create Form (hidden by default via inline style) -->
+        <div id="create-collection-container" class="create-inline-form" style="display: none;">
+          <input type="text" id="new-collection-name" class="input-field flex-1 h-full"
+            placeholder="Collection name...">
+          <!-- ✅ type="button" — CRITICAL: prevents triggering any form submit -->
+          <button type="button" id="submit-create-collection" class="btn btn-primary h-full px-4">Create</button>
         </div>
-      </section>
 
-      <section class="actions mt-lg">
-        <button id="save-btn" class="btn btn-primary size-lg w-full">
+        <!-- ✅ type="button" — prevents accidental form submit -->
+        <button type="button" id="save-btn" class="btn btn-primary w-full size-lg mt-md">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-save">
-            <path
-              d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-            <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" />
-            <path d="M7 3v4a1 1 0 0 0 1 1h7" />
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
           </svg>
           <span id="save-text">Save Memory</span>
         </button>
-      </section>
+      </div>
 
+      <!-- Toast -->
       <div id="notification" class="toast hidden">
-        <span id="toast-icon"></span>
         <span id="toast-msg"></span>
       </div>
     </div>
-  </div>
 
+  </div>
   <script src="../../dist/popup.js"></script>
 </body>
 

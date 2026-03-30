@@ -1,4 +1,3 @@
-// const BASE_URL = 'http://localhost:5000/api'
 // API base URL for all backend requests
 export const BASE_URL = 'https://sheryian-coding-school-08un.onrender.com/api'
 
@@ -11,7 +10,7 @@ export async function apiRequest(
 
     if (!token) {
         try {
-            const cookie = await chrome.cookies.get({ url: 'http://localhost', name: 'token' })
+            const cookie = await chrome.cookies.get({ url: 'https://sheryian-coding-school-08un.onrender.com', name: 'token' })
             if (cookie?.value) {
                 token = cookie.value
                 await chrome.storage.local.set({ token })
