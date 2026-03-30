@@ -10,8 +10,9 @@ import zod from 'zod';
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
+    sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 1 day
+    path: '/',
 };
 
 const registerSchema = zod.object({
@@ -43,7 +44,12 @@ export const authController = {
     }),
 
     logout: (_req: Request, res: Response) => {
-        res.clearCookie('token', { httpOnly: true, secure: env.NODE_ENV === 'production', sameSite: 'strict' });
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: env.NODE_ENV === 'production',
+            sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+            path: '/',
+        });
         logger.info('User logged out');
         sendResponse({ res, message: 'Logged out successfully' });
     },
