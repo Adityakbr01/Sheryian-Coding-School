@@ -33,6 +33,7 @@ const app = express();
 const corsOptions: cors.CorsOptions = {
     origin: [
         env.CLIENT_URL,
+        "https://ainegotiation.onrender.com",
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:5175',
