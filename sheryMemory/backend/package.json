@@ -6,8 +6,8 @@
     "dev": "bun run --watch src/server.ts",
     "build": "bun build src/server.ts --compile --outfile dist/server --external mock-aws-s3 --external aws-sdk --external nock",
     "start": "./dist/server",
-    "worker:processor": "bun run src/workers/processor.worker.ts",
-    "worker:resurface": "bun run src/workers/resurface.worker.ts",
+    "worker:processor": "bun run ./src/workers/processor.worker.ts",
+    "worker:resurface": "bun run ./src/workers/resurface.worker.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
