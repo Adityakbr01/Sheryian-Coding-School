@@ -1,3 +1,4 @@
+import { API_URL } from '@/constants/api'
 import type {
   LoginInput,
   RegisterInput,
@@ -6,7 +7,6 @@ import type {
 } from '../types/auth.types'
 import Cookies from 'js-cookie'
 
-const API_URL = 'http://localhost:5000/api' // Or your backend URL
 
 export const authApi = {
   login: async (data: LoginInput): Promise<AuthResponse> => {

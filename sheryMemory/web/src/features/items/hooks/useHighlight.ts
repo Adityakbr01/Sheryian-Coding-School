@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
+import { API_URL } from '@/constants/api'
 
 // ── Types ─────────────────────────────────────────────────────────
 export interface Highlight {
@@ -23,7 +24,6 @@ export const HIGHLIGHT_COLORS = [
   { name: 'Orange', value: '#fed7aa' },
 ]
 
-const API_URL = 'http://localhost:5000/api'
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',

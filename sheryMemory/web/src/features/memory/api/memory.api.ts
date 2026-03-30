@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie'
 import type { Item } from '../../items/types/items.types'
+import { API_URL } from '@/constants/api'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const getHeaders = () => {
   const token = Cookies.get('token')

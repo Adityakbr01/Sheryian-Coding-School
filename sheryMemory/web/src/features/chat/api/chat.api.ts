@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import type { Session, Message, ChatMode } from '../types/chat.types'
-
-const API_URL = 'http://localhost:5000/api'
+import { API_URL } from '@/constants/api'
 
 const getHeaders = () => {
   const token = Cookies.get('token')

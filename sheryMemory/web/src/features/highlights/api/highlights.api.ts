@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie'
 import type { HighlightsResponse } from '../types/highlights.types'
+import { API_URL } from '@/constants/api'
 
-const API_URL = 'http://localhost:5000/api'
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',

@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { useAuth } from '../features/auth/hooks/useAuth'
+
+import { API_URL } from '@/constants/api'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
 
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+// Remove trailing /api if present to get the base URL for socket connection
+const SOCKET_URL = API_URL.replace(/\/api$/, '')
 console.log('⚙️ [Socket Debug] Target URL calculated as:', SOCKET_URL)
 
 export function useSocket() {

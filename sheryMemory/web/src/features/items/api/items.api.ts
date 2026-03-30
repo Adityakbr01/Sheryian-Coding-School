@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import type { Item } from '../types/items.types'
-
-const API_URL = 'http://localhost:5000/api' // Or your backend URL
+import { API_URL } from '@/constants/api'
 
 const getHeaders = () => {
   const token = Cookies.get('token')

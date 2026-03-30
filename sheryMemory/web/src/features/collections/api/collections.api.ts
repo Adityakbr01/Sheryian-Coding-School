@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import type { Collection } from '../types/collections.types'
-
-const API_URL = 'http://localhost:5000/api' // Or relative path if behind proxy
+import { API_URL } from '@/constants/api'
 
 const getHeaders = () => {
   const token = Cookies.get('token')
