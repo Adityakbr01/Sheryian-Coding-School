@@ -14,8 +14,7 @@ const DIFFICULTY_INFO = {
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuthStore()
-  console.log(isAuthenticated)
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthStore()
   const { setSession, setLoading } = useNegotiateStore()
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
@@ -30,7 +29,9 @@ export default function HomePage() {
 
   const handleStart = async () => {
     if (!selectedProduct) return
+    if (isAuthLoading) return // wait for auth check
     if (!isAuthenticated) return navigate('/login')
+    
     setStarting(true)
     try {
       setLoading(true)
@@ -65,7 +66,7 @@ export default function HomePage() {
         <h2 className="mb-4 text-lg font-semibold text-(--text-primary)">
           Choose a Product
         </h2>
-        {!isAuthenticated && (
+        {!isAuthenticated && !isAuthLoading && (
           <div className="mb-4 rounded-xl border border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-800">
             🔒 Login is required to create a negotiation session. Please log in
             and then choose a product.
@@ -135,10 +136,10 @@ export default function HomePage() {
 
       <button
         onClick={handleStart}
-        disabled={!selectedProduct || starting}
+        disabled={!selectedProduct || starting || isAuthLoading}
         className="w-full rounded-xl bg-(--accent) py-4 text-lg font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        {starting ? 'Starting...' : '🤝 Start Negotiation'}
+        {isAuthLoading ? 'Authenticating...' : starting ? 'Starting...' : '🤝 Start Negotiation'}
       </button>
     </div>
   )
