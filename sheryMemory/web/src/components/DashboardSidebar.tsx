@@ -10,11 +10,19 @@ import {
   Brain,
   Library,
   Sparkle,
+  LogOut,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { SlideButton } from './SlideButton'
+import { useAuth } from '../features/auth/hooks/useAuth'
 
-export type DashboardTab = 'home' | 'collections' | 'graph' | 'highlights' | 'library' | 'chat'
+export type DashboardTab =
+  | 'home'
+  | 'collections'
+  | 'graph'
+  | 'highlights'
+  | 'library'
+  | 'chat'
 
 interface DashboardSidebarProps {
   activeTab: DashboardTab
@@ -27,18 +35,20 @@ const NAV_ITEMS: {
   label: string
   icon: React.ElementType
 }[] = [
-    { key: 'home', label: 'Home', icon: Home },
-    { key: 'library', label: 'Library', icon: Library },
-    { key: 'collections', label: 'Collections', icon: FolderOpen },
-    { key: 'graph', label: 'Graph View', icon: Network },
-    { key: 'highlights', label: 'Highlights', icon: BookOpen },
-  ]
+  { key: 'home', label: 'Home', icon: Home },
+  { key: 'library', label: 'Library', icon: Library },
+  { key: 'collections', label: 'Collections', icon: FolderOpen },
+  { key: 'graph', label: 'Graph View', icon: Network },
+  { key: 'highlights', label: 'Highlights', icon: BookOpen },
+]
 
 export function DashboardSidebar({
   activeTab,
   onChange,
   onNewThought,
 }: DashboardSidebarProps) {
+  const { logout: authLogout } = useAuth()
+
   const handleNav = (tab: DashboardTab) => {
     onChange(tab)
   }
@@ -68,10 +78,11 @@ export function DashboardSidebar({
             <button
               key={key}
               onClick={() => handleNav(key)}
-              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${isActive
-                ? 'text-(--accent)'
-                : 'text-(--text-secondary) hover:text-(--text-primary)'
-                }`}
+              className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ${
+                isActive
+                  ? 'text-(--accent)'
+                  : 'text-(--text-secondary) hover:text-(--text-primary)'
+              }`}
             >
               {isActive && (
                 <motion.div
@@ -91,11 +102,7 @@ export function DashboardSidebar({
 
       {/* New Thought CTA */}
       <div className="px-4 py-1">
-        <SlideButton
-          onClick={() => onNewThought()}
-          fullWidth
-          className="gap-2"
-        >
+        <SlideButton onClick={() => onNewThought()} fullWidth className="gap-2">
           <div className="flex items-center justify-center gap-2">
             <Plus className="h-4 w-4" /> New Thought
           </div>
@@ -118,23 +125,11 @@ export function DashboardSidebar({
 
       {/* Footer */}
       <div className="space-y-0.5 px-3 pb-5">
-
         {/* Help Button */}
         <button
           disabled
           title="Coming soon"
-          className="
-      flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px]
-      text-(--text-muted)
-      transition-colors duration-200
-
-      hover:bg-(--bg-overlay)
-      hover:text-(--text-primary)
-
-      disabled:opacity-50
-      disabled:cursor-default
-      disabled:pointer-events-none
-    "
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-(--text-muted) transition-colors duration-200 hover:bg-(--bg-overlay) hover:text-(--text-primary) disabled:pointer-events-none disabled:cursor-default disabled:opacity-50"
         >
           <HelpCircle className="h-[18px] w-[18px]" />
           Help
@@ -144,23 +139,21 @@ export function DashboardSidebar({
         <button
           disabled
           title="Coming soon"
-          className="
-      flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px]
-      text-(--text-muted)
-      transition-colors duration-200
-
-      hover:bg-(--bg-overlay)
-      hover:text-(--text-primary)
-
-      disabled:opacity-50
-      disabled:cursor-default
-      disabled:pointer-events-none
-    "
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-(--text-muted) transition-colors duration-200 hover:bg-(--bg-overlay) hover:text-(--text-primary) disabled:pointer-events-none disabled:cursor-default disabled:opacity-50"
         >
           <Settings className="h-[18px] w-[18px]" />
           Settings
         </button>
-
+        {/* LogOut */}
+        <div>
+          <button
+            onClick={() => authLogout()}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-red-500 transition-colors duration-200 hover:bg-red-500/10"
+          >
+            <LogOut className="h-[18px] w-[18px]" />
+            Logout
+          </button>
+        </div>
       </div>
     </>
   )

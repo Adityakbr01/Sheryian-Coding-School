@@ -36,7 +36,7 @@ export default function DashboardPage() {
     isSearchLoading,
     resurfacedItems,
     clearNotifications,
-    closeNotifications
+    closeNotifications,
   } = useDashboard()
 
   if (isUserLoading) return <DashboardSkeleton />

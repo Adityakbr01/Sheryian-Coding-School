@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '../api/auth.api'
 import { useAuthStore } from '../store/auth.store'
 import type { LoginInput, RegisterInput } from '../types/auth.types'
@@ -10,6 +10,7 @@ export function useAuth() {
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const { data: meData, isLoading: isUserLoading } = useQuery({
     queryKey: ['me'],
@@ -46,6 +47,7 @@ export function useAuth() {
     isUserLoading,
     logout: () => {
       logoutAction()
+      queryClient.removeQueries({ queryKey: ['me'] })
       navigate('/login')
     },
     login: loginMutation.mutate,
